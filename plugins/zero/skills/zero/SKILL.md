@@ -33,10 +33,9 @@ Two surfaces give you Zero:
 ## The runner
 
 The runner is the published `@zeroxyz/cli`, installed once per session into a shared,
-plugin-owned home and pointed at by `$ZERO_RUNNER`. You do **not** install or update it — the
-SessionStart hook does. You never run `zero init`, `zero wallet`, or `zero welcome`, and you never
-create, import, or fund a local wallet. Identity comes from a session (below); signing is handled
-by a managed wallet server-side.
+plugin-owned home and pointed at by `$ZERO_RUNNER`. You do **not** install, update, or configure
+it — the SessionStart hook handles provisioning, and the runner needs no wallet setup. Identity
+comes from a session (below); signing is managed server-side.
 
 **Prefer the runner for every step of the loop, even when MCP search/get/fetch tools are also
 available.** The runner is the complete, auditable path: it pays 402 challenges automatically,
@@ -69,7 +68,7 @@ machine running the agent.
 
 The session is saved to the runner's shared, plugin-owned config (not the user's `~/.zero`), so
 authenticating once here also authenticates Zero in your other agents (Codex, etc.). Signing is
-managed server-side — no key, no local wallet.
+managed server-side — nothing to set up.
 
 Check identity any time with `"$ZERO_RUNNER" auth whoami`. The device code expires (~10 min); if
 `--finish` reports `expired`, just run `--start` again.
@@ -95,8 +94,7 @@ persisted session. In these environments the **MCP connector MUST be used** to a
    The runner exchanges the code for a session token automatically on each call. Signing is again
    managed server-side.
 4. **Re-mint when it expires.** The code is short-lived. If runner calls start failing with an
-   auth error mid-task, call `authorize` again and re-export `ZERO_SESSION_CODE` — don't fall back
-   to creating a wallet or running `zero init`.
+   auth error mid-task, call `authorize` again and re-export `ZERO_SESSION_CODE`.
 
 ### Bring-your-own signing
 
@@ -106,9 +104,8 @@ explicitly provides; never generate one.
 
 ### Funding
 
-With a managed wallet, funding is **not** a local `zero wallet fund` command. If a call fails for
-insufficient balance, use the connector's funding tool to get a funding URL for the user to open —
-never create or fund a local wallet, and never mention a welcome bonus.
+Funding is managed server-side. If a call fails for insufficient balance, use the connector's
+funding tool to get a funding URL and hand it to the user to open.
 
 ## The loop
 
