@@ -192,7 +192,7 @@ resolve_cli_version() {
     cat "$RESOLVED_VERSION_FILE"; return 0
   fi
   local v
-  v="$(HOME="$ZH" npm_config_cache="$NPM_CACHE" "$NPM_BIN" view "$CLI_PKG@$CLI_SPEC" version 2>/dev/null | tail -1 || true)"
+  v="$(HOME="$ZH" npm_config_cache="$NPM_CACHE" PATH="$NODE_BIN_DIR:$PATH" "$NPM_BIN" view "$CLI_PKG@$CLI_SPEC" version 2>/dev/null | tail -1 || true)"
   if [ -n "$v" ]; then
     printf '%s' "$v" >"$RESOLVED_VERSION_FILE"
     printf '%s' "$v"; return 0
@@ -221,7 +221,7 @@ mkdir -p "$ZH" "$BIN_DIR" "$CLI_DIR" "$NPM_CACHE"
 VERSION="$(resolve_cli_version)"
 INSTALLED="$(cat "$INSTALLED_VERSION_FILE" 2>/dev/null || true)"
 if [ ! -f "$CLI_ENTRY" ] || [ "$INSTALLED" != "$VERSION" ] || ! is_fresh "$INSTALLED_VERSION_FILE"; then
-  if [ -n "$NPM_BIN" ] && HOME="$ZH" npm_config_cache="$NPM_CACHE" "$NPM_BIN" install \
+  if [ -n "$NPM_BIN" ] && HOME="$ZH" npm_config_cache="$NPM_CACHE" PATH="$NODE_BIN_DIR:$PATH" "$NPM_BIN" install \
         --prefix "$CLI_DIR" "$CLI_PKG@$VERSION" \
         --no-audit --no-fund --loglevel=error >&2 2>&1; then
     printf '%s' "$VERSION" >"$INSTALLED_VERSION_FILE"
