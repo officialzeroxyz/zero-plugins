@@ -9,27 +9,37 @@
 # ($ZERO_RUNNER, .../bin/zero), a bare `zero`/`zerocli`, and may be preceded by env
 # assignments (e.g. `ZERO_SESSION_TOKEN=... zero ...`).
 #
-# Reads the tool input with jq; if jq is absent we do nothing and let the command
-# go through normal approval (the safe default). Conservative by construction —
-# anything we can't positively classify as read-only is left for manual approval.
-# Always exits 0. stdout carries at most one PreToolUse JSON object.
+# No external tools — pure bash parameter expansion (no jq/sed/awk/node), so it runs
+# anywhere bash does. We only need the executable + subcommand, which are plain words
+# at the very start of the command value (before any user args that could contain
+# quotes/braces), so a full JSON parse is unnecessary. Best-effort + fail-safe:
+# anything we can't positively classify as a read-only zero command is left for manual
+# approval. Always exits 0. stdout carries at most one PreToolUse JSON object.
 
 set -euo pipefail
 
-# No jq → no auto-approval. Manual approval still works; that's the safe fallback.
-command -v jq >/dev/null 2>&1 || exit 0
-
 input="$(cat)"
-tool_name="$(printf '%s' "$input" | jq -r '.tool_name // empty')"
-[ "$tool_name" = "Bash" ] || exit 0
 
-cmd="$(printf '%s' "$input" | jq -r '.tool_input.command // empty')"
-[ -n "$cmd" ] || exit 0
+# Must be a Bash tool call (compact or spaced JSON).
+case "$input" in
+  *'"tool_name":"Bash"'* | *'"tool_name": "Bash"'*) ;;
+  *) exit 0 ;;
+esac
 
-# Strip quotes the agent may have wrapped tokens in, then tokenize on whitespace.
-cmd_norm="${cmd//\"/}"
-cmd_norm="${cmd_norm//\'/}"
-read -r -a toks <<<"$cmd_norm"
+# Pull the LEADING portion of the command value without a JSON parser: strip up to the
+# command key, trim whitespace, require the opening quote, then keep text up to the
+# first (possibly escaped) double-quote. The exe + subcommand live in that prefix.
+after="${input#*\"command\":}"
+[ "$after" = "$input" ] && exit 0                 # no command field → not ours
+after="${after#"${after%%[![:space:]]*}"}"        # trim leading whitespace
+case "$after" in \"*) after="${after#\"}" ;; *) exit 0 ;; esac # require opening quote
+lead="${after%%\"*}"                              # text before the first quote
+lead="${lead%\\}"                                 # drop a trailing backslash from \"
+
+# Normalize stray quote/backslash chars, then tokenize on whitespace.
+lead="${lead//\\/}"
+lead="${lead//\'/}"
+IFS=' ' read -r -a toks <<<"$lead" || true
 
 # Skip leading env assignments (VAR=value) to reach the executable token.
 idx=0
@@ -52,12 +62,10 @@ case "$base" in
 esac
 
 case "$sub" in
-  search | get | review | runs) ;; # read-only, no payment
-  config)
-    case "$cmd" in *--set*) exit 0 ;; esac # only viewing config is safe
-    ;;
-  init) ;;        # wallet generation only; safe to re-run
-  *) exit 0 ;;    # fetch (money), wallet (funds), or unknown → manual approval
+  search | get | review | runs) ;;          # read-only, no payment
+  config) case "$lead" in *--set*) exit 0 ;; esac ;; # only viewing config is safe
+  init) ;;                                   # wallet generation only; safe to re-run
+  *) exit 0 ;;                               # fetch (money), wallet (funds), unknown → manual
 esac
 
 cat <<'JSON'
