@@ -104,8 +104,8 @@ explicitly provides; never generate one.
 
 ### Funding
 
-Funding is managed server-side. If a call fails for insufficient balance, use the connector's
-funding tool to get a funding URL and hand it to the user to open.
+Funding is managed server-side. If a call fails for insufficient balance, point the user to
+https://www.zero.xyz/profile to fund their Zero account.
 
 ## The loop
 
