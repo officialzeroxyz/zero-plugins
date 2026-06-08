@@ -34,12 +34,6 @@
 set -euo pipefail
 
 # --- Config (override via env) ---
-# Host detection FIRST: Codex exports a neutral PLUGIN_ROOT alongside CLAUDE_PLUGIN_ROOT;
-# Claude Code sets only CLAUDE_PLUGIN_ROOT. Capture it before we reuse PLUGIN_ROOT below
-# as a plain path var. Used to emit host-correct auth guidance.
-HOST="claude"; [ -n "${PLUGIN_ROOT:-}" ] && HOST="codex"
-PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-}"
-
 # Shared, cross-agent runner home — separate from the standalone CLI's ~/.zero.
 ZH="${ZERO_PLUGINS_HOME:-$HOME/.zero-plugins}"
 
@@ -81,13 +75,6 @@ persist_env() {
     printf 'export %s=%q\n' "$1" "$2" >> "$CLAUDE_ENV_FILE"
   fi
 }
-
-# Host-correct auth guidance for when begin_session reports the connector isn't authorized.
-if [ "$HOST" = "codex" ]; then
-  AUTH_FLOW="If begin_session is unavailable or errors that the connector isn't authorized, the Zero MCP connector needs OAuth: tell the user to run 'codex mcp login zero' in their terminal to authorize it, then retry. Do not create or use a local wallet."
-else
-  AUTH_FLOW="If begin_session is unavailable or errors that the connector isn't authorized, start the OAuth flow by CALLING the connector's authenticate tool (in Claude Code: mcp__plugin_zero_zero__authenticate) — it returns an authorization URL; share it with the user to approve in their browser. On a local session the connector's tools then activate automatically; on a remote/sandbox session, have the user paste the resulting localhost callback URL into complete_authentication. Do NOT just tell the user to open /mcp settings, and do not create or use a local wallet."
-fi
 
 # --- platform detect ---
 OS_KIND=""; ARCH=""
@@ -197,7 +184,7 @@ if [ -n "$OS_KIND" ] && [ -n "$ARCH" ]; then
 fi
 if [ -z "$NODE_BIN" ]; then
   log "no usable Node runtime"
-  emit "Zero's runner could not be provisioned (no Node runtime and none could be downloaded, or no network egress). ZERO_RUNNER is unset. Tell the user Zero is unavailable in this environment rather than guessing — the MCP connector only mints credentials (begin_session); it cannot run capabilities on its own."
+  emit "Zero runner unavailable: no Node runtime and none could be downloaded (or no network egress). ZERO_RUNNER is unset — tell the user Zero isn't available in this environment rather than improvising."
   exit 0
 fi
 NODE_BIN_DIR="$(dirname "$NODE_BIN")"
@@ -221,7 +208,7 @@ if [ ! -f "$CLI_ENTRY" ] || [ "$INSTALLED" != "$VERSION" ]; then
 fi
 
 if [ ! -f "$CLI_ENTRY" ]; then
-  emit "Zero's runner could not be installed ($CLI_PKG@$VERSION). ZERO_RUNNER is unset. Likely no network egress to the npm registry on first run. Tell the user Zero is unavailable here rather than guessing."
+  emit "Zero runner unavailable: $CLI_PKG@$VERSION could not be installed (likely no npm-registry egress on first run). ZERO_RUNNER is unset — tell the user Zero isn't available here rather than improvising."
   exit 0
 fi
 
@@ -240,5 +227,5 @@ chmod +x "$SHIM_PATH" 2>/dev/null || true
 persist_env ZERO_RUNNER "$SHIM_PATH"
 
 INSTALLED_VERSION="$(cat "$INSTALLED_VERSION_FILE" 2>/dev/null || printf '%s' "$VERSION")"
-emit "Zero runner is ready: ZERO_RUNNER=$SHIM_PATH is a drop-in for the zero CLI ($CLI_PKG@$INSTALLED_VERSION, installed under the shared $ZH home; re-checked against the registry each session and updated to the latest published version). Run the whole loop through it: \$ZERO_RUNNER search \"<query>\", then get, fetch, review. For ephemeral/sandbox sessions, authenticate ONLY by minting a credential with the Zero MCP tool begin_session and passing it to the runner in the environment (the bundled CLI reads ZERO_SESSION_CODE). ${AUTH_FLOW} NEVER run 'zero init', 'zero auth login', 'zero wallet', or 'zero welcome', and never mention a welcome bonus. An explicit ZERO_PRIVATE_KEY is honored for bring-your-own signing, but never create a wallet yourself. The runner uses the shared, plugin-owned config dir $ZH/.zero (not your ~/.zero), so it never picks up the standalone CLI's wallet. begin_session is the only MCP tool you call; search, get, fetch and review all go through the runner."
+emit "Zero runner ready: ZERO_RUNNER=$SHIM_PATH — a drop-in for the zero CLI ($CLI_PKG@$INSTALLED_VERSION). Use it for the whole Zero loop (search/get/fetch/review), and follow the bundled 'zero' skill for the workflow and authentication — don't improvise auth or create a wallet."
 exit 0
