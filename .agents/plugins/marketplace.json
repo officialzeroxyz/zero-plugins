@@ -1,0 +1,20 @@
+{
+  "name": "zero-plugins",
+  "interface": {
+    "displayName": "Zero"
+  },
+  "plugins": [
+    {
+      "name": "zero",
+      "source": {
+        "source": "local",
+        "path": "./plugins/zero"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
