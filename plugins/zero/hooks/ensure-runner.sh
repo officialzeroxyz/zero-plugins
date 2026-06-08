@@ -54,10 +54,6 @@ NODE_DIST_BASE="${ZERO_NODE_DIST_BASE:-https://nodejs.org/dist}"
 NODE_CHANNEL="${ZERO_NODE_CHANNEL:-latest-v24.x}"
 # A system node older than this is treated as unusable -> we download instead.
 NODE_MIN_MAJOR="${ZERO_NODE_MIN_MAJOR:-20}"
-# How often (minutes) we re-check the registry for a newer CLI version and re-validate
-# the runner. Between checks we use the installed copy with no network. Default 24h.
-RUNNER_REFRESH_TTL_MIN="${ZERO_RUNNER_REFRESH_TTL_MIN:-1440}"
-
 NODE_DIR="$ZH/node"            # downloaded Node lives here (if needed)
 CLI_DIR="$ZH/cli"              # the installed @zeroxyz/cli
 NPM_CACHE="$ZH/.npm"           # contained npm/npx cache
@@ -92,11 +88,6 @@ if [ "$HOST" = "codex" ]; then
 else
   AUTH_FLOW="If begin_session is unavailable or errors that the connector isn't authorized, start the OAuth flow by CALLING the connector's authenticate tool (in Claude Code: mcp__plugin_zero_zero__authenticate) — it returns an authorization URL; share it with the user to approve in their browser. On a local session the connector's tools then activate automatically; on a remote/sandbox session, have the user paste the resulting localhost callback URL into complete_authentication. Do NOT just tell the user to open /mcp settings, and do not create or use a local wallet."
 fi
-
-# A throttled freshness check: returns 0 (fresh) if $1 was touched within TTL minutes.
-is_fresh() {
-  [ -e "$1" ] && find "$1" -mmin "-$RUNNER_REFRESH_TTL_MIN" 2>/dev/null | grep -q .
-}
 
 # --- platform detect ---
 OS_KIND=""; ARCH=""
@@ -181,16 +172,14 @@ resolve_node() {
 }
 
 # Resolve CLI_SPEC to a concrete version. A purely numeric/dotted spec is used as-is.
-# Otherwise (a dist-tag like "latest" or a range) we ask the registry, throttled, and
-# fall back to the last resolved version when offline.
+# Otherwise (a dist-tag like "latest" or a range) we ask the registry EVERY session, so
+# the runner tracks the newest published version, falling back to the last resolved
+# version when offline.
 resolve_cli_version() {
   case "$CLI_SPEC" in
     *[!0-9.]*) ;;                              # tag/range — resolve below
     *) printf '%s' "$CLI_SPEC"; return 0 ;;    # looks like X.Y.Z
   esac
-  if is_fresh "$RESOLVED_VERSION_FILE" && [ -s "$RESOLVED_VERSION_FILE" ]; then
-    cat "$RESOLVED_VERSION_FILE"; return 0
-  fi
   local v
   v="$(HOME="$ZH" npm_config_cache="$NPM_CACHE" PATH="$NODE_BIN_DIR:$PATH" "$NPM_BIN" view "$CLI_PKG@$CLI_SPEC" version 2>/dev/null | tail -1 || true)"
   if [ -n "$v" ]; then
@@ -220,7 +209,7 @@ mkdir -p "$ZH" "$BIN_DIR" "$CLI_DIR" "$NPM_CACHE"
 # --- install / refresh the CLI (throttled) ---
 VERSION="$(resolve_cli_version)"
 INSTALLED="$(cat "$INSTALLED_VERSION_FILE" 2>/dev/null || true)"
-if [ ! -f "$CLI_ENTRY" ] || [ "$INSTALLED" != "$VERSION" ] || ! is_fresh "$INSTALLED_VERSION_FILE"; then
+if [ ! -f "$CLI_ENTRY" ] || [ "$INSTALLED" != "$VERSION" ]; then
   if [ -n "$NPM_BIN" ] && HOME="$ZH" npm_config_cache="$NPM_CACHE" PATH="$NODE_BIN_DIR:$PATH" "$NPM_BIN" install \
         --prefix "$CLI_DIR" "$CLI_PKG@$VERSION" \
         --no-audit --no-fund --loglevel=error >&2 2>&1; then
@@ -251,5 +240,5 @@ chmod +x "$SHIM_PATH" 2>/dev/null || true
 persist_env ZERO_RUNNER "$SHIM_PATH"
 
 INSTALLED_VERSION="$(cat "$INSTALLED_VERSION_FILE" 2>/dev/null || printf '%s' "$VERSION")"
-emit "Zero runner is ready: ZERO_RUNNER=$SHIM_PATH is a drop-in for the zero CLI ($CLI_PKG@$INSTALLED_VERSION, installed under the shared $ZH home; auto-updates on the next session about every ${RUNNER_REFRESH_TTL_MIN} minutes). Run the whole loop through it: \$ZERO_RUNNER search \"<query>\", then get, fetch, review. For ephemeral/sandbox sessions, authenticate ONLY by minting a credential with the Zero MCP tool begin_session and passing it to the runner in the environment (the bundled CLI reads ZERO_SESSION_CODE). ${AUTH_FLOW} NEVER run 'zero init', 'zero auth login', 'zero wallet', or 'zero welcome', and never mention a welcome bonus. An explicit ZERO_PRIVATE_KEY is honored for bring-your-own signing, but never create a wallet yourself. The runner uses the shared, plugin-owned config dir $ZH/.zero (not your ~/.zero), so it never picks up the standalone CLI's wallet. begin_session is the only MCP tool you call; search, get, fetch and review all go through the runner."
+emit "Zero runner is ready: ZERO_RUNNER=$SHIM_PATH is a drop-in for the zero CLI ($CLI_PKG@$INSTALLED_VERSION, installed under the shared $ZH home; re-checked against the registry each session and updated to the latest published version). Run the whole loop through it: \$ZERO_RUNNER search \"<query>\", then get, fetch, review. For ephemeral/sandbox sessions, authenticate ONLY by minting a credential with the Zero MCP tool begin_session and passing it to the runner in the environment (the bundled CLI reads ZERO_SESSION_CODE). ${AUTH_FLOW} NEVER run 'zero init', 'zero auth login', 'zero wallet', or 'zero welcome', and never mention a welcome bonus. An explicit ZERO_PRIVATE_KEY is honored for bring-your-own signing, but never create a wallet yourself. The runner uses the shared, plugin-owned config dir $ZH/.zero (not your ~/.zero), so it never picks up the standalone CLI's wallet. begin_session is the only MCP tool you call; search, get, fetch and review all go through the runner."
 exit 0
