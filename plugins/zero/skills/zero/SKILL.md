@@ -66,9 +66,9 @@ machine running the agent.
 # → {"status":"ok","user":{"id":"…","email":"…"}}
 ```
 
-The session is saved to the runner's shared, plugin-owned config (not the user's `~/.zero`), so
-authenticating once here also authenticates Zero in your other agents (Codex, etc.). Signing is
-managed server-side — nothing to set up.
+The session is saved to the shared `~/.zero/config.json`, so authenticating once here also signs
+you in everywhere Zero is used on this machine — the standalone `zero` CLI and your other agents
+(Codex, etc.) all share the one login. Signing is managed server-side — nothing to set up.
 
 Check identity any time with `"$ZERO_RUNNER" auth whoami`. The device code expires (~10 min); if
 `--finish` reports `expired`, just run `--start` again.
