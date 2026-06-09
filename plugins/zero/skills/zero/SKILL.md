@@ -50,8 +50,9 @@ There are two environments, and the right path depends on which you're in.
 ### Persistent — the user's own computer (not a sandbox or cloud runner)
 
 Authenticate the runner with the **device-code login**. It's non-interactive and agent-friendly:
-you start it, hand the user a URL, and finish once they've authorized. No browser is opened on the
-machine running the agent.
+you start it, show the user a URL, then run the finish step — which **polls on its own** until they
+authorize. No browser is opened on the machine running the agent, and you do **not** wait for the
+user to tell you they're done — the finish command blocks until it knows.
 
 ```bash
 # 1. Start: prints a URL + user code and exits immediately (no waiting, no browser).
@@ -59,19 +60,25 @@ machine running the agent.
 # → {"deviceCode":"…","userCode":"WXYZ-1234","verificationUri":"https://…",
 #    "url":"https://…?code=WXYZ-1234","pollInterval":5,"expiresAt":…}
 
-# 2. Give the user the "url" (and the userCode) and ask them to authorize in their browser.
+# 2. Show the user the "url" (and the userCode) and ask them to authorize it in their browser.
 
-# 3. Finish: poll until they've authorized, then persist the session.
+# 3. Immediately run finish. It BLOCKS and polls (~every 2s) until the user authorizes, then
+#    persists the session. Run it right after step 2 — do NOT pause to ask "are you done yet?";
+#    the command returning is your signal.
 "$ZERO_RUNNER" auth login --finish <deviceCode> --json
-# → {"status":"ok","user":{"id":"…","email":"…"}}
+# → {"status":"ok","user":{"id":"…","email":"…"}}     once authorized
+# → {"status":"expired"}                                if the ~10 min code TTL lapses first
 ```
+
+Treat the finish command's return as the source of truth: a successful exit means the session is
+already persisted; `{"status":"expired"}` means the code lapsed — start over from step 1. Never
+block the conversation polling by hand or waiting on the user to confirm; `--finish` is the poll.
 
 The session is saved to the shared `~/.zero/config.json`, so authenticating once here also signs
 you in everywhere Zero is used on this machine — the standalone `zero` CLI and your other agents
 (Codex, etc.) all share the one login. Signing is managed server-side — nothing to set up.
 
-Check identity any time with `"$ZERO_RUNNER" auth whoami`. The device code expires (~10 min); if
-`--finish` reports `expired`, just run `--start` again.
+Check identity any time with `"$ZERO_RUNNER" auth whoami`.
 
 ### Ephemeral / sandbox — cloud, CI, web/mobile sandbox runners
 
