@@ -117,7 +117,7 @@ Then:
    (`https://mcp.zero.xyz`) isn't already available as a tool, walk the user through adding it for
    their host and the one-time authorization/consent step (give exact steps + the URL if you can't
    add it programmatically). Then call the connector's **`authorize`** tool — it returns
-   `{ code, expiresAt, scopes }`, where `code` is a short-lived session code (a `zsc_…` string).
+   `{ code, expiresAt }`, where `code` is a short-lived session code (a `zsc_…` string).
 
 3. **Hand it to the CLI via the environment.** Export the `code` as `ZERO_SESSION_CODE` so every
    call picks it up:
