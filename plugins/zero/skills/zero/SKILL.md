@@ -27,8 +27,10 @@ Two surfaces give you Zero:
   *only* way to authenticate the runner (see below).
 
 > **Convention:** examples below write `zero` for brevity. Always invoke the runner by its real
-> path — `"$ZERO_RUNNER" search "…"`. If `$ZERO_RUNNER` is unset, the runner didn't provision;
-> tell the user Zero isn't available here rather than improvising or creating a wallet.
+> path — `"$ZERO_RUNNER" search "…"`. If `$ZERO_RUNNER` is unset, the runner didn't provision: in a
+> persistent environment, tell the user Zero isn't available here rather than improvising; in an
+> ephemeral sandbox, invoke the published CLI directly with `npx` instead (see **Ephemeral /
+> sandbox** below). Never create a wallet either way.
 
 ## The runner
 
@@ -83,25 +85,53 @@ Check identity any time with `"$ZERO_RUNNER" auth whoami`.
 ### Ephemeral / sandbox — cloud, CI, web/mobile sandbox runners
 
 A device-code login is wrong here: the environment may be wiped between turns and can't hold a
-persisted session. In these environments the **MCP connector MUST be used** to authenticate.
+persisted session. Instead you run the published `@zeroxyz/cli` directly and authenticate through
+the **MCP connector's `authorize` tool**, which mints a short-lived code the CLI exchanges per call.
 
-1. **Ensure the connector is present.** If the Zero connector (`https://mcp.zero.xyz`) isn't
-   already available as a tool, walk the user through adding it for their host, and through the
-   one-time authorization/consent step. Do this to the best of your ability for the current host;
-   if you can't add it programmatically, give the user the exact steps and the URL.
-2. **Mint a session code.** Call the connector's **`authorize`** tool. It returns a short-lived
-   `ZERO_SESSION_CODE`.
-3. **Hand it to the runner via the environment.** Export it so every runner call picks it up:
+**Two hard prerequisites — confirm both before anything else.** If either is missing Zero cannot
+run; stop and walk the user through enabling it rather than improvising:
+
+- **Code execution.** You must be able to run shell commands to invoke the CLI. If the sandbox is
+  read-only or has no tool/code execution, tell the user to enable code execution for this agent
+  (on Claude.ai, the conversation's tool/connector settings; on other hosts, the equivalent "allow
+  code/tool execution" toggle).
+- **Network egress.** The CLI must reach the npm registry (to fetch itself) and `*.zero.xyz` (to
+  search and pay). If commands hang or fail with DNS/connection-refused errors, egress is disabled
+  or allowlisted — tell the user to enable outbound network access, or to allowlist
+  `registry.npmjs.org` and `*.zero.xyz`.
+
+Then:
+
+1. **Get the runner.** If `$ZERO_RUNNER` is already set (a plugin hook provisioned it), use it
+   exactly as in the persistent flow. Otherwise invoke the published CLI directly with `npx` —
+   node/npx is present in most sandboxes:
 
    ```bash
-   export ZERO_SESSION_CODE=<code-from-authorize>
-   "$ZERO_RUNNER" search "…"
+   npx -y @zeroxyz/cli@latest search "…"
    ```
 
-   The runner exchanges the code for a session token automatically on each call. Signing is again
-   managed server-side.
-4. **Re-mint when it expires.** The code is short-lived. If runner calls start failing with an
-   auth error mid-task, call `authorize` again and re-export `ZERO_SESSION_CODE`.
+   Substitute `npx -y @zeroxyz/cli@latest` wherever the loop below writes `zero`. The first call
+   downloads the package; later calls in the same sandbox hit the npx cache.
+
+2. **Ensure the connector is present, then mint a session code.** If the Zero connector
+   (`https://mcp.zero.xyz`) isn't already available as a tool, walk the user through adding it for
+   their host and the one-time authorization/consent step (give exact steps + the URL if you can't
+   add it programmatically). Then call the connector's **`authorize`** tool — it returns
+   `{ code, expiresAt, scopes }`, where `code` is a short-lived session code (a `zsc_…` string).
+
+3. **Hand it to the CLI via the environment.** Export the `code` as `ZERO_SESSION_CODE` so every
+   call picks it up:
+
+   ```bash
+   export ZERO_SESSION_CODE=<the "code" field from authorize>
+   npx -y @zeroxyz/cli@latest search "…"
+   ```
+
+   The CLI exchanges the code for a session token automatically on each call. Signing is managed
+   server-side.
+
+4. **Re-mint when it expires.** The code is short-lived. If calls start failing with an auth error
+   mid-task, call `authorize` again and re-export `ZERO_SESSION_CODE`.
 
 ### Bring-your-own signing
 
