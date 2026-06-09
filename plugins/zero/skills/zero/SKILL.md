@@ -27,8 +27,10 @@ Two surfaces give you Zero:
   *only* way to authenticate the runner (see below).
 
 > **Convention:** examples below write `zero` for brevity. Always invoke the runner by its real
-> path — `"$ZERO_RUNNER" search "…"`. If `$ZERO_RUNNER` is unset, the runner didn't provision;
-> tell the user Zero isn't available here rather than improvising or creating a wallet.
+> path — `"$ZERO_RUNNER" search "…"`. If `$ZERO_RUNNER` is unset, the runner didn't provision: in a
+> persistent environment, tell the user Zero isn't available here rather than improvising; in an
+> ephemeral sandbox, invoke the published CLI directly with `npx` instead (see **Ephemeral /
+> sandbox** below). Never create a wallet either way.
 
 ## The runner
 
@@ -76,32 +78,41 @@ block the conversation polling by hand or waiting on the user to confirm; `--fin
 
 The session is saved to the shared `~/.zero/config.json`, so authenticating once here also signs
 you in everywhere Zero is used on this machine — the standalone `zero` CLI and your other agents
-(Codex, etc.) all share the one login. Signing is managed server-side — nothing to set up.
+all share the one login. Signing is managed server-side — nothing to set up.
 
 Check identity any time with `"$ZERO_RUNNER" auth whoami`.
 
 ### Ephemeral / sandbox — cloud, CI, web/mobile sandbox runners
 
-A device-code login is wrong here: the environment may be wiped between turns and can't hold a
-persisted session. In these environments the **MCP connector MUST be used** to authenticate.
+A device-code login won't work — the environment can't hold a persisted session. Run the published
+`@zeroxyz/cli` directly and authenticate via the **MCP connector's `authorize` tool**.
 
-1. **Ensure the connector is present.** If the Zero connector (`https://mcp.zero.xyz`) isn't
-   already available as a tool, walk the user through adding it for their host, and through the
-   one-time authorization/consent step. Do this to the best of your ability for the current host;
-   if you can't add it programmatically, give the user the exact steps and the URL.
-2. **Mint a session code.** Call the connector's **`authorize`** tool. It returns a short-lived
-   `ZERO_SESSION_CODE`.
-3. **Hand it to the runner via the environment.** Export it so every runner call picks it up:
+**Two prerequisites — confirm both first.** If either is missing, stop and walk the user through
+enabling it in your product/environment:
+
+- **Code execution** — you must be able to run shell commands to invoke the CLI.
+- **Network egress** — the CLI must reach the npm registry and `*.zero.xyz`. If calls hang or fail
+  with DNS/connection errors, ask the user to enable outbound access (or allowlist
+  `registry.npmjs.org` and `*.zero.xyz`).
+
+Then:
+
+1. **Get the runner.** Use `$ZERO_RUNNER` if a hook already set it; otherwise invoke the CLI with
+   `npx -y @zeroxyz/cli@latest` (node/npx is present in most sandboxes) — substitute that wherever
+   the loop writes `zero`.
+2. **Authorize.** If the connector (`https://mcp.zero.xyz`) isn't available as a tool yet, walk the
+   user through adding it and the one-time consent. Then call its **`authorize`** tool to get a
+   short-lived authorization `code`.
+3. **Export the code** so every call picks it up:
 
    ```bash
-   export ZERO_SESSION_CODE=<code-from-authorize>
-   "$ZERO_RUNNER" search "…"
+   export ZERO_SESSION_CODE=<code from authorize>
+   npx -y @zeroxyz/cli@latest search "…"
    ```
 
-   The runner exchanges the code for a session token automatically on each call. Signing is again
-   managed server-side.
-4. **Re-mint when it expires.** The code is short-lived. If runner calls start failing with an
-   auth error mid-task, call `authorize` again and re-export `ZERO_SESSION_CODE`.
+   The CLI exchanges it for a session token on each call; signing is managed server-side.
+4. **Re-mint when it expires.** If calls start failing with an auth error mid-task, call `authorize`
+   again and re-export `ZERO_SESSION_CODE`.
 
 ### Bring-your-own signing
 
