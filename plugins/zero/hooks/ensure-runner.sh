@@ -15,11 +15,12 @@
 #   a. system `node` (>= min major) on PATH if present — nothing is downloaded; else
 #   b. download an official Node build (which bundles npm) into the runtime home, once.
 #
-# Two homes, deliberately split:
-#   - Runtime home ($HOME/.zero-plugins): the downloaded Node, the npm cache, the
-#     installed CLI, and the shim. Plugin-owned, disposable, contained via explicit
-#     --prefix / npm_config_cache paths (NOT via $HOME). Shared across host plugins.
-#   - Auth/config home: the user's real ~/.zero — the SAME file the standalone CLI and
+# One Zero home (~/.zero), two deliberately namespaced areas:
+#   - Runtime ($HOME/.zero/runtime): the downloaded Node, the npm cache, the installed
+#     CLI, and the shim. Plugin-owned and disposable — safe to delete and rebuild. Kept
+#     in its own subdir (not loose in ~/.zero) and contained via explicit --prefix /
+#     npm_config_cache paths (NOT via $HOME). Shared across host plugins.
+#   - Auth/config (~/.zero/config.json): the SAME file the standalone CLI and
 #     skill.md-only agents use. The shim does NOT override $HOME, so one `auth login`
 #     is shared across every Zero install method on the machine (plugin, skill.md, raw
 #     CLI), not just plugin agents. Writes are additive (a session merges in alongside
@@ -38,10 +39,11 @@
 set -euo pipefail
 
 # --- Config (override via env) ---
-# Plugin-owned RUNTIME home (Node, npm cache, installed CLI, shim) — NOT the auth/config
-# home. Auth lives in the user's real ~/.zero (the shim leaves $HOME alone) so the login
-# is shared with the standalone CLI and skill.md-only agents.
-ZH="${ZERO_PLUGINS_HOME:-$HOME/.zero-plugins}"
+# Plugin-owned RUNTIME area (Node, npm cache, installed CLI, shim), namespaced under the
+# user's ~/.zero so there's a single Zero home. This is NOT the auth/config file: the shim
+# leaves $HOME alone, so the login in ~/.zero/config.json is shared with the standalone CLI
+# and skill.md-only agents. Override the location with ZERO_PLUGINS_HOME.
+ZH="${ZERO_PLUGINS_HOME:-$HOME/.zero/runtime}"
 
 # The published runner package and which version line to track. Default "latest";
 # pin by exporting ZERO_CLI_SPEC=0.0.44 (a concrete version skips the registry check).
