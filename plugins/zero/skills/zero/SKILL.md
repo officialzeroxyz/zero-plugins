@@ -101,8 +101,8 @@ Then:
    `npx -y @zeroxyz/cli@latest` (node/npx is present in most sandboxes) — substitute that wherever
    the loop writes `zero`.
 2. **Authorize.** If the connector (`https://mcp.zero.xyz`) isn't available as a tool yet, walk the
-   user through adding it and the one-time consent. Then call its **`authorize`** tool — it returns
-   `{ code, expiresAt }`.
+   user through adding it and the one-time consent. Then call its **`authorize`** tool to get a
+   short-lived authorization `code`.
 3. **Export the code** so every call picks it up:
 
    ```bash
