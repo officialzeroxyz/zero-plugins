@@ -1,0 +1,13 @@
+{
+  "name": "zero-plugins",
+  "owner": { "name": "Zero", "url": "https://zero.xyz" },
+  "description": "Official Zero plugins — search and pay for AI capabilities from any agent.",
+  "plugins": [
+    {
+      "name": "zero",
+      "source": "./plugins/zero",
+      "description": "Search and pay for AI capabilities (x402 / MPP) — image/video/audio generation, web scraping, data enrichment, real-time data, messaging — with automatic, wallet-backed payment. No per-service signup.",
+      "category": "productivity"
+    }
+  ]
+}
