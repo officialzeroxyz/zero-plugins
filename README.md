@@ -47,7 +47,7 @@ plugins/zero-gemini/                      # Gemini overlay (NOT directly install
   └── hooks/hooks.json                   # Gemini hook wiring (SessionStart, BeforeAgent; ${extensionPath}; ms timeouts)
 
 scripts/build-gemini.sh                   # assembles overlay + shared plugins/zero/ files → dist/zero-gemini/
-.github/workflows/release-gemini.yml      # runs the build script, attaches dist as a release asset
+.github/workflows/release-gemini.yml      # on main, auto-publishes a release for each new manifest version
 
 dist/zero-gemini/                         # (git-ignored) the assembled, installable extension:
   ├── gemini-extension.json              #   ← plugins/zero-gemini/
@@ -120,11 +120,16 @@ gemini extensions install https://github.com/officialzeroxyz/zero-plugins
 
 Gemini doesn't read the Codex/Claude marketplace catalogs, and a git-URL install expects
 the `gemini-extension.json` at the *root* of what it installs — but this is a monorepo
-whose root isn't an extension. To bridge that, a release workflow
-(`.github/workflows/release-gemini.yml`) runs `scripts/build-gemini.sh` to assemble the
-extension and attaches it as a single `zero-gemini.tar.gz` (manifest at the archive root)
-to each GitHub Release; Gemini's installer downloads that asset. So the one-liner above
-works against any **published release**.
+whose root isn't an extension. To bridge that, `.github/workflows/release-gemini.yml`
+auto-publishes a GitHub Release: on each push to `main` it reads the `version` from
+`plugins/zero-gemini/gemini-extension.json` and, if no release exists for it yet, runs
+`scripts/build-gemini.sh` and publishes that version as a release with a single
+`zero-gemini.tar.gz` asset (manifest at the archive root), marked **Latest**. Gemini's
+installer downloads that asset, so the one-liner above works once the release lands.
+
+To ship an update, bump `version` in `plugins/zero-gemini/gemini-extension.json` and merge
+to `main` — the release is cut automatically. A merge that doesn't change the version is a
+no-op, so content-only changes (skill, hook scripts) ship only when you bump the version.
 
 From a local checkout (no release needed — handy for development), assemble the extension
 with the build script and install the result. `plugins/zero-gemini/` itself is only an
