@@ -27,13 +27,11 @@ Two surfaces give you Zero:
   **authentication and funding**, not the loop. In ephemeral/sandbox environments it is also the
   *only* way to authenticate the runner (see below).
 
-> **Convention:** examples below write `zero` for brevity — invoke the runner by the path the
-> SessionStart hook reported. On hosts that persist hook env vars (Claude Code, Codex) it's exported
-> as `$ZERO_RUNNER`, so `"$ZERO_RUNNER" search "…"` works. On hosts that don't (Gemini CLI),
-> `$ZERO_RUNNER` is **not** set in your shell — use the absolute path the hook announced (default
-> `~/.zero/runtime/bin/zero`). If the hook reported the runner as *unavailable* (not merely an
-> unexported var), in a persistent environment tell the user Zero isn't available here rather than
-> improvising; in an ephemeral sandbox, invoke the published CLI directly with `npx` instead (see
+> **Convention:** examples write `zero` for brevity, but invoke the runner by its absolute path —
+> `$HOME/.zero/runtime/bin/zero` (what the SessionStart hook reports, and exports as `$ZERO_RUNNER`
+> on Claude Code / Codex). Don't run a bare `zero`: `$PATH` could resolve it to an unrelated global
+> install. If the hook reported the runner *unavailable*, in a persistent environment tell the user
+> Zero isn't available here; in an ephemeral sandbox use `npx -y @zeroxyz/cli@latest` instead (see
 > **Ephemeral / sandbox** below). Never create a wallet either way.
 
 ## The runner
