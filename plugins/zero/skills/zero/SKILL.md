@@ -19,25 +19,30 @@ Zero is a search engine and payment layer for AI agents: discover external paid 
 
 Two surfaces give you Zero:
 
-- **The runner** — a `zero` CLI the plugin provisions for this session and exports as
-  `$ZERO_RUNNER`. This is your primary tool: it runs the whole loop, handles 402 payment
-  (including cross-chain), streams binary output, and enforces spend caps.
+- **The runner** — a `zero` CLI the plugin/extension provisions for this session. This is your
+  primary tool: it runs the whole loop, handles 402 payment (including cross-chain), streams binary
+  output, and enforces spend caps. The SessionStart hook reports its absolute path; on hosts that
+  persist hook env vars it's also exported as `$ZERO_RUNNER`.
 - **The MCP connector** (`https://mcp.zero.xyz`) — the Zero connector tool surface. Its job is
   **authentication and funding**, not the loop. In ephemeral/sandbox environments it is also the
   *only* way to authenticate the runner (see below).
 
-> **Convention:** examples below write `zero` for brevity. Always invoke the runner by its real
-> path — `"$ZERO_RUNNER" search "…"`. If `$ZERO_RUNNER` is unset, the runner didn't provision: in a
-> persistent environment, tell the user Zero isn't available here rather than improvising; in an
-> ephemeral sandbox, invoke the published CLI directly with `npx` instead (see **Ephemeral /
-> sandbox** below). Never create a wallet either way.
+> **Convention:** run the runner as `"$ZERO_RUNNER"` (the examples below do), never a bare `zero` —
+> `$PATH` could resolve `zero` to an unrelated global install, whereas `"$ZERO_RUNNER"` hits the
+> provisioned runner or fails loudly. Claude Code / Codex export `$ZERO_RUNNER` for you; on Gemini
+> CLI it isn't exported, so wherever an example writes `$ZERO_RUNNER`, use the runner's absolute path
+> instead — `$HOME/.zero/runtime/bin/zero`, which the SessionStart hook reports. If the hook reported
+> the runner *unavailable*, in a persistent environment tell the user Zero isn't available here; in
+> an ephemeral sandbox use `npx -y @zeroxyz/cli@latest` instead (see **Ephemeral / sandbox** below).
+> Never create a wallet either way.
 
 ## The runner
 
 The runner is the published `@zeroxyz/cli`, installed once per session into a shared,
-plugin-owned home and pointed at by `$ZERO_RUNNER`. You do **not** install, update, or configure
-it — the SessionStart hook handles provisioning, and the runner needs no wallet setup. Identity
-comes from a session (below); signing is managed server-side.
+plugin-owned home and reported by its absolute path (also exported as `$ZERO_RUNNER` on hosts that
+persist hook env vars; default path `~/.zero/runtime/bin/zero`). You do **not** install, update, or
+configure it — the SessionStart hook handles provisioning, and the runner needs no wallet setup.
+Identity comes from a session (below); signing is managed server-side.
 
 **Prefer the runner for every step of the loop, even when MCP search/get/fetch tools are also
 available.** The runner is the complete, auditable path: it pays 402 challenges automatically,
@@ -97,9 +102,9 @@ enabling it in your product/environment:
 
 Then:
 
-1. **Get the runner.** Use `$ZERO_RUNNER` if a hook already set it; otherwise invoke the CLI with
-   `npx -y @zeroxyz/cli@latest` (node/npx is present in most sandboxes) — substitute that wherever
-   the loop writes `zero`.
+1. **Get the runner.** If the SessionStart hook provisioned one, point `ZERO_RUNNER` at it as above;
+   otherwise invoke the CLI with `npx -y @zeroxyz/cli@latest` (node/npx is present in most sandboxes)
+   — substitute that wherever the examples use `"$ZERO_RUNNER"`.
 2. **Authorize.** If the connector (`https://mcp.zero.xyz`) isn't available as a tool yet, walk the
    user through adding it and the one-time consent. Then call its **`authorize`** tool to get a
    short-lived authorization `code`.
@@ -127,14 +132,14 @@ https://www.zero.xyz/profile to fund their Zero account.
 
 ## The loop
 
-1. **Search** — `zero search "weather forecast"`. Always re-search; capabilities, prices, and
-   rankings churn. Never reuse URLs/schemas/prices from memory or earlier in the conversation.
-2. **Inspect** — `zero get 1 --formatted` prints a human summary plus a copy-pasteable `Try it:`
-   line. Plain `zero get 1` returns full JSON (URL, method, `bodySchema`, examples, pricing). If
-   `bodySchema` is `null`, skip that result — don't invent field names.
-3. **Call** — `zero fetch <url> [-d '<json>'] [-H 'k:v'] [--max-pay 0.50]`. 402 responses are paid
-   automatically (x402 + MPP, including cross-chain bridging from Base to Tempo).
-4. **Review** — `zero review <runId> --accuracy N --value N --reliability N --content "<observation>"`.
+1. **Search** — `"$ZERO_RUNNER" search "weather forecast"`. Always re-search; capabilities, prices,
+   and rankings churn. Never reuse URLs/schemas/prices from memory or earlier in the conversation.
+2. **Inspect** — `"$ZERO_RUNNER" get 1 --formatted` prints a human summary plus a copy-pasteable
+   `Try it:` line. Plain `"$ZERO_RUNNER" get 1` returns full JSON (URL, method, `bodySchema`,
+   examples, pricing). If `bodySchema` is `null`, skip that result — don't invent field names.
+3. **Call** — `"$ZERO_RUNNER" fetch <url> [-d '<json>'] [-H 'k:v'] [--max-pay 0.50]`. 402 responses
+   are paid automatically (x402 + MPP, including cross-chain bridging from Base to Tempo).
+4. **Review** — `"$ZERO_RUNNER" review <runId> --accuracy N --value N --reliability N --content "<observation>"`.
    The `runId` is printed to stderr (or in the `--json` envelope). Always review after a paid call.
 
 ## Request shape
@@ -146,13 +151,13 @@ envelope as the body.
 GET — encode `queryParams` as query string:
 
 ```bash
-zero fetch "https://api.example.com/locate?ip=8.8.8.8"
+"$ZERO_RUNNER" fetch "https://api.example.com/locate?ip=8.8.8.8"
 ```
 
 POST — send `input.body` as JSON:
 
 ```bash
-zero fetch https://api.example.com/translate \
+"$ZERO_RUNNER" fetch https://api.example.com/translate \
   -d '{"text":"hello","to":"es"}' \
   -H "Content-Type:application/json"
 ```
@@ -180,9 +185,9 @@ zero fetch https://api.example.com/translate \
 - **stderr** — progress, payment info, the `Run ID:` line, warnings.
 
 ```bash
-zero fetch "<url>" | jq .                        # body on stdout
-zero fetch --json "<url>" | jq 'select(.ok)'     # programmatic
-zero fetch "<image-url>" > out.png               # binary
+"$ZERO_RUNNER" fetch "<url>" | jq .                    # body on stdout
+"$ZERO_RUNNER" fetch --json "<url>" | jq 'select(.ok)' # programmatic
+"$ZERO_RUNNER" fetch "<image-url>" > out.png           # binary
 ```
 
 ## Reviews — what to write
@@ -227,13 +232,13 @@ Lost a `runId`? `zero runs --unreviewed` (optionally `--capability <slug>`).
 ## End-to-end
 
 ```bash
-zero search "sentiment analysis"
-zero get 1 --formatted
-zero fetch https://nlp-api.example.com/sentiment \
+"$ZERO_RUNNER" search "sentiment analysis"
+"$ZERO_RUNNER" get 1 --formatted
+"$ZERO_RUNNER" fetch https://nlp-api.example.com/sentiment \
   -d '{"text":"Zero is great"}' \
   -H "Content-Type:application/json"
 # Run ID printed on stderr
-zero review abc123 --accuracy 5 --value 4 --reliability 5 \
+"$ZERO_RUNNER" review abc123 --accuracy 5 --value 4 --reliability 5 \
   --content "Classified a 200-char product-review snippet positive in ~180ms; matched manual read. Clean schema, no auth."
 ```
 

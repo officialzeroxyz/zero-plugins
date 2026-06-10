@@ -1,0 +1,75 @@
+name: Release Gemini extension
+
+# Auto-publishes a GitHub Release for the Gemini extension, version-driven by the manifest.
+# On a push to main, it reads the version from plugins/zero-gemini/gemini-extension.json; if
+# no release exists for that version yet, it assembles the extension and publishes a release
+# (creating the tag, attaching the single asset, marking it Latest). This is what lets users
+# install with the plain repo URL:
+#
+#     gemini extensions install https://github.com/<owner>/zero-plugins
+#
+# To ship a change: bump "version" in plugins/zero-gemini/gemini-extension.json and merge to
+# main. A push that doesn't change the version finds the release already exists and no-ops —
+# so content changes (skill, hook scripts) only ship once you bump the version.
+#
+# Asset invariants (do not break — see scripts/build-gemini.sh and github.ts in gemini-cli):
+# exactly ONE asset, name ends `.tar.gz` with no darwin/linux/win32 substring, and
+# gemini-extension.json sits at the archive root. A pure-text extension needs only this one
+# generic .tar.gz; Gemini extracts it in-process via the `tar` package on every OS.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "plugins/zero-gemini/**"
+      - "plugins/zero/skills/**"
+      - "plugins/zero/hooks/ensure-runner.sh"
+      - "plugins/zero/hooks/zero-context.sh"
+      - "scripts/build-gemini.sh"
+      - ".github/workflows/release-gemini.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read manifest version
+        id: ver
+        run: |
+          version="$(jq -r .version plugins/zero-gemini/gemini-extension.json)"
+          [ -n "$version" ] && [ "$version" != "null" ] || { echo "no version in manifest" >&2; exit 1; }
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+
+      - name: Skip if the release already exists
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "${{ steps.ver.outputs.tag }}" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Release ${{ steps.ver.outputs.tag }} already exists — nothing to do."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build the extension asset
+        if: steps.check.outputs.exists == 'false'
+        run: ./scripts/build-gemini.sh --tar zero-gemini.tar.gz
+
+      - name: Create and publish the release
+        if: steps.check.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.ver.outputs.tag }}" zero-gemini.tar.gz \
+            --target "${{ github.sha }}" \
+            --title "Zero for Gemini CLI ${{ steps.ver.outputs.tag }}" \
+            --latest \
+            --notes "Install with: \`gemini extensions install https://github.com/${{ github.repository }}\`"

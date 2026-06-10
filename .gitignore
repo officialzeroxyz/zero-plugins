@@ -4,3 +4,5 @@ node_modules/
 /tmp/
 .env
 .env.local
+# Assembled Gemini extension (built by scripts/build-gemini.sh)
+/dist/
