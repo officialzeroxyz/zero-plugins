@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "name": "Prepare the Zero runner",
+            "command": "bash \"${extensionPath}/hooks/ensure-runner.sh\"",
+            "timeout": 120000
+          }
+        ]
+      }
+    ],
+    "BeforeAgent": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "name": "Inject Zero availability reminder",
+            "command": "bash \"${extensionPath}/hooks/zero-context.sh\"",
+            "timeout": 5000
+          }
+        ]
+      }
+    ]
+  }
+}
