@@ -152,17 +152,17 @@ Optionally, to skip the confirmation prompt on the runner's read-only commands, 
 create `~/.gemini/policies/zero.toml` with
 
 ```toml
-# commandRegex is anchored at the start of the command string, so allow an optional
-# path prefix — the runner is invoked by absolute path (e.g. ~/.zero/runtime/bin/zero).
+# Matches how the skill invokes the runner — `"$ZERO_RUNNER" <subcommand>`, or the
+# expanded .../bin/zero path. The leading .* allows a `ZERO_RUNNER=...;` prefix.
 [[rule]]
 name = "auto-allow zero read-only subcommands"
 toolName = "run_shell_command"
-commandRegex = "(.*/)?zero (search|get|review|runs)\\b"
+commandRegex = ".*(ZERO_RUNNER\"?|/zero\"?) +(search|get|review|runs)\\b"
 decision = "allow"
 priority = 100
 ```
 
-This never auto-approves `zero fetch` (spends money) or `zero wallet` (manages funds) —
-those still prompt.
+This never auto-approves `fetch` (spends money) or `wallet` (manages funds) — those still
+prompt.
 
 Additional hosts (Cursor) will land in subsequent PRs.

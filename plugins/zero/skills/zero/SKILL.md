@@ -27,12 +27,19 @@ Two surfaces give you Zero:
   **authentication and funding**, not the loop. In ephemeral/sandbox environments it is also the
   *only* way to authenticate the runner (see below).
 
-> **Convention:** examples write `zero` for brevity, but invoke the runner by its absolute path —
-> `$HOME/.zero/runtime/bin/zero` (what the SessionStart hook reports, and exports as `$ZERO_RUNNER`
-> on Claude Code / Codex). Don't run a bare `zero`: `$PATH` could resolve it to an unrelated global
-> install. If the hook reported the runner *unavailable*, in a persistent environment tell the user
-> Zero isn't available here; in an ephemeral sandbox use `npx -y @zeroxyz/cli@latest` instead (see
-> **Ephemeral / sandbox** below). Never create a wallet either way.
+> **Convention:** always run the runner as `"$ZERO_RUNNER"` (the examples below do), **never a bare
+> `zero`** — `$PATH` could resolve `zero` to an unrelated global install, but `"$ZERO_RUNNER"` either
+> hits the provisioned runner or fails loudly. `$ZERO_RUNNER` is pre-set on Claude Code / Codex; on
+> Gemini CLI it isn't, so set it at the start of each shell command (the `:-` fallback makes this
+> safe to prepend anywhere):
+>
+> ```bash
+> export ZERO_RUNNER="${ZERO_RUNNER:-$HOME/.zero/runtime/bin/zero}"
+> ```
+>
+> If the SessionStart hook reported the runner *unavailable*, in a persistent environment tell the
+> user Zero isn't available here; in an ephemeral sandbox use `npx -y @zeroxyz/cli@latest` instead
+> (see **Ephemeral / sandbox** below). Never create a wallet either way.
 
 ## The runner
 
@@ -60,8 +67,11 @@ authorize. No browser is opened on the machine running the agent, and you do **n
 user to tell you they're done — the finish command blocks until it knows.
 
 ```bash
+# Set the runner path (pre-set on Claude Code / Codex; required on Gemini CLI):
+export ZERO_RUNNER="${ZERO_RUNNER:-$HOME/.zero/runtime/bin/zero}"
+
 # 1. Start: prints a URL + user code and exits immediately (no waiting, no browser).
-zero auth login --start --json
+"$ZERO_RUNNER" auth login --start --json
 # → {"deviceCode":"…","userCode":"WXYZ-1234","verificationUri":"https://…",
 #    "url":"https://…?code=WXYZ-1234","pollInterval":5,"expiresAt":…}
 
@@ -70,7 +80,7 @@ zero auth login --start --json
 # 3. Immediately run finish. It BLOCKS and polls (~every 2s) until the user authorizes, then
 #    persists the session. Run it right after step 2 — do NOT pause to ask "are you done yet?";
 #    the command returning is your signal.
-zero auth login --finish <deviceCode> --json
+"$ZERO_RUNNER" auth login --finish <deviceCode> --json
 # → {"status":"ok","user":{"id":"…","email":"…"}}     once authorized
 # → {"status":"expired"}                                if the ~10 min code TTL lapses first
 ```
@@ -83,7 +93,7 @@ The session is saved to the shared `~/.zero/config.json`, so authenticating once
 you in everywhere Zero is used on this machine — the standalone `zero` CLI and your other agents
 all share the one login. Signing is managed server-side — nothing to set up.
 
-Check identity any time with `zero auth whoami`.
+Check identity any time with `"$ZERO_RUNNER" auth whoami`.
 
 ### Ephemeral / sandbox — cloud, CI, web/mobile sandbox runners
 
@@ -100,10 +110,9 @@ enabling it in your product/environment:
 
 Then:
 
-1. **Get the runner.** Use the runner path the SessionStart hook reported if it provisioned one
-   (exported as `$ZERO_RUNNER` where the host persists hook env vars); otherwise invoke the CLI with
-   `npx -y @zeroxyz/cli@latest` (node/npx is present in most sandboxes) — substitute that wherever
-   the loop writes `zero`.
+1. **Get the runner.** If the SessionStart hook provisioned one, point `ZERO_RUNNER` at it as above;
+   otherwise invoke the CLI with `npx -y @zeroxyz/cli@latest` (node/npx is present in most sandboxes)
+   — substitute that wherever the examples use `"$ZERO_RUNNER"`.
 2. **Authorize.** If the connector (`https://mcp.zero.xyz`) isn't available as a tool yet, walk the
    user through adding it and the one-time consent. Then call its **`authorize`** tool to get a
    short-lived authorization `code`.
@@ -131,14 +140,14 @@ https://www.zero.xyz/profile to fund their Zero account.
 
 ## The loop
 
-1. **Search** — `zero search "weather forecast"`. Always re-search; capabilities, prices, and
-   rankings churn. Never reuse URLs/schemas/prices from memory or earlier in the conversation.
-2. **Inspect** — `zero get 1 --formatted` prints a human summary plus a copy-pasteable `Try it:`
-   line. Plain `zero get 1` returns full JSON (URL, method, `bodySchema`, examples, pricing). If
-   `bodySchema` is `null`, skip that result — don't invent field names.
-3. **Call** — `zero fetch <url> [-d '<json>'] [-H 'k:v'] [--max-pay 0.50]`. 402 responses are paid
-   automatically (x402 + MPP, including cross-chain bridging from Base to Tempo).
-4. **Review** — `zero review <runId> --accuracy N --value N --reliability N --content "<observation>"`.
+1. **Search** — `"$ZERO_RUNNER" search "weather forecast"`. Always re-search; capabilities, prices,
+   and rankings churn. Never reuse URLs/schemas/prices from memory or earlier in the conversation.
+2. **Inspect** — `"$ZERO_RUNNER" get 1 --formatted` prints a human summary plus a copy-pasteable
+   `Try it:` line. Plain `"$ZERO_RUNNER" get 1` returns full JSON (URL, method, `bodySchema`,
+   examples, pricing). If `bodySchema` is `null`, skip that result — don't invent field names.
+3. **Call** — `"$ZERO_RUNNER" fetch <url> [-d '<json>'] [-H 'k:v'] [--max-pay 0.50]`. 402 responses
+   are paid automatically (x402 + MPP, including cross-chain bridging from Base to Tempo).
+4. **Review** — `"$ZERO_RUNNER" review <runId> --accuracy N --value N --reliability N --content "<observation>"`.
    The `runId` is printed to stderr (or in the `--json` envelope). Always review after a paid call.
 
 ## Request shape
@@ -150,13 +159,13 @@ envelope as the body.
 GET — encode `queryParams` as query string:
 
 ```bash
-zero fetch "https://api.example.com/locate?ip=8.8.8.8"
+"$ZERO_RUNNER" fetch "https://api.example.com/locate?ip=8.8.8.8"
 ```
 
 POST — send `input.body` as JSON:
 
 ```bash
-zero fetch https://api.example.com/translate \
+"$ZERO_RUNNER" fetch https://api.example.com/translate \
   -d '{"text":"hello","to":"es"}' \
   -H "Content-Type:application/json"
 ```
@@ -184,9 +193,9 @@ zero fetch https://api.example.com/translate \
 - **stderr** — progress, payment info, the `Run ID:` line, warnings.
 
 ```bash
-zero fetch "<url>" | jq .                        # body on stdout
-zero fetch --json "<url>" | jq 'select(.ok)'     # programmatic
-zero fetch "<image-url>" > out.png               # binary
+"$ZERO_RUNNER" fetch "<url>" | jq .                    # body on stdout
+"$ZERO_RUNNER" fetch --json "<url>" | jq 'select(.ok)' # programmatic
+"$ZERO_RUNNER" fetch "<image-url>" > out.png           # binary
 ```
 
 ## Reviews — what to write
@@ -231,13 +240,14 @@ Lost a `runId`? `zero runs --unreviewed` (optionally `--capability <slug>`).
 ## End-to-end
 
 ```bash
-zero search "sentiment analysis"
-zero get 1 --formatted
-zero fetch https://nlp-api.example.com/sentiment \
+export ZERO_RUNNER="${ZERO_RUNNER:-$HOME/.zero/runtime/bin/zero}"
+"$ZERO_RUNNER" search "sentiment analysis"
+"$ZERO_RUNNER" get 1 --formatted
+"$ZERO_RUNNER" fetch https://nlp-api.example.com/sentiment \
   -d '{"text":"Zero is great"}' \
   -H "Content-Type:application/json"
 # Run ID printed on stderr
-zero review abc123 --accuracy 5 --value 4 --reliability 5 \
+"$ZERO_RUNNER" review abc123 --accuracy 5 --value 4 --reliability 5 \
   --content "Classified a 200-char product-review snippet positive in ~180ms; matched manual read. Clean schema, no auth."
 ```
 
