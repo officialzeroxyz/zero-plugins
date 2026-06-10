@@ -59,11 +59,9 @@ jobs:
 
       - name: Package the extension (manifest at archive root)
         run: |
-          # Archive the CONTENTS of the extension dir so gemini-extension.json is at the
-          # tarball root. GNU tar preserves the 0755 bits on the hook scripts.
-          tar -czf zero-gemini.tar.gz -C plugins/zero-gemini .
-          echo "=== archive contents ==="
-          tar -tzf zero-gemini.tar.gz | sort
+          # Assemble the Gemini overlay + the shared skill/hook scripts into one archive.
+          # Same script used for local installs, so the release can't drift from source.
+          ./scripts/build-gemini.sh --tar zero-gemini.tar.gz
 
       - name: Attach the asset to the release
         env:

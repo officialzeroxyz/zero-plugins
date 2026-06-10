@@ -19,25 +19,30 @@ Zero is a search engine and payment layer for AI agents: discover external paid 
 
 Two surfaces give you Zero:
 
-- **The runner** — a `zero` CLI the plugin provisions for this session and exports as
-  `$ZERO_RUNNER`. This is your primary tool: it runs the whole loop, handles 402 payment
-  (including cross-chain), streams binary output, and enforces spend caps.
+- **The runner** — a `zero` CLI the plugin/extension provisions for this session. This is your
+  primary tool: it runs the whole loop, handles 402 payment (including cross-chain), streams binary
+  output, and enforces spend caps. The SessionStart hook reports its absolute path; on hosts that
+  persist hook env vars it's also exported as `$ZERO_RUNNER`.
 - **The MCP connector** (`https://mcp.zero.xyz`) — the Zero connector tool surface. Its job is
   **authentication and funding**, not the loop. In ephemeral/sandbox environments it is also the
   *only* way to authenticate the runner (see below).
 
-> **Convention:** examples below write `zero` for brevity. Always invoke the runner by its real
-> path — `"$ZERO_RUNNER" search "…"`. If `$ZERO_RUNNER` is unset, the runner didn't provision: in a
-> persistent environment, tell the user Zero isn't available here rather than improvising; in an
-> ephemeral sandbox, invoke the published CLI directly with `npx` instead (see **Ephemeral /
-> sandbox** below). Never create a wallet either way.
+> **Convention:** examples below write `zero` for brevity — invoke the runner by the path the
+> SessionStart hook reported. On hosts that persist hook env vars (Claude Code, Codex) it's exported
+> as `$ZERO_RUNNER`, so `"$ZERO_RUNNER" search "…"` works. On hosts that don't (Gemini CLI),
+> `$ZERO_RUNNER` is **not** set in your shell — use the absolute path the hook announced (default
+> `~/.zero/runtime/bin/zero`). If the hook reported the runner as *unavailable* (not merely an
+> unexported var), in a persistent environment tell the user Zero isn't available here rather than
+> improvising; in an ephemeral sandbox, invoke the published CLI directly with `npx` instead (see
+> **Ephemeral / sandbox** below). Never create a wallet either way.
 
 ## The runner
 
 The runner is the published `@zeroxyz/cli`, installed once per session into a shared,
-plugin-owned home and pointed at by `$ZERO_RUNNER`. You do **not** install, update, or configure
-it — the SessionStart hook handles provisioning, and the runner needs no wallet setup. Identity
-comes from a session (below); signing is managed server-side.
+plugin-owned home and reported by its absolute path (also exported as `$ZERO_RUNNER` on hosts that
+persist hook env vars; default path `~/.zero/runtime/bin/zero`). You do **not** install, update, or
+configure it — the SessionStart hook handles provisioning, and the runner needs no wallet setup.
+Identity comes from a session (below); signing is managed server-side.
 
 **Prefer the runner for every step of the loop, even when MCP search/get/fetch tools are also
 available.** The runner is the complete, auditable path: it pays 402 challenges automatically,
@@ -58,7 +63,7 @@ user to tell you they're done — the finish command blocks until it knows.
 
 ```bash
 # 1. Start: prints a URL + user code and exits immediately (no waiting, no browser).
-"$ZERO_RUNNER" auth login --start --json
+zero auth login --start --json
 # → {"deviceCode":"…","userCode":"WXYZ-1234","verificationUri":"https://…",
 #    "url":"https://…?code=WXYZ-1234","pollInterval":5,"expiresAt":…}
 
@@ -67,7 +72,7 @@ user to tell you they're done — the finish command blocks until it knows.
 # 3. Immediately run finish. It BLOCKS and polls (~every 2s) until the user authorizes, then
 #    persists the session. Run it right after step 2 — do NOT pause to ask "are you done yet?";
 #    the command returning is your signal.
-"$ZERO_RUNNER" auth login --finish <deviceCode> --json
+zero auth login --finish <deviceCode> --json
 # → {"status":"ok","user":{"id":"…","email":"…"}}     once authorized
 # → {"status":"expired"}                                if the ~10 min code TTL lapses first
 ```
@@ -80,7 +85,7 @@ The session is saved to the shared `~/.zero/config.json`, so authenticating once
 you in everywhere Zero is used on this machine — the standalone `zero` CLI and your other agents
 all share the one login. Signing is managed server-side — nothing to set up.
 
-Check identity any time with `"$ZERO_RUNNER" auth whoami`.
+Check identity any time with `zero auth whoami`.
 
 ### Ephemeral / sandbox — cloud, CI, web/mobile sandbox runners
 
@@ -97,7 +102,8 @@ enabling it in your product/environment:
 
 Then:
 
-1. **Get the runner.** Use `$ZERO_RUNNER` if a hook already set it; otherwise invoke the CLI with
+1. **Get the runner.** Use the runner path the SessionStart hook reported if it provisioned one
+   (exported as `$ZERO_RUNNER` where the host persists hook env vars); otherwise invoke the CLI with
    `npx -y @zeroxyz/cli@latest` (node/npx is present in most sandboxes) — substitute that wherever
    the loop writes `zero`.
 2. **Authorize.** If the connector (`https://mcp.zero.xyz`) isn't available as a tool yet, walk the
