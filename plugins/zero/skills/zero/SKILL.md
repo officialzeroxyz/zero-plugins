@@ -27,19 +27,14 @@ Two surfaces give you Zero:
   **authentication and funding**, not the loop. In ephemeral/sandbox environments it is also the
   *only* way to authenticate the runner (see below).
 
-> **Convention:** always run the runner as `"$ZERO_RUNNER"` (the examples below do), **never a bare
-> `zero`** — `$PATH` could resolve `zero` to an unrelated global install, but `"$ZERO_RUNNER"` either
-> hits the provisioned runner or fails loudly. `$ZERO_RUNNER` is pre-set on Claude Code / Codex; on
-> Gemini CLI it isn't, so set it at the start of each shell command (the `:-` fallback makes this
-> safe to prepend anywhere):
->
-> ```bash
-> export ZERO_RUNNER="${ZERO_RUNNER:-$HOME/.zero/runtime/bin/zero}"
-> ```
->
-> If the SessionStart hook reported the runner *unavailable*, in a persistent environment tell the
-> user Zero isn't available here; in an ephemeral sandbox use `npx -y @zeroxyz/cli@latest` instead
-> (see **Ephemeral / sandbox** below). Never create a wallet either way.
+> **Convention:** run the runner as `"$ZERO_RUNNER"` (the examples below do), never a bare `zero` —
+> `$PATH` could resolve `zero` to an unrelated global install, whereas `"$ZERO_RUNNER"` hits the
+> provisioned runner or fails loudly. Claude Code / Codex export `$ZERO_RUNNER` for you; on Gemini
+> CLI it isn't exported, so wherever an example writes `$ZERO_RUNNER`, use the runner's absolute path
+> instead — `$HOME/.zero/runtime/bin/zero`, which the SessionStart hook reports. If the hook reported
+> the runner *unavailable*, in a persistent environment tell the user Zero isn't available here; in
+> an ephemeral sandbox use `npx -y @zeroxyz/cli@latest` instead (see **Ephemeral / sandbox** below).
+> Never create a wallet either way.
 
 ## The runner
 
@@ -67,9 +62,6 @@ authorize. No browser is opened on the machine running the agent, and you do **n
 user to tell you they're done — the finish command blocks until it knows.
 
 ```bash
-# Set the runner path (pre-set on Claude Code / Codex; required on Gemini CLI):
-export ZERO_RUNNER="${ZERO_RUNNER:-$HOME/.zero/runtime/bin/zero}"
-
 # 1. Start: prints a URL + user code and exits immediately (no waiting, no browser).
 "$ZERO_RUNNER" auth login --start --json
 # → {"deviceCode":"…","userCode":"WXYZ-1234","verificationUri":"https://…",
@@ -240,7 +232,6 @@ Lost a `runId`? `zero runs --unreviewed` (optionally `--capability <slug>`).
 ## End-to-end
 
 ```bash
-export ZERO_RUNNER="${ZERO_RUNNER:-$HOME/.zero/runtime/bin/zero}"
 "$ZERO_RUNNER" search "sentiment analysis"
 "$ZERO_RUNNER" get 1 --formatted
 "$ZERO_RUNNER" fetch https://nlp-api.example.com/sentiment \
