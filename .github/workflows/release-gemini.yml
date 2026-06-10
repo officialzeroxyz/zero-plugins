@@ -1,0 +1,74 @@
+name: Release Gemini extension asset
+
+# Packages plugins/zero-gemini/ into a single self-contained archive and attaches it to
+# the GitHub Release, so users can install with the plain repo URL:
+#
+#     gemini extensions install https://github.com/officialzeroxyz/zero-plugins
+#
+# Gemini's release installer (packages/cli/src/config/extensions/github.ts) picks a
+# release asset like so: it tries a `${platform}.${arch}.` name prefix, then a
+# `${platform}.` prefix, then — only if the release has EXACTLY ONE uploaded asset — a
+# generic fallback (an asset whose name contains none of darwin/linux/win32). Our
+# extension is pure text (shell + skill + manifest), so one generic `.tar.gz` is
+# sufficient and fully cross-platform: Gemini extracts `.tar.gz` in-process via the `tar`
+# package on every OS, including Windows.
+#
+# Invariants this workflow upholds (do not break these or installs will fail):
+#   - exactly ONE asset is attached (the generic fallback requires assets.length === 1);
+#   - the asset name ends in `.tar.gz` and contains no darwin/linux/win32 substring;
+#   - `gemini-extension.json` sits at the ARCHIVE ROOT (no wrapper directory), so the
+#     installer finds it without relying on its narrow unwrap heuristic.
+#
+# Attach this asset to EVERY published release. A release without it makes Gemini fall
+# back to GitHub's source tarball (repo root — no manifest there) and the install fails.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing release tag to attach the asset to"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve release tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${{ github.event.release.tag_name }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Sanity-check the extension manifest
+        run: |
+          test -f plugins/zero-gemini/gemini-extension.json
+          python3 -m json.tool plugins/zero-gemini/gemini-extension.json > /dev/null
+          echo "manifest version: $(python3 -c 'import json;print(json.load(open("plugins/zero-gemini/gemini-extension.json"))["version"])')"
+
+      - name: Package the extension (manifest at archive root)
+        run: |
+          # Archive the CONTENTS of the extension dir so gemini-extension.json is at the
+          # tarball root. GNU tar preserves the 0755 bits on the hook scripts.
+          tar -czf zero-gemini.tar.gz -C plugins/zero-gemini .
+          echo "=== archive contents ==="
+          tar -tzf zero-gemini.tar.gz | sort
+
+      - name: Attach the asset to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # --clobber so re-runs replace the asset rather than erroring. We intentionally
+          # upload only this one asset to preserve Gemini's single-generic-asset fallback.
+          gh release upload "${{ steps.tag.outputs.tag }}" zero-gemini.tar.gz --clobber

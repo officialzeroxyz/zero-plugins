@@ -47,6 +47,8 @@ plugins/zero-gemini/
       ├── hooks.json                     # hook declarations (Gemini events; ${extensionPath}; ms timeouts)
       ├── ensure-runner.sh               # SessionStart: provisions the @zeroxyz/cli runner
       └── zero-context.sh                # BeforeAgent: injects a short "Zero is available" reminder
+
+.github/workflows/release-gemini.yml     # packages plugins/zero-gemini/ as a release asset for git-URL installs
 ```
 
 All three hosts share one login via `~/.zero/config.json` and one runtime under
@@ -92,19 +94,30 @@ Install in Codex:
 
 Install in Gemini CLI:
 
-Gemini installs an extension from the directory that *directly* contains
-`gemini-extension.json` (it does not read the Codex/Claude marketplace catalogs, and
-git-URL installs expect the manifest at the repo root). For this monorepo, clone it and
-point the installer at the extension subdirectory:
+```
+gemini extensions install https://github.com/officialzeroxyz/zero-plugins
+```
+
+Gemini doesn't read the Codex/Claude marketplace catalogs, and a git-URL install expects
+the `gemini-extension.json` at the *root* of what it installs — but this is a monorepo
+whose root isn't an extension. To bridge that, a release workflow
+(`.github/workflows/release-gemini.yml`) packages `plugins/zero-gemini/` into a single
+`zero-gemini.tar.gz` (manifest at the archive root) and attaches it to each GitHub
+Release; Gemini's installer downloads that asset. So the one-liner above works against any
+**published release**.
+
+From a local checkout (no release needed — handy for development), point the installer
+straight at the extension subdirectory, which *is* a valid extension root:
 
 ```
 git clone https://github.com/officialzeroxyz/zero-plugins
 gemini extensions install ./zero-plugins/plugins/zero-gemini
+# or, for a live-linked dev install:
+gemini extensions link ./zero-plugins/plugins/zero-gemini
 ```
 
-(Use `gemini extensions link ./zero-plugins/plugins/zero-gemini` instead for a live-linked
-dev install.) Restart Gemini CLI; the SessionStart hook provisions the runner and the
-`zero` skill becomes available.
+Restart Gemini CLI; the SessionStart hook provisions the runner and the `zero` skill
+becomes available.
 
 Optionally, to skip the confirmation prompt on the runner's read-only commands, add a
 **user** policy (extensions can't auto-approve — Gemini strips extension `allow` rules):
