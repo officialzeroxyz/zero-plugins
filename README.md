@@ -39,4 +39,12 @@ Install in Claude Code:
 /plugin install zero@zero-plugins
 ```
 
+Install in Codex:
+
+```
+/plugin marketplace add officialzeroxyz/zero-plugins
+/plugin install zero@zero-plugins
+/reload-plugins
+```
+
 Additional hosts (Cursor, Gemini) will land in subsequent PRs.
