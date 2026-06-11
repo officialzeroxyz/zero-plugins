@@ -18,8 +18,7 @@ Codex and Claude Code are both backed by the same `plugins/zero/` directory:
 .agents/plugins/marketplace.json        # Codex marketplace catalog
 .claude-plugin/marketplace.json         # Claude Code marketplace catalog
 plugins/zero/
-  ├── .codex-plugin/plugin.json          # Codex manifest (declares skills, mcp, hooks)
-  ├── .codex-plugin/mcp.json             # Zero MCP connector for Codex (flattened) → https://mcp.zero.xyz
+  ├── .codex-plugin/plugin.json          # Codex manifest (declares skills, hooks — no MCP, see below)
   ├── .claude-plugin/plugin.json         # Claude Code manifest (skills/hooks/.mcp.json auto-discovered)
   ├── .mcp.json                          # Zero MCP connector for Claude (mcpServers-wrapped) → https://mcp.zero.xyz
   ├── skills/zero/SKILL.md               # the 'zero' skill — runner, auth, the search→call→review loop
@@ -30,11 +29,13 @@ plugins/zero/
       └── auto-approve-zero.sh           # PreToolUse: auto-approves the runner's own commands
 ```
 
-Both hosts share one login via `~/.zero`. Each host reads its own MCP config:
-Claude auto-discovers the plugin-root `.mcp.json`, which uses the documented
+Both hosts share one login via `~/.zero`. Only Claude ships the MCP connector:
+it auto-discovers the plugin-root `.mcp.json`, which uses the documented
 `{"mcpServers": {...}}` shape (claude.ai's plugin loader is stricter than the
-CLI and silently drops the connector otherwise), while the Codex manifest
-points at the flattened `.codex-plugin/mcp.json`.
+CLI and silently drops the connector otherwise). The Codex plugin deliberately
+has no MCP server — the connector's one hard job is authenticating in
+ephemeral sandboxes, and the Codex surfaces that load plugins (app, CLI) are
+persistent, while Codex cloud loads neither plugins nor MCP.
 
 Gemini CLI is delivered as a separate **extension**, but it reuses the shared
 `plugins/zero/` content rather than copying it. Gemini needs `gemini-extension.json` at
