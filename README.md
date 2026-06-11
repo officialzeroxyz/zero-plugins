@@ -157,12 +157,14 @@ Optionally, to skip the confirmation prompt on the runner's read-only commands, 
 create `~/.gemini/policies/zero.toml` with
 
 ```toml
-# Matches how the skill invokes the runner — `"$ZERO_RUNNER" <subcommand>`, or the
-# expanded .../bin/zero path. The leading .* allows a `ZERO_RUNNER=...;` prefix.
+# Matches how the skill invokes the runner — the resolved .../bin/zero path or
+# `"$ZERO_RUNNER"` anywhere in the command, or a bare `zero` anchored to the start of
+# the command (optionally after env assignments), so `zero` appearing as a mere
+# argument elsewhere can't trigger an allow.
 [[rule]]
 name = "auto-allow zero read-only subcommands"
 toolName = "run_shell_command"
-commandRegex = ".*(ZERO_RUNNER\"?|/zero\"?) +(search|get|review|runs)\\b"
+commandRegex = ".*(ZERO_RUNNER\"?|/zero\"?) +(search|get|review|runs)\\b|^(\\w+=\\S+ +)*zero +(search|get|review|runs)\\b"
 decision = "allow"
 priority = 100
 ```
