@@ -108,16 +108,29 @@ Then:
 2. **Authorize.** If the connector (`https://mcp.zero.xyz`) isn't available as a tool yet, walk the
    user through adding it and the one-time consent. Then call its **`authorize`** tool to get a
    short-lived authorization `code`.
-3. **Export the code** so every call picks it up:
+3. **Exchange the code for a session token — without printing it.** The code from `authorize` is
+   one-time; the reusable credential is the session token that `zero auth exchange` returns. The
+   command writes the bare token to stdout precisely so you can capture it straight into an env
+   var or file. Never run it bare, `echo`/`cat` the token, or paste it into the conversation —
+   the token must not land in the transcript.
 
    ```bash
-   export ZERO_SESSION_CODE=<code from authorize>
+   # If your shell persists across commands, capture it directly into the environment:
+   export ZERO_SESSION_TOKEN="$(npx -y @zeroxyz/cli@latest auth exchange <code from authorize>)"
    npx -y @zeroxyz/cli@latest search "…"
+
+   # If each command runs in a fresh shell (most agent harnesses), write it to an
+   # owner-only file once, then load it per call:
+   (umask 077; npx -y @zeroxyz/cli@latest auth exchange <code from authorize> > /tmp/zero-session-token)
+   ZERO_SESSION_TOKEN="$(cat /tmp/zero-session-token)" npx -y @zeroxyz/cli@latest search "…"
    ```
 
-   The CLI exchanges it for a session token on each call; signing is managed server-side.
-4. **Re-mint when it expires.** If calls start failing with an auth error mid-task, call `authorize`
-   again and re-export `ZERO_SESSION_CODE`.
+   Every CLI call picks `ZERO_SESSION_TOKEN` up from the environment; signing is managed
+   server-side. (`auth exchange --json` emits `{token, expiresAt}` instead, if you need the
+   expiry.)
+4. **Re-mint when it expires.** The token is short-lived and has no refresh path. If calls start
+   failing with an auth error mid-task, call `authorize` again, re-run `auth exchange`, and
+   re-capture `ZERO_SESSION_TOKEN` the same way.
 
 ### Bring-your-own signing
 
