@@ -24,7 +24,7 @@ plugins/zero/
   ├── skills/zero/SKILL.md               # the 'zero' skill — runner, auth, the search→call→review loop
   └── hooks/
       ├── hooks.json                     # hook declarations
-      ├── ensure-runner.sh               # SessionStart: provisions the @zeroxyz/cli runner
+      ├── ensure-runner.sh               # SessionStart: provisions the @zeroxyz/cli runner; daily plugin refresh
       ├── zero-context.sh                # UserPromptSubmit: injects a short "Zero is available" reminder
       └── auto-approve-zero.sh           # PreToolUse: auto-approves the runner's own commands
 ```
@@ -116,10 +116,11 @@ Install in Codex:
 /reload-plugins
 ```
 
-Install in Gemini CLI:
+Install in Gemini CLI (`--auto-update` keeps the extension fresh — recommended, see
+"Staying up to date" below):
 
 ```
-gemini extensions install https://github.com/officialzeroxyz/zero-plugins
+gemini extensions install https://github.com/officialzeroxyz/zero-plugins --auto-update
 ```
 
 Gemini doesn't read the Codex/Claude marketplace catalogs, and a git-URL install expects
@@ -168,5 +169,31 @@ priority = 100
 
 This never auto-approves `fetch` (spends money) or `wallet` (manages funds) — those still
 prompt.
+
+### Staying up to date
+
+Two layers update on different cadences, both handled for you:
+
+- **The CLI runner** is re-resolved against npm every session by the SessionStart hook —
+  a new `@zeroxyz/cli` release reaches every machine on its next session.
+- **The plugin itself** (skill, hooks, manifest) is refreshed **once a day, in the
+  background**, by the same hook. It goes through each host's own plugin manager — never
+  by writing into host-owned directories — and sweeps every Zero install on the machine,
+  whichever host started the session:
+
+  | Host | Commands run |
+  |---|---|
+  | Claude Code | `claude plugin marketplace update zero-plugins` && `claude plugin update zero@zero-plugins` |
+  | Codex | `codex plugin marketplace upgrade zero-plugins` && `codex plugin add zero@zero-plugins` |
+
+  Updates apply on the next session (hosts require a restart to load the new version).
+  Set `ZERO_PLUGIN_AUTOUPDATE=0` to opt out.
+
+  **Gemini is not swept** — `gemini extensions update` re-prompts for interactive consent
+  whenever an update changes hooks/skills/MCP (by design, with no consent-skipping flag),
+  and a background hook auto-answering a security prompt would be a consent bypass.
+  Install with `--auto-update` instead (see the install command above) and Gemini keeps
+  the extension fresh natively; otherwise run `gemini extensions update zero` yourself
+  occasionally.
 
 Additional hosts (Cursor) will land in subsequent PRs.
