@@ -6,11 +6,5 @@
   "homepage": "https://zero.xyz",
   "repository": "https://github.com/officialzeroxyz/zero-plugins",
   "license": "MIT",
-  "keywords": ["zero", "x402", "mpp", "payments", "capabilities", "mcp", "agent-tools"],
-  "mcpServers": {
-    "zero": {
-      "type": "http",
-      "url": "https://mcp.zero.xyz"
-    }
-  }
+  "keywords": ["zero", "x402", "mpp", "payments", "capabilities", "mcp", "agent-tools"]
 }
