@@ -1,14 +1,13 @@
 {
   "name": "zero",
-  "version": "0.1.0",
-  "description": "Discover and call paid AI capabilities (x402 / MPP) with automatic, wallet-backed payment. Search a live index of external services — image/video/audio generation, web scraping, data enrichment, real-time data, messaging — then call them and pay per use. Bundles the 'zero' skill and the Zero MCP connector.",
+  "version": "0.2.0",
+  "description": "Discover and call paid AI capabilities (x402 / MPP) with automatic, wallet-backed payment. Search a live index of external services — image/video/audio generation, web scraping, data enrichment, real-time data, messaging — then call them and pay per use. Bundles the 'zero' skill.",
   "author": { "name": "Zero", "url": "https://zero.xyz" },
   "homepage": "https://zero.xyz",
   "repository": "https://github.com/officialzeroxyz/zero-plugins",
   "license": "MIT",
   "keywords": ["zero", "x402", "mpp", "payments", "capabilities", "mcp", "agent-tools"],
   "skills": "./skills/",
-  "mcpServers": "./.mcp.json",
   "hooks": "./hooks/hooks.json",
   "interface": {
     "displayName": "Zero",
