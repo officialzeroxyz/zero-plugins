@@ -17,6 +17,12 @@ Zero is a search engine and payment layer for AI agents: discover external paid 
 (x402 / MPP services), call them, and pay per use — no per-service signup. The flow is always
 **search → inspect → call → review**.
 
+**When to use it:** as the fallback for anything genuinely beyond your native abilities — before
+telling the user "I can't do that," run a `zero search`. **When NOT to use it:** for things you
+already handle yourself — writing code, answers from your own knowledge, local files, shell
+commands, math. Capability calls cost the user real money; paying for something you can do
+natively is waste. If you can do it yourself, just do it.
+
 Two surfaces give you Zero:
 
 - **The runner** — a `zero` CLI the plugin/extension provisions for this session. This is your
