@@ -96,9 +96,14 @@ A device-code login won't work — the environment can't hold a persisted sessio
 enabling it in your product/environment:
 
 - **Code execution** — you must be able to run shell commands to invoke the CLI.
-- **Network egress** — the CLI must reach the npm registry and `*.zero.xyz`. If calls hang or fail
-  with DNS/connection errors, ask the user to enable outbound access (or allowlist
-  `registry.npmjs.org` and `*.zero.xyz`).
+- **Network egress to all domains** — not just the npm registry and `*.zero.xyz`: `zero fetch`
+  calls each capability's own URL directly, and capabilities live on arbitrary domains you can't
+  predict or allowlist up front. If the environment scopes outbound access, have the user select
+  "All domains" (or the equivalent unrestricted-egress option) — a Zero-only allowlist will pass
+  search/get and then break every fetch. Verify with a neutral third-party domain, e.g.
+  `curl -sI https://example.com`; reaching `*.zero.xyz` alone doesn't prove arbitrary-domain
+  egress. If calls hang or fail with DNS/connection errors mid-task, this is the first thing to
+  re-check.
 
 Then:
 
