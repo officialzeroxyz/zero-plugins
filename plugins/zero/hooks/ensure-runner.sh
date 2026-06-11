@@ -28,7 +28,8 @@
 #     keeps signing until they opt into managed signing via `zero wallet migrate`.
 #
 # Auth: the agent never creates a wallet. For ephemeral/sandbox environments it mints a
-# short-lived ZERO_SESSION_CODE via the Zero MCP connector's authorize tool; for
+# one-time code via the Zero MCP connector's authorize tool and exchanges it
+# (`zero auth exchange`) for a short-lived ZERO_SESSION_TOKEN; for
 # persistent environments a device-code `auth login` (persisted to ~/.zero) is
 # preferred. An explicit ZERO_PRIVATE_KEY is honored for bring-your-own signing.
 #
@@ -226,7 +227,7 @@ fi
 # shared with the standalone CLI and skill.md-only agents. The runtime stays contained
 # in $ZH via the explicit install --prefix and npm_config_cache, not via $HOME.
 # NODE_BIN_DIR is on PATH so the CLI can spawn node/subprocesses. Auth comes from the
-# MCP-minted ZERO_SESSION_CODE (passed in the environment), the persisted ~/.zero
+# exchanged ZERO_SESSION_TOKEN (passed in the environment), the persisted ~/.zero
 # session, or an explicit ZERO_PRIVATE_KEY (BYO).
 cat >"$SHIM_PATH" <<SHIM
 #!/usr/bin/env sh
