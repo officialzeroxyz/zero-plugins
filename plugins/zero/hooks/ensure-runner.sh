@@ -5,6 +5,8 @@
 # Provisions a Zero "runner" so the agent can call paid capabilities directly in its
 # own environment, exports its path as $ZERO_RUNNER for the session, and tells the
 # agent — via the SessionStart `additionalContext` payload — how to authenticate.
+# Also refreshes the machine's Zero plugin installs once a day, in the background,
+# through each host's own plugin-manager commands (see that section below).
 #
 # Runner model: the runner IS the published @zeroxyz/cli npm package (a single
 # bundled, zero-dependency file as of 0.0.44), run on Node. We install it once per
@@ -201,6 +203,38 @@ NPM_BIN="$NODE_BIN_DIR/npm"
 [ -x "$NPM_BIN" ] || NPM_BIN="$(command -v npm 2>/dev/null || true)"
 
 mkdir -p "$ZH" "$BIN_DIR" "$CLI_DIR" "$NPM_CACHE"
+
+# --- keep the host plugin installs fresh (background, daily, best-effort) ---
+# The CLI below is refreshed every session, but the *plugin layer* (skill, hooks,
+# manifest) only updates when the host's marketplace machinery runs — which most users
+# never enable. So once a day, refresh every Zero install on the machine through each
+# host's own front-door commands; never by writing into host-owned plugin dirs:
+#   Claude Code - marketplace update, then plugin update (both required: plugin update
+#                 resolves against the local catalog clone; applies next session)
+#   Codex       - marketplace upgrade, then plugin add (upgrade re-resolves the plugin
+#                 from the snapshot; add is idempotent and syncs the version cache)
+# Gemini is deliberately NOT swept: `gemini extensions update` re-prompts for interactive
+# consent whenever an update changes hooks/skills/MCP (and has no --consent flag), and a
+# hook auto-answering a security prompt would be a consent bypass. Gemini freshness comes
+# from its native `extensions install --auto-update` instead (see the README).
+# We sweep every host CLI on PATH instead of detecting the current host: plugin installs
+# are machine-global (like ~/.zero itself), so whichever host opens a session first
+# freshens all of them, and absent CLIs / not-installed plugins fail quietly. The job is
+# detached with all fds redirected so SessionStart never waits on it and the stdout JSON
+# contract holds. The stamp is written before the attempt so a failing/offline day
+# retries tomorrow rather than hammering every session. Opt out: ZERO_PLUGIN_AUTOUPDATE=0.
+PLUGIN_UPDATE_STAMP="$ZH/.plugin-update-day"
+if [ "${ZERO_PLUGIN_AUTOUPDATE:-1}" != "0" ]; then
+  TODAY="$(date +%Y-%m-%d)"
+  if [ "$(cat "$PLUGIN_UPDATE_STAMP" 2>/dev/null || true)" != "$TODAY" ]; then
+    printf '%s' "$TODAY" >"$PLUGIN_UPDATE_STAMP"
+    log "refreshing host plugin installs in the background (daily; ZERO_PLUGIN_AUTOUPDATE=0 disables)"
+    {
+      command -v claude >/dev/null 2>&1 && { claude plugin marketplace update zero-plugins && claude plugin update zero@zero-plugins; } || true
+      command -v codex >/dev/null 2>&1 && { codex plugin marketplace upgrade zero-plugins && codex plugin add zero@zero-plugins; } || true
+    } </dev/null >/dev/null 2>&1 &
+  fi
+fi
 
 # --- install / refresh the CLI (throttled) ---
 VERSION="$(resolve_cli_version)"
