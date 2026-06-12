@@ -1,11 +1,11 @@
 # Zero for Claude on the web (claude.ai) & Claude Cowork
 
-How to install the Zero plugin in the Claude app — web, desktop, or mobile,
-they're all the same product — and in Claude Cowork. Everything here is clicks
-in the Claude UI; no terminal involved.
+How to install Zero in the Claude app — web, desktop, or mobile, they're all
+the same product — and in Claude Cowork. Everything here is clicks in the
+Claude UI; no terminal involved.
 
-> Using Claude Code (the CLI) instead? See the
-> [Claude Code guide](claude-code.md).
+> Using Claude Code instead? See the [CLI guide](claude-code.md) or the
+> [desktop guide](claude-code-desktop.md).
 
 ## Install the plugin
 
@@ -33,13 +33,7 @@ in the Claude UI; no terminal involved.
 
 Open a new session and ask: *"Help me set up and test Zero."*
 
-## Notes
+## Troubleshooting
 
-- **How this differs from the CLI hosts.** Claude Code, Codex, and Gemini CLI
-  run on a persistent machine where a CLI runner handles Zero calls and
-  sign-in. Claude's chat sandboxes are ephemeral and typically have no network
-  access to `zero.xyz`, so here the **Zero MCP connector** does that job
-  instead — it's what the account connection above sets up.
-- **Network allowlists.** If your environment blocks requests to `zero.xyz`
-  after install, allow `zero.xyz` and `*.zero.xyz` in your network or
-  connector settings.
+If Zero can't be reached after install, allow `zero.xyz` and `*.zero.xyz` in
+your network or connector settings.

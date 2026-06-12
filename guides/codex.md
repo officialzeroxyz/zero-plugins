@@ -1,11 +1,13 @@
-# Zero for Codex
+# Zero for Codex (CLI)
 
-How to install the Zero plugin in Codex — the CLI and the desktop app — what
-it supports, and how it stays up to date.
+How to install Zero in the Codex CLI, what it can do there, and how it stays
+up to date.
 
-## Install (CLI)
+> Using the Codex desktop app? See the [Codex app guide](codex-app.md).
 
-Inside an interactive Codex CLI session, run:
+## Install
+
+Inside a Codex CLI session, run:
 
 ```
 /plugin marketplace add officialzeroxyz/zero-plugins
@@ -20,63 +22,31 @@ codex plugin marketplace add officialzeroxyz/zero-plugins
 codex plugin add zero@zero-plugins
 ```
 
-That's it. The plugin's `SessionStart` hook provisions the Zero runner
-automatically — then ask Codex to *"help me set up and test Zero"* and it
-walks you through signing in.
-
-## Install (desktop app)
-
-The Codex app's slash commands don't include plugin management — `/plugin …`
-only works in the CLI. The app's **Plugins** screen browses curated plugins,
-and adding a third-party marketplace isn't part of its UI. So install from a
-terminal; one plugin system serves Codex's surfaces:
-
-1. **Add the marketplace and install from a terminal:**
-
-   ```bash
-   codex plugin marketplace add officialzeroxyz/zero-plugins
-   codex plugin add zero@zero-plugins
-   ```
-
-2. **Start a new thread** in the app, then ask Codex to *"help me set up and
-   test Zero"*.
+That's it — Zero sets itself up automatically. Ask Codex: *"Help me set up
+and test Zero."* It walks you through signing in.
 
 ## What's supported
 
-The Codex plugin is backed by the same `plugins/zero/` directory as the Claude
-Code plugin — same skill, same hook scripts:
-
-| Component | Status | What it does |
+| Feature | Supported | What it does |
 |---|---|---|
-| `zero` skill | ✅ | Teaches the agent the search → call → review loop |
-| `SessionStart` hook | ✅ | Provisions the `@zeroxyz/cli` runner each session and puts `zero` on PATH |
-| `UserPromptSubmit` hook | ✅ | Reminds the agent each turn that Zero is available |
-| `PreToolUse` hook | ✅ | Auto-approves the runner's own read-only commands, so searches don't prompt |
-| MCP connector | ❌ | Deliberately omitted — see below |
-
-**Why no MCP connector?** The connector's one hard job is authenticating in
-ephemeral sandboxes. The Codex surfaces that load plugins (the app and the
-CLI) are persistent machines where the runner handles auth, while Codex cloud
-loads neither plugins nor MCP — so the connector would have nothing to do.
-Everything it offers is also available through the runner.
+| `zero` skill | ✅ | Teaches Codex how to find, use, and pay for capabilities |
+| Automatic setup (`SessionStart` hook) | ✅ | Installs and updates the Zero runner each session |
+| Zero reminders (`UserPromptSubmit` hook) | ✅ | Keeps Codex aware that Zero is available |
+| Auto-approval (`PreToolUse` hook) | ✅ | Zero's read-only commands run without permission prompts |
+| Zero connector (MCP) | — | Not included on Codex; everything works through the `zero` command instead |
 
 ## Staying up to date
 
-Updates are automatic, on two cadences:
+Nothing to do — updates are automatic:
 
-- **The CLI runner** (`@zeroxyz/cli`) is re-resolved against npm by the
-  `SessionStart` hook — a new release reaches you on your next session.
-- **The plugin itself** (skill, hooks, manifest) is refreshed once a day, in
-  the background, by the same hook. It goes through Codex's own plugin
-  manager — `codex plugin marketplace upgrade zero-plugins` followed by
-  `codex plugin add zero@zero-plugins` — never by writing into host-owned
-  directories. The update applies the next time you start Codex.
+- The Zero runner updates at the start of each session.
+- The plugin itself checks for updates once a day, in the background, and
+  they apply the next time you start Codex.
 
-Set `ZERO_PLUGIN_AUTOUPDATE=0` to opt out of the daily plugin refresh.
+To turn off the daily plugin check, set `ZERO_PLUGIN_AUTOUPDATE=0` in your
+environment.
 
-## Shared state across hosts
+## Sign in once
 
-Claude Code, Codex, and Gemini CLI installs all share one login
-(`~/.zero/config.json`) and one runtime (`~/.zero/runtime`) — sign in once and
-every host on the machine is signed in. The daily plugin refresh likewise
-sweeps every Zero install on the machine, whichever host started the session.
+Zero installs in Codex, Claude Code, and Gemini CLI on the same computer
+share one account — sign in once and you're signed in everywhere.
