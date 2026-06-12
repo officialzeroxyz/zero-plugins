@@ -1,11 +1,11 @@
 # Zero for Codex
 
-How to install the Zero plugin in Codex, what it supports there, and how it
-stays up to date.
+How to install the Zero plugin in Codex — the CLI and the desktop app — what
+it supports, and how it stays up to date.
 
-## Install
+## Install (CLI)
 
-Inside Codex, run:
+Inside an interactive Codex CLI session, run:
 
 ```
 /plugin marketplace add officialzeroxyz/zero-plugins
@@ -13,9 +13,33 @@ Inside Codex, run:
 /reload-plugins
 ```
 
+Or, from a regular shell:
+
+```bash
+codex plugin marketplace add officialzeroxyz/zero-plugins
+codex plugin add zero@zero-plugins
+```
+
 That's it. The plugin's `SessionStart` hook provisions the Zero runner
 automatically — then ask Codex to *"help me set up and test Zero"* and it
 walks you through signing in.
+
+## Install (desktop app)
+
+The Codex app's slash commands don't include plugin management — `/plugin …`
+only works in the CLI. The app's **Plugins** screen browses curated plugins,
+and adding a third-party marketplace isn't part of its UI. So install from a
+terminal; one plugin system serves Codex's surfaces:
+
+1. **Add the marketplace and install from a terminal:**
+
+   ```bash
+   codex plugin marketplace add officialzeroxyz/zero-plugins
+   codex plugin add zero@zero-plugins
+   ```
+
+2. **Start a new thread** in the app, then ask Codex to *"help me set up and
+   test Zero"*.
 
 ## What's supported
 

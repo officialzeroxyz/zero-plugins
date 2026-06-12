@@ -1,11 +1,15 @@
 # Zero for Claude Code
 
-How to install the Zero plugin in Claude Code, what it supports there, and how
-it stays up to date.
+How to install the Zero plugin in Claude Code — the CLI and the desktop
+app — what it supports, and how it stays up to date.
 
-## Install
+> **Using Claude on the web (claude.ai) or Claude Cowork instead?** Those
+> install through the plugin UI, not a shell — see the
+> [claude.ai & Claude Cowork guide](claude-ai.md).
 
-Inside Claude Code, run:
+## Install (CLI)
+
+Inside an interactive Claude Code session, run:
 
 ```
 /plugin marketplace add officialzeroxyz/zero-plugins
@@ -13,13 +17,39 @@ Inside Claude Code, run:
 /reload-plugins
 ```
 
+Or, from a regular shell:
+
+```bash
+claude plugin marketplace add officialzeroxyz/zero-plugins
+claude plugin install zero@zero-plugins
+```
+
 That's it. The plugin's `SessionStart` hook provisions the Zero runner
 automatically — then ask Claude to *"help me set up and test Zero"* and it
 walks you through signing in.
 
-> **Using Claude on the web (claude.ai) or Claude Cowork instead?** Those
-> install through the plugin UI, not a shell — see the
-> [claude.ai & Claude Cowork guide](claude-ai.md).
+## Install (desktop app)
+
+The `/plugin` and `/reload-plugins` slash commands are CLI-only — the desktop
+app uses a plugin manager UI instead. The app shares its configuration with
+the CLI (same `~/.claude` state), so a plugin installed in one is installed in
+both.
+
+1. **Add the Zero marketplace from a terminal** (the desktop plugin browser
+   shows plugins from your configured marketplaces, but adding a marketplace
+   isn't part of its UI):
+
+   ```bash
+   claude plugin marketplace add officialzeroxyz/zero-plugins
+   ```
+
+2. **Install the plugin** — either run
+   `claude plugin install zero@zero-plugins` in the same terminal, or in the
+   desktop app click the **+** button next to the prompt box, select
+   **Plugins** → **Add plugin**, and install **zero** from the plugin browser.
+
+3. **Start a new session** in the app to load it, then ask Claude to *"help
+   me set up and test Zero"*.
 
 ## What's supported
 

@@ -13,10 +13,10 @@ signups, no API keys to manage.
 
 Pick your agent:
 
-- **[Claude Code](guides/claude-code.md)**
+- **[Claude Code](guides/claude-code.md)** — CLI and desktop app
 - **[Claude on the web (claude.ai) & Claude Cowork](guides/claude-ai.md)** —
   web, desktop, and mobile
-- **[Codex](guides/codex.md)**
+- **[Codex](guides/codex.md)** — CLI and desktop app
 - **[Gemini CLI](guides/gemini-cli.md)**
 - **Anything else** — the standalone installer works in any agent with a
   shell (and for humans at a terminal):
