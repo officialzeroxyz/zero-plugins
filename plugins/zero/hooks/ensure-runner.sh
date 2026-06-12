@@ -46,12 +46,14 @@
 # Install mode (--install): the standalone install path for humans and for agents with
 # no plugin support — `curl -fsSL https://zero.xyz/install.sh | bash` (zero.xyz serves
 # this script from main with INSTALL_MODE defaulted to 1; see the mode section below).
-# Same provisioning,
-# but: a human summary replaces the JSON object, failures exit non-zero so scripts/CI
-# can tell, the host-plugin refresh sweep is skipped (no plugin host to refresh), and
-# the Zero skill is copied to the portable ~/.agents/skills/ directory so skills-capable
-# agents pick it up. NOT ~/.claude/skills/: a standalone skill there would shadow the
-# plugin's copy if the user later installs the plugin (the pre-1.0 leftover problem).
+# Same provisioning, but: a human summary replaces the JSON object, failures exit
+# non-zero so scripts/CI can tell, the host-plugin refresh sweep is skipped (no plugin
+# host to refresh), and after provisioning the runner this script hands off to
+# `zero init` (@zeroxyz/cli >= 1.1.0), which installs the skill + hooks — fetched from
+# zero.xyz, proxies of this repo's main — into ~/.claude/ and ~/.agents/ and registers
+# the hooks in ~/.claude/settings.json. Harnesses with a bespoke skills dir follow up
+# with `zero init --skills-dir <dir>` (init is idempotent — re-runs replace, never
+# duplicate); `zero uninstall` reverses the whole install.
 
 set -euo pipefail
 
@@ -367,29 +369,14 @@ if [ "$INSTALL_MODE" = "0" ]; then
   exit 0
 fi
 
-# --- install mode: copy the skill, then a human summary instead of the JSON object ---
-# The skill goes to the portable ~/.agents/skills/ directory (the agentskills.io
-# convention nearly every skills-capable harness reads). Source it from the checkout
-# next to this script when running from the repo/plugin; otherwise (curl | bash, where
-# BASH_SOURCE is empty) fetch zero.xyz/SKILL.md, which proxies this repo's main — the
-# same skill the plugin ships.
-SKILL_DIR="${ZERO_SKILL_DIR:-$HOME/.agents/skills/zero}"
-SKILL_RAW_URL="https://zero.xyz/SKILL.md"
-SKILL_STATUS="not installed"
-LOCAL_SKILL=""
-if [ -n "${BASH_SOURCE[0]:-}" ] && [ -f "${BASH_SOURCE[0]}" ]; then
-  LOCAL_SKILL="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd)/../skills/zero/SKILL.md"
-fi
-if mkdir -p "$SKILL_DIR" 2>/dev/null; then
-  if [ -n "$LOCAL_SKILL" ] && [ -f "$LOCAL_SKILL" ]; then
-    cp "$LOCAL_SKILL" "$SKILL_DIR/SKILL.md" && SKILL_STATUS="$SKILL_DIR/SKILL.md (from local checkout)"
-  elif curl -fsSL "$SKILL_RAW_URL" -o "$SKILL_DIR/SKILL.md" 2>/dev/null; then
-    SKILL_STATUS="$SKILL_DIR/SKILL.md"
-  else
-    SKILL_STATUS="not installed — fetch failed; get it from $SKILL_RAW_URL"
-  fi
-fi
-
+# --- install mode: report the runner, then hand off to `zero init` ---
+# The runner we just provisioned IS the installer for everything else:
+# `zero init` fetches the skill + hooks from zero.xyz (proxies of this repo's
+# main — the same content the plugin ships), writes the skill to
+# ~/.claude/skills/zero/ and ~/.agents/skills/zero/, stages the hook scripts
+# in ~/.zero/hooks/, and registers them in ~/.claude/settings.json. It prints
+# its own step-by-step summary (ending with the `zero auth login` next step),
+# and `zero uninstall` reverses it all.
 if [ -n "$RC_PATH_ADDED" ]; then
   PATH_STATUS="added to $RC_PATH_ADDED — open a new terminal or run: source \"$RC_PATH_ADDED\""
 elif [[ ":$PATH:" == *":$BIN_DIR:"* ]]; then
@@ -400,12 +387,14 @@ fi
 
 cat <<SUMMARY
 
-Zero installed.
+Zero runner installed.
 
   runner   $SHIM_PATH  ($CLI_PKG@$INSTALLED_VERSION)
   PATH     $PATH_STATUS
-  skill    $SKILL_STATUS
-
-Next: sign in with \`zero auth login\` (it prints a URL to approve in your browser).
 SUMMARY
+
+if ! "$SHIM_PATH" init; then
+  printf 'zero install failed: `zero init` exited non-zero — fix the issue it reported and re-run: zero init\n' >&2
+  exit 1
+fi
 exit 0
