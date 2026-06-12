@@ -123,6 +123,16 @@ Install in Gemini CLI (`--auto-update` keeps the extension fresh — recommended
 gemini extensions install https://github.com/officialzeroxyz/zero-plugins --auto-update
 ```
 
+Standalone install — for humans, or for agents with no plugin support. Provisions the
+runner, puts `zero` on PATH, and copies the Zero skill to the portable
+`~/.agents/skills/` directory. `zero.xyz/install.sh` serves the same script the plugins
+run as their SessionStart hook (`plugins/zero/hooks/ensure-runner.sh`), with its mode
+default flipped to `--install` server-side, so no flag is needed:
+
+```
+curl -fsSL https://zero.xyz/install.sh | bash
+```
+
 Gemini doesn't read the Codex/Claude marketplace catalogs, and a git-URL install expects
 the `gemini-extension.json` at the *root* of what it installs — but this is a monorepo
 whose root isn't an extension. To bridge that, `.github/workflows/release-gemini.yml`
