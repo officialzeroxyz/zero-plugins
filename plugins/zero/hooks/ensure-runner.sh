@@ -365,7 +365,7 @@ fi
 INSTALLED_VERSION="$(cat "$INSTALLED_VERSION_FILE" 2>/dev/null || printf '%s' "$VERSION")"
 
 if [ "$INSTALL_MODE" = "0" ]; then
-  emit "Zero runner ready: ZERO_RUNNER=$SHIM_PATH — a drop-in for the zero CLI ($CLI_PKG@$INSTALLED_VERSION), also placed on PATH as plain \`zero\` (immediately on hosts that persist hook env; in new shells elsewhere). Use it for the whole Zero loop (search/get/fetch/review), and follow the bundled 'zero' skill for the workflow and authentication — don't improvise auth or create a wallet."
+  emit "Zero runner ready ($CLI_PKG@$INSTALLED_VERSION): invoke it as plain \`zero\` — it's on PATH (immediately on hosts that persist hook env; in new shells elsewhere). If bare \`zero\` doesn't resolve, use the absolute path $SHIM_PATH (also exported as ZERO_RUNNER where supported). Use it for the whole Zero loop (search/get/fetch/review), and follow the bundled 'zero' skill for the workflow and authentication — don't improvise auth or create a wallet."
   exit 0
 fi
 
