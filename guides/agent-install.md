@@ -90,18 +90,6 @@ Find the subsection for the agent **you** are, run its steps in order, and
 continue with **Step 2** below. Run only your own subsection — the other
 agent's commands will not work for you.
 
-### Already installed Zero another way? (all agents)
-
-A standalone install (`zero init`, or the `curl zero.xyz/install.sh`
-one-liner that calls it) coexists with the plugin. The harness may warn the
-user that the plugin's Zero skill or hooks are shadowed by the standalone
-copy, and the Zero context reminder may appear twice — both are harmless;
-do **not** fix them by deleting files. If the user wants the standalone
-install gone, `zero uninstall` removes it cleanly — but machine-wide: every
-app reading the shared `~/.claude` and `~/.agents` directories loses it, not
-just this host, so offer it and let the user decide. Never touch
-`~/.claude/plugins/`.
-
 ### Claude Code
 
 1. **Add the Zero marketplace and install the plugin:**
