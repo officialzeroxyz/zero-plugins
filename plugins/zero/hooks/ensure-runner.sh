@@ -3,10 +3,14 @@
 # Zero plugin — SessionStart hook.
 #
 # Provisions a Zero "runner" so the agent can call paid capabilities directly in its
-# own environment, exports its path as $ZERO_RUNNER for the session, and tells the
-# agent — via the SessionStart `additionalContext` payload — how to authenticate.
-# Also refreshes the machine's Zero plugin installs once a day, in the background,
-# through each host's own plugin-manager commands (see that section below).
+# own environment, exports its path as $ZERO_RUNNER for the session, puts the runner
+# on PATH as plain `zero` (env file for this session where supported, shell rc for
+# everything else — see that section below), and tells the agent — via the
+# SessionStart `additionalContext` payload — how to authenticate. Also refreshes the
+# machine's Zero plugin installs once a day, in the background, through each host's
+# own plugin-manager commands (see that section below). Because it both installs the
+# runner and wires up PATH, this script doubles as the canonical standalone installer
+# for agents with no plugin support at all.
 #
 # Runner model: the runner IS the published @zeroxyz/cli npm package (a single
 # bundled, zero-dependency file as of 0.0.44), run on Node. We install it once per
@@ -272,6 +276,54 @@ chmod +x "$SHIM_PATH" 2>/dev/null || true
 
 persist_env ZERO_RUNNER "$SHIM_PATH"
 
+# --- put `zero` on PATH (idempotent; opt out: ZERO_PATH_AUTOADD=0) ---
+# Two audiences:
+#   - This session, on hosts with an env-persistence file (Claude Code): prepend
+#     $BIN_DIR via $CLAUDE_ENV_FILE so bare `zero` resolves immediately.
+#   - Everything else on the machine — including hosts with no env injection at all
+#     (e.g. Gemini CLI) — gets a PATH line appended to the user's shell rc, the same
+#     way the retired pre-1.0 install.sh handled ~/.zero/bin. New shells, and any
+#     agent launched from them, then resolve bare `zero` without $ZERO_RUNNER.
+# The rc edit is keyed on the runtime-bin dir substring so it's written at most once,
+# and a write failure degrades to a logged hint — it never blocks the session.
+if [ "${ZERO_PATH_AUTOADD:-1}" != "0" ]; then
+  if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
+    printf 'export PATH=%q":$PATH"\n' "$BIN_DIR" >> "$CLAUDE_ENV_FILE"
+  fi
+
+  # Write the rc line $HOME-relative so it survives dotfile sync across machines;
+  # grep for the $HOME-stripped form so either spelling counts as already-present.
+  RC_DIR_REF="$BIN_DIR"; RC_GREP="$BIN_DIR"
+  case "$BIN_DIR" in
+    "$HOME"/*) RC_DIR_REF="\$HOME/${BIN_DIR#"$HOME"/}"; RC_GREP="${BIN_DIR#"$HOME"/}" ;;
+  esac
+  PATH_LINE="export PATH=\"$RC_DIR_REF:\$PATH\""
+
+  add_path_to_rc() {
+    local rc="$1"
+    if [ -f "$rc" ] && grep -qF "$RC_GREP" "$rc" 2>/dev/null; then
+      return 0
+    fi
+    if printf '\n# Zero runner (added by the zero plugin SessionStart hook)\n%s\n' "$PATH_LINE" >>"$rc" 2>/dev/null; then
+      log "added $BIN_DIR to PATH in $rc (takes effect in new shells)"
+    else
+      log "could not write $rc — add to PATH manually: $PATH_LINE"
+    fi
+  }
+
+  case "$(basename "${SHELL:-}")" in
+    zsh)  add_path_to_rc "$HOME/.zshrc" ;;
+    bash)
+      if [ -f "$HOME/.bash_profile" ]; then
+        add_path_to_rc "$HOME/.bash_profile"
+      else
+        add_path_to_rc "$HOME/.bashrc"
+      fi
+      ;;
+    *)    log "unrecognized shell '${SHELL:-}' — to put zero on PATH add: $PATH_LINE" ;;
+  esac
+fi
+
 INSTALLED_VERSION="$(cat "$INSTALLED_VERSION_FILE" 2>/dev/null || printf '%s' "$VERSION")"
-emit "Zero runner ready: ZERO_RUNNER=$SHIM_PATH — a drop-in for the zero CLI ($CLI_PKG@$INSTALLED_VERSION). Use it for the whole Zero loop (search/get/fetch/review), and follow the bundled 'zero' skill for the workflow and authentication — don't improvise auth or create a wallet."
+emit "Zero runner ready: ZERO_RUNNER=$SHIM_PATH — a drop-in for the zero CLI ($CLI_PKG@$INSTALLED_VERSION), also placed on PATH as plain \`zero\` (immediately on hosts that persist hook env; in new shells elsewhere). Use it for the whole Zero loop (search/get/fetch/review), and follow the bundled 'zero' skill for the workflow and authentication — don't improvise auth or create a wallet."
 exit 0

@@ -45,7 +45,8 @@ a working executable:
    (Claude Code, Codex).
 2. **`$HOME/.zero/runtime/bin/zero`** — the provisioned runner's well-known path, for hosts
    that don't persist hook env vars (e.g. Gemini CLI); the SessionStart hook reports it.
-3. **`zero` on `$PATH`** — a standalone CLI install (`npm install -g @zeroxyz/cli`). The name
+3. **`zero` on `$PATH`** — either the provisioned runner (the SessionStart hook adds its
+   directory to PATH) or a standalone CLI install (`npm install -g @zeroxyz/cli`). The name
    is generic, so don't trust it on sight: it counts only if `zero --help` prints the Zero CLI
    header (`Zero CLI — Search engine for AI agents`). Anything else → skip this tier.
 4. **`npx -y @zeroxyz/cli@latest`** — ephemeral/sandbox environments only, where nothing is
