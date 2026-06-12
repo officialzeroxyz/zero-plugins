@@ -210,8 +210,10 @@ now, inside the plugin root you found in Step 1:
 
 On a persistent machine (skip only in throwaway sandboxes/CI) the runner needs
 auth set up once. Run these commands yourself rather than handing them to the
-user to paste — their part is opening one URL to approve the sign-in. Use the
-runner path the bootstrap just printed (`ZERO_RUNNER=…`):
+user to paste — their part is opening one URL to approve the sign-in. Invoke the
+runner as plain `zero` if that resolves on your PATH; otherwise substitute the
+absolute runner path the bootstrap just printed (written as `"$ZERO_RUNNER"` in
+the commands below):
 
 > **First check:** run `"$ZERO_RUNNER" auth whoami --json`. The user is signed in
 > only if the output has a `user` object — if so, skip the login below. Anything

@@ -35,28 +35,35 @@ Two surfaces give you Zero:
 
 ## Resolving `zero`
 
-Every example below invokes the runner as `zero`. That is shorthand for a **resolved runner**,
-not an instruction to trust `$PATH` blindly. Resolve it once, before your first call, then use
-the same resolved command everywhere `zero` appears below — substituting its absolute path if
-your shell doesn't persist variables between commands. Take the first of these that resolves to
-a working executable:
+Every example below invokes the runner as plain `zero`, and that is also what you should type
+in real commands whenever it resolves: users read your commands, and `zero search …` reads like
+a normal CLI where `"$ZERO_RUNNER" search …` reads like machinery. The name is generic, though,
+so resolve it once, before your first call — don't trust `$PATH` blindly. Take the first tier
+that resolves to a working executable, then use the same spelling everywhere `zero` appears
+below:
 
-1. **`$ZERO_RUNNER`** — exported by the SessionStart hook on hosts that persist hook env vars
-   (Claude Code, Codex).
-2. **`$HOME/.zero/runtime/bin/zero`** — the provisioned runner's well-known path, for hosts
+1. **`zero` on `$PATH`** — preferred. Either the provisioned runner (the SessionStart hook
+   prepends its directory to PATH: immediately on hosts that persist hook env vars, in new
+   shells elsewhere) or a standalone CLI install (`npm install -g @zeroxyz/cli`). Trust it
+   without further checks when `command -v zero` matches `$ZERO_RUNNER` or points into
+   `$HOME/.zero/runtime/bin`; any other path counts only if `zero --help` prints the Zero CLI
+   header (`Zero CLI — Search engine for AI agents`). Anything else → fall through.
+2. **`$ZERO_RUNNER`** — the runner's absolute path, exported by the SessionStart hook on hosts
+   that persist hook env vars (Claude Code, Codex). The fallback spelling when bare `zero`
+   doesn't resolve yet or failed the check above.
+3. **`$HOME/.zero/runtime/bin/zero`** — the provisioned runner's well-known path, for hosts
    that don't persist hook env vars (e.g. Gemini CLI); the SessionStart hook reports it.
-3. **`zero` on `$PATH`** — either the provisioned runner (the SessionStart hook adds its
-   directory to PATH) or a standalone CLI install (`npm install -g @zeroxyz/cli`). The name
-   is generic, so don't trust it on sight: it counts only if `zero --help` prints the Zero CLI
-   header (`Zero CLI — Search engine for AI agents`). Anything else → skip this tier.
 4. **`npx -y @zeroxyz/cli@latest`** — ephemeral/sandbox environments only, where nothing is
    provisioned or installed (see **Ephemeral / sandbox** below).
 
 ```bash
-ZERO="${ZERO_RUNNER:-}"
+ZERO="$(command -v zero || true)"                     # tier 1 — verify per the rules above
+[ -n "$ZERO" ] || ZERO="${ZERO_RUNNER:-}"
 [ -x "$ZERO" ] || ZERO="$HOME/.zero/runtime/bin/zero"
-[ -x "$ZERO" ] || ZERO="$(command -v zero || true)"   # then verify: "$ZERO" --help
 ```
+
+When tier 1 wins, invoke it as plain `zero`; on the lower tiers use the absolute path (which
+also survives shells that don't persist variables between commands).
 
 If no tier resolves in a persistent environment, tell the user Zero isn't available here —
 don't install the CLI yourself. In an ephemeral sandbox, fall through to `npx`. Never create a
