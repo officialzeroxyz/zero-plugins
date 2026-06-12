@@ -1,6 +1,6 @@
 {
   "name": "zero",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Discover and call paid AI capabilities (x402 / MPP) with automatic, wallet-backed payment. Search a live index of external services — image/video/audio generation, web scraping, data enrichment, real-time data, messaging — then call them and pay per use. Bundles the 'zero' skill and the Zero MCP connector.",
   "author": { "name": "Zero", "url": "https://zero.xyz" },
   "homepage": "https://zero.xyz",
