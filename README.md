@@ -11,7 +11,15 @@ signups, no API keys to manage.
 
 ## Install Zero
 
-Pick your agent:
+The recommended way to install Zero is to let your agent install it and guide
+you through setup. Just ask your agent:
+
+```
+Use curl www.zero.xyz/install.md and then install and setup Zero for me
+```
+
+If you prefer to set up Zero manually, or your agent had issues with the
+installation, use the guides below. Pick your agent:
 
 - **[Claude Code (CLI)](guides/claude-code.md)**
 - **[Claude Code Desktop](guides/claude-code-desktop.md)**
