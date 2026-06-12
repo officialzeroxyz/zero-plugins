@@ -274,6 +274,11 @@ Lost a `runId`? `zero runs --unreviewed` (optionally `--capability <slug>`).
 - **Capability must be resolvable.** When calling outside a fresh search, pass `--capability <slug>`
   so the run is reviewable.
 - **Before ending a multi-call task, run `zero runs --unreviewed`** and review anything you missed.
+- **Zero reminder injected twice per prompt?** A plugin install and a standalone install
+  (`zero init`) are coexisting; the harness may also warn the user about a shadowed Zero
+  skill or hook. Harmless — don't fix it by deleting files. If the user wants the duplicate
+  gone, `zero uninstall` removes the standalone copy — machine-wide, for every app reading
+  the shared `~/.claude`/`~/.agents` directories — so offer it, don't run it unprompted.
 
 ## End-to-end
 

@@ -86,17 +86,9 @@ required.
 
 ## Step 1 — agent-specific setup
 
-Check for pre-plugin leftovers just below, then find the subsection for the
-agent **you** are, run its steps in order, and continue with **Step 2** below.
-Run only your own subsection — the other agent's commands will not work for
-you.
-
-### Before you start — pre-plugin leftovers (all agents)
-
-A pre-1.0 installer (`zero init`) shipped a standalone Zero skill and hooks
-that would shadow the plugin's. Check your default skills and hooks folders
-for any dangling Zero skill or hooks; only if you find some, remove them.
-Most machines have none — move on. Never touch `~/.claude/plugins/`.
+Find the subsection for the agent **you** are, run its steps in order, and
+continue with **Step 2** below. Run only your own subsection — the other
+agent's commands will not work for you.
 
 ### Claude Code
 
@@ -152,28 +144,41 @@ Most machines have none — move on. Never touch `~/.claude/plugins/`.
 
 ### Don't see your agent?
 
-If none of the subsections above is the agent you are, do **not** improvise
-with another agent's commands. What to do next depends on whether your harness
-has its own plugin system:
+If none of the subsections above is the agent you are — or you don't know how
+to install plugins in your harness — do **not** improvise with another agent's
+commands. Use the standalone installer instead:
 
-**Your harness has a native plugin or extension system** (an equivalent of the
-`claude plugin install` / `gemini extensions install` commands above): attempt
-to install the Zero plugin yourself. Everything lives in one public repo —
-<https://github.com/officialzeroxyz/zero-plugins> — which is both the
-marketplace the agents above install from and the source of the plugin itself
-(the plugin is named `zero`). Use your harness's own install mechanism — an
-explicit exception to the verbatim-commands rule above. If your harness reads
-skills from the shared `~/.agents/skills/` directory, the stale-skill cleanup
-in **Before you start** applies to you too. If the install succeeds, locate the
-installed plugin root and continue with **Step 2** — the remaining steps are
-agent-agnostic.
+```bash
+curl -fsSL https://zero.xyz/install.sh | bash
+```
 
-**Your harness has no plugin system, or your self-install attempt failed**:
-request support and stop. Substitute the placeholder values in this command
-(also an exception to running commands byte-exact) — your agent/harness name
-(if a self-install failed, append a brief note saying what failed; the field
-caps at 300 characters) and a contact email (ask the user if they want to
-leave theirs, and omit the `email` field entirely if not):
+It provisions the same runner the plugins use, puts `zero` on PATH, and then
+runs `zero init`, which installs the Zero skill into both `~/.claude/skills/`
+and `~/.agents/skills/` (between those two, nearly every skills-capable
+harness reads one or the other) and registers the Zero hooks in
+`~/.claude/settings.json` for Claude-compatible hosts. The whole install is
+reversible with `zero uninstall`.
+
+If your harness reads skills from its own directory instead (say
+`~/.yourharness/skills`), follow up with a second `zero init` run naming it —
+an explicit exception to the verbatim-commands rule, since the path is yours
+to fill in. Init is idempotent, so the re-run replaces rather than duplicates:
+
+```bash
+zero init --skills-dir ~/.yourharness/skills
+```
+
+When it finishes: read the installed skill at
+`~/.agents/skills/zero/SKILL.md`, skip **Step 2** (the installer already
+bootstrapped the runner), and continue with **Step 3** using the runner path
+the summary printed (bare `zero` also works in new shells — use the full
+runner path if `zero` isn't found in this one).
+
+**If the installer fails**, request support and stop. Substitute the
+placeholder values in this command (also an exception to running commands
+byte-exact) — your agent/harness name plus a brief note on what failed (the
+field caps at 300 characters), and a contact email (ask the user if they want
+to leave theirs, and omit the `email` field entirely if not):
 
 ```bash
 curl -sS -X POST https://api.zero.xyz/v1/request-agent-access \
