@@ -17,7 +17,7 @@ install paths — pick by where you're running:
   not apply to you (those sandboxes have no plugin CLI and typically no
   network egress to zero.xyz, even when a shell exists).
 - **In a coding agent with a real shell** (Claude Code, Codex, Gemini CLI,
-  OpenClaw, …): skip the next section and follow the
+  OpenClaw, Droid, …): skip the next section and follow the
   [shell-based install](#shell-based-install-cli-coding-agents) below.
 
 ## Claude Chat (claude.ai) & Claude Cowork — plugin UI install
@@ -71,7 +71,7 @@ required.
 > here, stop and re-read the raw file. In particular, **never delete anything under
 > `~/.claude/plugins/`**.
 >
-> Use the `claude`/`codex`/`gemini`/`openclaw` binary's CLI subcommands — **never
+> Use the `claude`/`codex`/`gemini`/`openclaw`/`droid` binary's CLI subcommands — **never
 > REPL slash commands** (`/plugin …`, `/extensions …`), because the desktop apps
 > run you without an interactive REPL and cannot execute them. The install takes effect
 > *in this same session* — no reload or restart needed, so don't ask the user to
@@ -84,12 +84,13 @@ required.
 
 ---
 
-## Step 1 — agent-specific setup
+## Step 1 — install the plugin
 
-Check for pre-plugin leftovers just below, then find the subsection for the
-agent **you** are, run its steps in order, and continue with **Step 2** below.
-Run only your own subsection — the other agent's commands will not work for
-you.
+The install is the same shape for every agent: run your harness's own
+plugin-install command(s) from the list below, then **locate the installed
+plugin root** — you'll need it in Step 2. Run only the commands listed for the
+agent **you** are; another agent's commands will not work for you. If you're
+not listed, skip to **Don't see your agent?** below.
 
 ### Before you start — pre-plugin leftovers (all agents)
 
@@ -98,57 +99,48 @@ that would shadow the plugin's. Check your default skills and hooks folders
 for any dangling Zero skill or hooks; only if you find some, remove them.
 Most machines have none — move on. Never touch `~/.claude/plugins/`.
 
-### Claude Code
+### Install commands by agent
 
-1. **Add the Zero marketplace and install the plugin:**
+**Claude Code** — plugin root: `claude plugin details zero` prints it.
 
-   ```bash
-   claude plugin marketplace add officialzeroxyz/zero-plugins
-   claude plugin install zero@zero-plugins
-   ```
+```bash
+claude plugin marketplace add officialzeroxyz/zero-plugins
+claude plugin install zero@zero-plugins
+```
 
-2. **Find the installed plugin root** with `claude plugin details zero`, then
-   continue with **Step 2** below.
+**Codex** — plugin root: locate it after the install.
 
-### Codex
+```bash
+codex plugin marketplace add officialzeroxyz/zero-plugins
+codex plugin add zero@zero-plugins
+```
 
-1. **Add the Zero marketplace and install the plugin:**
+**Gemini CLI** — no marketplace-add step; Gemini resolves the repo to its
+published release archive. Extension root: `gemini extensions list` shows it;
+extensions live under `~/.gemini/extensions/`.
 
-   ```bash
-   codex plugin marketplace add officialzeroxyz/zero-plugins
-   codex plugin add zero@zero-plugins
-   ```
+```bash
+gemini extensions install https://github.com/officialzeroxyz/zero-plugins --auto-update
+```
 
-2. **Locate the installed plugin root**, then continue with **Step 2** below.
+**OpenClaw** — plugin root: `openclaw plugins inspect zero` shows it. One
+OpenClaw-specific point: OpenClaw imports the plugin's skill but **never
+executes its hooks** — not on this session or any later one — so the Step 2
+bootstrap is the only time the runner's dependencies get set up. Don't skip it.
 
-### Gemini CLI
+```bash
+openclaw plugins install zero --marketplace officialzeroxyz/zero-plugins
+```
 
-1. **Install the Zero extension** from its GitHub repository (Gemini resolves this to the
-   published release archive — no marketplace-add step like Claude/Codex):
+**Droid (Factory)** — the full repository URL is required (the bare
+`owner/repo` shorthand the other agents use is not accepted). Plugin root: the
+version directory under `~/.factory/plugins/cache/zero-plugins/zero/`
+(`droid plugin list` confirms the install).
 
-   ```bash
-   gemini extensions install https://github.com/officialzeroxyz/zero-plugins --auto-update
-   ```
-
-2. **Locate the installed extension root** (`gemini extensions list` shows installed
-   extensions; they live under `~/.gemini/extensions/`), then continue with **Step 2**
-   below.
-
-### OpenClaw
-
-1. **Install the Zero plugin.** OpenClaw installs Claude-format plugins directly
-   from the marketplace repo:
-
-   ```bash
-   openclaw plugins install zero --marketplace officialzeroxyz/zero-plugins
-   ```
-
-2. **Locate the installed plugin root** (`openclaw plugins inspect zero` shows it;
-   `openclaw plugins list` shows everything installed), then continue with
-   **Step 2** below. One OpenClaw-specific point: OpenClaw imports the plugin's
-   skill but **never executes its hooks** — not on this session or any later one —
-   so the Step 2 bootstrap is the only time the runner's dependencies get set up.
-   Don't skip it.
+```bash
+droid plugin marketplace add https://github.com/officialzeroxyz/zero-plugins
+droid plugin install zero@zero-plugins
+```
 
 ### Don't see your agent?
 
@@ -158,7 +150,10 @@ has its own plugin system:
 
 **Your harness has a native plugin or extension system** (an equivalent of the
 `claude plugin install` / `gemini extensions install` commands above): attempt
-to install the Zero plugin yourself. Everything lives in one public repo —
+to install the Zero plugin yourself. Don't assume you know whether your harness
+has one — check your own binary's help output first (e.g. `<your-binary> --help`,
+then `<your-binary> plugin --help` or similar); plugin support may be newer than
+your training data. Everything lives in one public repo —
 <https://github.com/officialzeroxyz/zero-plugins> — which is both the
 marketplace the agents above install from and the source of the plugin itself
 (the plugin is named `zero`). Use your harness's own install mechanism — an
@@ -167,6 +162,13 @@ skills from the shared `~/.agents/skills/` directory, the stale-skill cleanup
 in **Before you start** applies to you too. If the install succeeds, locate the
 installed plugin root and continue with **Step 2** — the remaining steps are
 agent-agnostic.
+
+Do **not** substitute a manual `git clone` of the repo for a real plugin
+install: a clone (e.g. into `/tmp`) can bootstrap the runner for this one
+session, but it registers nothing with your harness — no skill, no hooks, no
+MCP connector on any future session — so the install evaporates when the
+session ends. If your harness truly has no plugin system, use the support
+path below instead.
 
 **Your harness has no plugin system, or your self-install attempt failed**:
 request support and stop. Substitute the placeholder values in this command
