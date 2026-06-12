@@ -44,8 +44,9 @@
 # step degrades to a clear "unavailable" message rather than blocking the session.
 #
 # Install mode (--install): the standalone install path for humans and for agents with
-# no plugin support — `curl -fsSL https://zero.xyz/install.sh | bash -s -- --install`
-# (zero.xyz/install.sh serves this script's bytes from main). Same provisioning,
+# no plugin support — `curl -fsSL https://zero.xyz/install.sh | bash` (zero.xyz serves
+# this script from main with INSTALL_MODE defaulted to 1; see the mode section below).
+# Same provisioning,
 # but: a human summary replaces the JSON object, failures exit non-zero so scripts/CI
 # can tell, the host-plugin refresh sweep is skipped (no plugin host to refresh), and
 # the Zero skill is copied to the portable ~/.agents/skills/ directory so skills-capable
@@ -55,6 +56,10 @@
 set -euo pipefail
 
 # --- mode ---
+# CONTRACT: zero.xyz/install.sh serves these same bytes with the next line rewritten
+# to INSTALL_MODE=1, so a plain `curl -fsSL https://zero.xyz/install.sh | bash`
+# installs with no flag. Keep the line exactly `INSTALL_MODE=0` — the route matches
+# it verbatim and refuses to serve the script if it goes missing.
 INSTALL_MODE=0
 for arg in "$@"; do
   case "$arg" in
