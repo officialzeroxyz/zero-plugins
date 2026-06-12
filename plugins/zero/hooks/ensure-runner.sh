@@ -44,8 +44,8 @@
 # step degrades to a clear "unavailable" message rather than blocking the session.
 #
 # Install mode (--install): the standalone install path for humans and for agents with
-# no plugin support — `curl -fsSL https://zero.xyz/install.sh | bash` (a wrapper that
-# fetches this script from main and passes --install). Same provisioning,
+# no plugin support — `curl -fsSL https://zero.xyz/install.sh | bash -s -- --install`
+# (zero.xyz/install.sh serves this script's bytes from main). Same provisioning,
 # but: a human summary replaces the JSON object, failures exit non-zero so scripts/CI
 # can tell, the host-plugin refresh sweep is skipped (no plugin host to refresh), and
 # the Zero skill is copied to the portable ~/.agents/skills/ directory so skills-capable
