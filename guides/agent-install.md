@@ -86,9 +86,15 @@ required.
 
 ## Step 1 — agent-specific setup
 
-Find the subsection for the agent **you** are, run its steps in order, and
-continue with **Step 2** below. Run only your own subsection — the other
-agent's commands will not work for you.
+Find the subsection for the agent **you** are and run its steps in order. Run
+only your own subsection — the other agent's commands will not work for you.
+
+Every subsection ends the same way: **find the installed plugin root**, then
+continue with **Step 2** below. This page doesn't catalog where each harness
+keeps its plugins — you know your own harness. Your plugin `list`/`inspect`
+subcommand usually prints the path, and your harness's config directory is
+the usual home. You have the right directory when it contains
+`skills/zero/SKILL.md`.
 
 ### Claude Code
 
@@ -99,8 +105,7 @@ agent's commands will not work for you.
    claude plugin install zero@zero-plugins
    ```
 
-2. **Find the installed plugin root** with `claude plugin details zero`, then
-   continue with **Step 2** below.
+2. **Find the installed plugin root**, then continue with **Step 2** below.
 
 ### Codex
 
@@ -111,7 +116,7 @@ agent's commands will not work for you.
    codex plugin add zero@zero-plugins
    ```
 
-2. **Locate the installed plugin root**, then continue with **Step 2** below.
+2. **Find the installed plugin root**, then continue with **Step 2** below.
 
 ### Gemini CLI
 
@@ -122,9 +127,7 @@ agent's commands will not work for you.
    gemini extensions install https://github.com/officialzeroxyz/zero-plugins --auto-update
    ```
 
-2. **Locate the installed extension root** (`gemini extensions list` shows installed
-   extensions; they live under `~/.gemini/extensions/`), then continue with **Step 2**
-   below.
+2. **Find the installed extension root**, then continue with **Step 2** below.
 
 ### OpenClaw
 
@@ -135,11 +138,10 @@ agent's commands will not work for you.
    openclaw plugins install zero --marketplace officialzeroxyz/zero-plugins
    ```
 
-2. **Locate the installed plugin root** (`openclaw plugins inspect zero` shows it;
-   `openclaw plugins list` shows everything installed), then continue with
-   **Step 2** below. One OpenClaw-specific point: OpenClaw imports the plugin's
-   skill but **never executes its hooks** — not on this session or any later one —
-   so the Step 2 bootstrap is the only time the runner's dependencies get set up.
+2. **Find the installed plugin root**, then continue with **Step 2** below.
+   One OpenClaw-specific point: OpenClaw imports the plugin's skill but
+   **never executes its hooks** — not on this session or any later one — so
+   the Step 2 bootstrap is the only time the runner's dependencies get set up.
    Don't skip it.
 
 ### Don't see your agent?
