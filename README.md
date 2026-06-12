@@ -43,8 +43,7 @@ Every install ships the same three ingredients:
 - **The `zero` skill** — teaches the agent how to search Zero, call a
   capability, and review the result.
 - **Hooks** — keep the Zero CLI runner provisioned and up to date, and remind
-  the agent that Zero is available. Hook support varies by host; each guide
-  above documents exactly what its host does and doesn't support.
+  the agent that Zero is available.
 - **The Zero MCP connector** — capability search and account status over MCP,
   on hosts that load it.
 

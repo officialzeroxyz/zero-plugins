@@ -84,8 +84,24 @@ The same concepts, renamed:
 There is **no auto-approve hook in this overlay.** A Gemini `BeforeTool` hook's
 `decision: "allow"` is inert (hooks can only escalate-to-`ask` or `block`/`deny`), and
 Gemini deliberately strips `allow` rules from extension-bundled policies for security —
-an extension cannot auto-approve its own commands. Users who want fewer prompts add
-their own policy; the Gemini CLI guide documents one.
+an extension cannot auto-approve its own commands. Users who want fewer prompts can add
+a **user** policy themselves — create `~/.gemini/policies/zero.toml` with:
+
+```toml
+# Matches how the skill invokes the runner — the resolved .../bin/zero path or
+# `"$ZERO_RUNNER"` anywhere in the command, or a bare `zero` anchored to the start of
+# the command (optionally after env assignments), so `zero` appearing as a mere
+# argument elsewhere can't trigger an allow.
+[[rule]]
+name = "auto-allow zero read-only subcommands"
+toolName = "run_shell_command"
+commandRegex = ".*(ZERO_RUNNER\"?|/zero\"?) +(search|get|review|runs)\\b|^(\\w+=\\S+ +)*zero +(search|get|review|runs)\\b"
+decision = "allow"
+priority = 100
+```
+
+This never auto-approves `fetch` (spends money) or `wallet` (manages funds) — those
+still prompt.
 
 Gemini is also **not swept by the plugin's daily background refresh** (the sweep in
 `ensure-runner.sh` covers Claude Code and Codex): `gemini extensions update` re-prompts

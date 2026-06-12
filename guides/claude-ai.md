@@ -32,8 +32,3 @@ Claude UI; no terminal involved.
 ## Try it
 
 Open a new session and ask: *"Help me set up and test Zero."*
-
-## Troubleshooting
-
-If Zero can't be reached after install, allow `zero.xyz` and `*.zero.xyz` in
-your network or connector settings.

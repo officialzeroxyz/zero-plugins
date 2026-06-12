@@ -1,11 +1,14 @@
 # Zero for the Codex app
 
-How to install Zero in the Codex desktop app.
+How to install Zero in the Codex desktop app and keep it up to date.
 
 > Using the Codex CLI in a terminal instead? See the
 > [Codex CLI guide](codex.md).
 
 ## Install
+
+The app and the CLI share one install — if you've already added Zero in the
+Codex CLI, it's already here too.
 
 1. Open **Plugins** in the sidebar.
 2. Click the **+** button in the top-right corner and choose **Add
@@ -23,11 +26,13 @@ How to install Zero in the Codex desktop app.
 5. Start a new chat and ask Codex: *"Help me set up and test Zero."* It walks
    you through signing in.
 
-## Good to know
+## Staying up to date
 
-- **The app and the CLI share one install.** If you've already added Zero in
-  the Codex CLI, it shows up in the app too — and the other way around.
-- **Updates are automatic.** Zero keeps itself up to date in the background;
-  updates apply the next time you start Codex.
-- **Sign in once.** Zero installs in Codex, Claude Code, and Gemini CLI on
-  the same computer share one account.
+Nothing to do — updates are automatic:
+
+- The Zero runner updates at the start of each session.
+- The plugin itself checks for updates once a day, in the background, and
+  they apply the next time you start Codex.
+
+To turn off the daily plugin check, set `ZERO_PLUGIN_AUTOUPDATE=0` in your
+environment.
