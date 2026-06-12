@@ -39,11 +39,27 @@
 # persistent environments a device-code `auth login` (persisted to ~/.zero) is
 # preferred. An explicit ZERO_PRIVATE_KEY is honored for bring-your-own signing.
 #
-# Contract: the ONLY thing written to stdout is a single SessionStart JSON object. All
-# human/log output goes to stderr. Always exits 0 — a failed provisioning step
-# degrades to a clear "unavailable" message rather than blocking the session.
+# Contract (hook mode): the ONLY thing written to stdout is a single SessionStart JSON
+# object. All human/log output goes to stderr. Always exits 0 — a failed provisioning
+# step degrades to a clear "unavailable" message rather than blocking the session.
+#
+# Install mode (--install): the standalone install path for humans and for agents with
+# no plugin support — `curl -fsSL <raw url> | bash -s -- --install`. Same provisioning,
+# but: a human summary replaces the JSON object, failures exit non-zero so scripts/CI
+# can tell, the host-plugin refresh sweep is skipped (no plugin host to refresh), and
+# the Zero skill is copied to the portable ~/.agents/skills/ directory so skills-capable
+# agents pick it up. NOT ~/.claude/skills/: a standalone skill there would shadow the
+# plugin's copy if the user later installs the plugin (the pre-1.0 leftover problem).
 
 set -euo pipefail
+
+# --- mode ---
+INSTALL_MODE=0
+for arg in "$@"; do
+  case "$arg" in
+    --install) INSTALL_MODE=1 ;;
+  esac
+done
 
 # --- Config (override via env) ---
 # Plugin-owned RUNTIME area (Node, npm cache, installed CLI, shim), namespaced under the
@@ -81,6 +97,18 @@ emit() {
   ctx="${ctx//\"/\\\"}"      # double quotes
   ctx="${ctx//$'\n'/ }"      # newlines -> spaces (JSON strings can't hold raw newlines)
   printf '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"%s"}}\n' "$ctx"
+}
+
+# Report a fatal provisioning problem and stop. Hook mode emits the JSON "unavailable"
+# context and exits 0 (never block a session); install mode prints the error and exits
+# 1 so scripts and CI see the failure. $1 = agent-facing context, $2 = human one-liner.
+fail() {
+  if [ "$INSTALL_MODE" = "1" ]; then
+    printf 'zero install failed: %s\n' "$2" >&2
+    exit 1
+  fi
+  emit "$1"
+  exit 0
 }
 
 # Append `export NAME=value` to the session env file so it persists for the session
@@ -199,8 +227,8 @@ if [ -n "$OS_KIND" ] && [ -n "$ARCH" ]; then
 fi
 if [ -z "$NODE_BIN" ]; then
   log "no usable Node runtime"
-  emit "Zero runner unavailable: no Node runtime and none could be downloaded (or no network egress). ZERO_RUNNER is unset — tell the user Zero isn't available in this environment rather than improvising."
-  exit 0
+  fail "Zero runner unavailable: no Node runtime and none could be downloaded (or no network egress). ZERO_RUNNER is unset — tell the user Zero isn't available in this environment rather than improvising." \
+       "no usable Node runtime found, and none could be downloaded (check network egress)"
 fi
 NODE_BIN_DIR="$(dirname "$NODE_BIN")"
 NPM_BIN="$NODE_BIN_DIR/npm"
@@ -228,7 +256,7 @@ mkdir -p "$ZH" "$BIN_DIR" "$CLI_DIR" "$NPM_CACHE"
 # contract holds. The stamp is written before the attempt so a failing/offline day
 # retries tomorrow rather than hammering every session. Opt out: ZERO_PLUGIN_AUTOUPDATE=0.
 PLUGIN_UPDATE_STAMP="$ZH/.plugin-update-day"
-if [ "${ZERO_PLUGIN_AUTOUPDATE:-1}" != "0" ]; then
+if [ "$INSTALL_MODE" = "0" ] && [ "${ZERO_PLUGIN_AUTOUPDATE:-1}" != "0" ]; then
   TODAY="$(date +%Y-%m-%d)"
   if [ "$(cat "$PLUGIN_UPDATE_STAMP" 2>/dev/null || true)" != "$TODAY" ]; then
     printf '%s' "$TODAY" >"$PLUGIN_UPDATE_STAMP"
@@ -255,8 +283,8 @@ if [ ! -f "$CLI_ENTRY" ] || [ "$INSTALLED" != "$VERSION" ]; then
 fi
 
 if [ ! -f "$CLI_ENTRY" ]; then
-  emit "Zero runner unavailable: $CLI_PKG@$VERSION could not be installed (likely no npm-registry egress on first run). ZERO_RUNNER is unset — tell the user Zero isn't available here rather than improvising."
-  exit 0
+  fail "Zero runner unavailable: $CLI_PKG@$VERSION could not be installed (likely no npm-registry egress on first run). ZERO_RUNNER is unset — tell the user Zero isn't available here rather than improvising." \
+       "$CLI_PKG@$VERSION could not be installed (likely no npm-registry egress)"
 fi
 
 # --- write the shim (regenerated each session so node/version changes take effect) ---
@@ -286,6 +314,7 @@ persist_env ZERO_RUNNER "$SHIM_PATH"
 #     agent launched from them, then resolve bare `zero` without $ZERO_RUNNER.
 # The rc edit is keyed on the runtime-bin dir substring so it's written at most once,
 # and a write failure degrades to a logged hint — it never blocks the session.
+RC_PATH_ADDED=""
 if [ "${ZERO_PATH_AUTOADD:-1}" != "0" ]; then
   if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
     printf 'export PATH=%q":$PATH"\n' "$BIN_DIR" >> "$CLAUDE_ENV_FILE"
@@ -306,6 +335,7 @@ if [ "${ZERO_PATH_AUTOADD:-1}" != "0" ]; then
     fi
     if printf '\n# Zero runner (added by the zero plugin SessionStart hook)\n%s\n' "$PATH_LINE" >>"$rc" 2>/dev/null; then
       log "added $BIN_DIR to PATH in $rc (takes effect in new shells)"
+      RC_PATH_ADDED="$rc"
     else
       log "could not write $rc — add to PATH manually: $PATH_LINE"
     fi
@@ -325,5 +355,50 @@ if [ "${ZERO_PATH_AUTOADD:-1}" != "0" ]; then
 fi
 
 INSTALLED_VERSION="$(cat "$INSTALLED_VERSION_FILE" 2>/dev/null || printf '%s' "$VERSION")"
-emit "Zero runner ready: ZERO_RUNNER=$SHIM_PATH — a drop-in for the zero CLI ($CLI_PKG@$INSTALLED_VERSION), also placed on PATH as plain \`zero\` (immediately on hosts that persist hook env; in new shells elsewhere). Use it for the whole Zero loop (search/get/fetch/review), and follow the bundled 'zero' skill for the workflow and authentication — don't improvise auth or create a wallet."
+
+if [ "$INSTALL_MODE" = "0" ]; then
+  emit "Zero runner ready: ZERO_RUNNER=$SHIM_PATH — a drop-in for the zero CLI ($CLI_PKG@$INSTALLED_VERSION), also placed on PATH as plain \`zero\` (immediately on hosts that persist hook env; in new shells elsewhere). Use it for the whole Zero loop (search/get/fetch/review), and follow the bundled 'zero' skill for the workflow and authentication — don't improvise auth or create a wallet."
+  exit 0
+fi
+
+# --- install mode: copy the skill, then a human summary instead of the JSON object ---
+# The skill goes to the portable ~/.agents/skills/ directory (the agentskills.io
+# convention nearly every skills-capable harness reads). Source it from the checkout
+# next to this script when running from the repo/plugin; otherwise (curl | bash, where
+# BASH_SOURCE is empty) fetch the published copy from the marketplace repo's main.
+SKILL_DIR="${ZERO_SKILL_DIR:-$HOME/.agents/skills/zero}"
+SKILL_RAW_URL="https://raw.githubusercontent.com/officialzeroxyz/zero-plugins/main/plugins/zero/skills/zero/SKILL.md"
+SKILL_STATUS="not installed"
+LOCAL_SKILL=""
+if [ -n "${BASH_SOURCE[0]:-}" ] && [ -f "${BASH_SOURCE[0]}" ]; then
+  LOCAL_SKILL="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd)/../skills/zero/SKILL.md"
+fi
+if mkdir -p "$SKILL_DIR" 2>/dev/null; then
+  if [ -n "$LOCAL_SKILL" ] && [ -f "$LOCAL_SKILL" ]; then
+    cp "$LOCAL_SKILL" "$SKILL_DIR/SKILL.md" && SKILL_STATUS="$SKILL_DIR/SKILL.md (from local checkout)"
+  elif curl -fsSL "$SKILL_RAW_URL" -o "$SKILL_DIR/SKILL.md" 2>/dev/null; then
+    SKILL_STATUS="$SKILL_DIR/SKILL.md"
+  else
+    SKILL_STATUS="not installed — fetch failed; get it from $SKILL_RAW_URL"
+  fi
+fi
+
+if [ -n "$RC_PATH_ADDED" ]; then
+  PATH_STATUS="added to $RC_PATH_ADDED — open a new terminal or run: source \"$RC_PATH_ADDED\""
+elif [[ ":$PATH:" == *":$BIN_DIR:"* ]]; then
+  PATH_STATUS="already on PATH"
+else
+  PATH_STATUS="already configured in your shell rc (new shells pick it up)"
+fi
+
+cat <<SUMMARY
+
+Zero installed.
+
+  runner   $SHIM_PATH  ($CLI_PKG@$INSTALLED_VERSION)
+  PATH     $PATH_STATUS
+  skill    $SKILL_STATUS
+
+Next: sign in with \`zero auth login\` (it prints a URL to approve in your browser).
+SUMMARY
 exit 0
