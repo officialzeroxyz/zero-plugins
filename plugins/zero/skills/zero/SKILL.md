@@ -223,6 +223,7 @@ zero fetch https://api.example.com/translate \
 | `-d <body>` | Inline JSON, `@./file`, or `@-`/`--data-stdin`. Implies POST + sets `Content-Type: application/json` if you didn't pass `-H`. |
 | `-H 'k:v'` | Repeatable. Caller-provided auth/API keys the capability requires. |
 | `--max-pay <usdc>` | Hard spend cap per call. Set this before unfamiliar or per-call-priced capabilities. |
+| `--timeout <seconds>` | Per-request timeout, overriding the default (60). Applies to each HTTP leg (probe and paid retry), not as a wall-clock deadline. Raise it up front for capabilities that take a while to respond — image, video, or audio generation commonly needs `--timeout 300` — rather than letting the call die at 60s after payment. |
 | `--json` | `{runId, ok, status, latencyMs, payment, body, bodyRaw}` envelope on stdout. Use `ok`, not `status`, for success. `body` is parsed JSON; `bodyRaw` is the literal text. |
 | `--raw-body` | With `--json`, keep `body` as the raw string. |
 | `--capability <slug>` | Required when calling outside a fresh `zero search` so the run is recorded for review. |
@@ -278,6 +279,9 @@ Lost a `runId`? `zero runs --unreviewed` (optionally `--capability <slug>`).
 - **`--json` `body` is already parsed.** Use `bodyRaw` (or `--raw-body`) for literal bytes.
 - **Check `ok`, not `status`.** `ok` is a pre-computed 2xx boolean.
 - **`--max-pay` is your cost guard.** Set it for any unfamiliar capability.
+- **Long-running capability? Raise `--timeout`.** The default 60s per-request timeout can cut off
+  image/video/audio generation after payment has already gone out. Pass `--timeout 300` (or more)
+  up front instead of retrying — and paying — twice.
 - **Capability must be resolvable.** When calling outside a fresh search, pass `--capability <slug>`
   so the run is reviewable.
 - **Before ending a multi-call task, run `zero runs --unreviewed`** and review anything you missed.
