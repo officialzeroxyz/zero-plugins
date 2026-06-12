@@ -7,6 +7,13 @@ Claude UI; no terminal involved.
 > Using Claude Code instead? See the [CLI guide](claude-code.md) or the
 > [desktop guide](claude-code-desktop.md).
 
+## Turn on code execution
+
+1. Open [claude.ai/new#settings/capabilities](https://claude.ai/new#settings/capabilities).
+2. Make sure **Code execution and file creation** is turned on.
+3. Make sure **Allow network egress** is turned on, and set the **Domain
+   allowlist** to **All domains**.
+
 ## Install the plugin
 
 1. Open [claude.ai/customize](https://claude.ai/customize) — in Claude Cowork,
