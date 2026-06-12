@@ -19,7 +19,7 @@ walks you through signing in.
 
 > **Using Claude on the web (claude.ai) or Claude Cowork instead?** Those
 > install through the plugin UI, not a shell — see the
-> [plugin UI walkthrough](agent-install.md#claude-chat-claudeai--claude-cowork--plugin-ui-install).
+> [claude.ai & Claude Cowork guide](claude-ai.md).
 
 ## What's supported
 
