@@ -86,20 +86,20 @@ required.
 
 ## Step 1 — agent-specific setup
 
-Check for pre-plugin leftovers just below, then find the subsection for the
-agent **you** are, run its steps in order, and continue with **Step 2** below.
-Run only your own subsection — the other agent's commands will not work for
-you.
+Find the subsection for the agent **you** are, run its steps in order, and
+continue with **Step 2** below. Run only your own subsection — the other
+agent's commands will not work for you.
 
-### Before you start — pre-plugin leftovers (all agents)
+### Already installed Zero another way? (all agents)
 
-Standalone installs (`zero init` — whether a pre-1.0 run or today's
-`curl zero.xyz/install.sh` flow, which calls it) ship a Zero skill and hooks
-outside the plugin; on a host that's now getting the plugin, those would
-shadow and double-fire the plugin's own. Check your default skills and hooks
-folders for a dangling Zero skill or hooks; only if you find some, reverse
-them with `zero uninstall` (or remove them by hand for a pre-1.0 install the
-CLI can't see). Most machines have none — move on. Never touch
+A standalone install (`zero init`, or the `curl zero.xyz/install.sh`
+one-liner that calls it) coexists with the plugin. The harness may warn the
+user that the plugin's Zero skill or hooks are shadowed by the standalone
+copy, and the Zero context reminder may appear twice — both are harmless;
+do **not** fix them by deleting files. If the user wants the standalone
+install gone, `zero uninstall` removes it cleanly — but machine-wide: every
+app reading the shared `~/.claude` and `~/.agents` directories loses it, not
+just this host, so offer it and let the user decide. Never touch
 `~/.claude/plugins/`.
 
 ### Claude Code
