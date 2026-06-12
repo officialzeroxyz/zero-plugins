@@ -44,7 +44,8 @@
 # step degrades to a clear "unavailable" message rather than blocking the session.
 #
 # Install mode (--install): the standalone install path for humans and for agents with
-# no plugin support — `curl -fsSL <raw url> | bash -s -- --install`. Same provisioning,
+# no plugin support — `curl -fsSL https://zero.xyz/install.sh | bash` (a wrapper that
+# fetches this script from main and passes --install). Same provisioning,
 # but: a human summary replaces the JSON object, failures exit non-zero so scripts/CI
 # can tell, the host-plugin refresh sweep is skipped (no plugin host to refresh), and
 # the Zero skill is copied to the portable ~/.agents/skills/ directory so skills-capable
@@ -365,9 +366,10 @@ fi
 # The skill goes to the portable ~/.agents/skills/ directory (the agentskills.io
 # convention nearly every skills-capable harness reads). Source it from the checkout
 # next to this script when running from the repo/plugin; otherwise (curl | bash, where
-# BASH_SOURCE is empty) fetch the published copy from the marketplace repo's main.
+# BASH_SOURCE is empty) fetch zero.xyz/SKILL.md, which proxies this repo's main — the
+# same skill the plugin ships.
 SKILL_DIR="${ZERO_SKILL_DIR:-$HOME/.agents/skills/zero}"
-SKILL_RAW_URL="https://raw.githubusercontent.com/officialzeroxyz/zero-plugins/main/plugins/zero/skills/zero/SKILL.md"
+SKILL_RAW_URL="https://zero.xyz/SKILL.md"
 SKILL_STATUS="not installed"
 LOCAL_SKILL=""
 if [ -n "${BASH_SOURCE[0]:-}" ] && [ -f "${BASH_SOURCE[0]}" ]; then

@@ -125,11 +125,12 @@ gemini extensions install https://github.com/officialzeroxyz/zero-plugins --auto
 
 Standalone install — for humans, or for agents with no plugin support. Provisions the
 runner, puts `zero` on PATH, and copies the Zero skill to the portable
-`~/.agents/skills/` directory (same script the plugins run as their SessionStart hook,
-in its `--install` mode):
+`~/.agents/skills/` directory. `zero.xyz/install.sh` wraps the same script the plugins
+run as their SessionStart hook (`plugins/zero/hooks/ensure-runner.sh`), in its
+`--install` mode:
 
 ```
-curl -fsSL https://raw.githubusercontent.com/officialzeroxyz/zero-plugins/main/plugins/zero/hooks/ensure-runner.sh | bash -s -- --install
+curl -fsSL https://zero.xyz/install.sh | bash
 ```
 
 Gemini doesn't read the Codex/Claude marketplace catalogs, and a git-URL install expects
