@@ -20,5 +20,5 @@ gemini extensions install ./dist/zero-gemini      # or: gemini extensions link .
 ```
 
 `.github/workflows/release-gemini.yml` runs the same script to attach the packaged
-extension to each GitHub Release. See the top-level [README](../../README.md#install-in-gemini-cli)
+extension to each GitHub Release. See the [Gemini CLI guide](../../guides/gemini-cli.md)
 for the full install instructions.
