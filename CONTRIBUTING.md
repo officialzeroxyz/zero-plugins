@@ -38,10 +38,10 @@ make major     # 1.3.2 -> 2.0.0
 (`make` with no target prints the available commands and the current version.
 The bump targets require [`jq`](https://stedolan.github.io/jq/).)
 
-A CI check (`.github/workflows/version-check.yml`) enforces this on every PR: it
-fails if shipped plugin files changed without a version bump, or if the
-manifests fall out of lockstep. Plugin READMEs are treated as docs and don't
-trip it.
+A CI check (`.github/workflows/version-check.yml`) enforces this on every PR
+that touches `plugins/`: it fails if shipped plugin files changed without a
+version bump, or if the manifests fall out of lockstep. Plugin READMEs are
+treated as docs and don't trip it.
 
 ### Adding a new plugin manifest
 
