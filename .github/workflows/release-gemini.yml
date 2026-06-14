@@ -1,12 +1,14 @@
-name: Release Gemini extension
+name: Release Gemini/Qwen extension
 
-# Auto-publishes a GitHub Release for the Gemini extension, version-driven by the manifest.
+# Auto-publishes a GitHub Release for the Gemini/Qwen extension archive, version-driven by the manifest.
 # On a push to main, it reads the version from plugins/zero-gemini/gemini-extension.json; if
 # no release exists for that version yet, it assembles the extension and publishes a release
-# (creating the tag, attaching the single asset, marking it Latest). This is what lets users
-# install with the plain repo URL:
+# (creating the tag, attaching the single asset, marking it Latest). The archive contains both
+# gemini-extension.json and qwen-extension.json at its root, so both hosts can install with the
+# plain repo URL:
 #
 #     gemini extensions install https://github.com/<owner>/zero-plugins
+#     qwen extensions install https://github.com/<owner>/zero-plugins
 #
 # To ship a change: bump "version" in plugins/zero-gemini/gemini-extension.json and merge to
 # main. A push that doesn't change the version finds the release already exists and no-ops —
@@ -14,17 +16,19 @@ name: Release Gemini extension
 #
 # Asset invariants (do not break — see scripts/build-gemini.sh and github.ts in gemini-cli):
 # exactly ONE asset, name ends `.tar.gz` with no darwin/linux/win32 substring, and
-# gemini-extension.json sits at the archive root. A pure-text extension needs only this one
-# generic .tar.gz; Gemini extracts it in-process via the `tar` package on every OS.
+# gemini-extension.json and qwen-extension.json sit at the archive root. A pure-text extension
+# needs only this one generic .tar.gz; Gemini/Qwen extract it in-process on every OS.
 
 on:
   push:
     branches: [main]
     paths:
       - "plugins/zero-gemini/**"
+      - "plugins/zero-qwen/**"
       - "plugins/zero/skills/**"
       - "plugins/zero/hooks/ensure-runner.sh"
       - "plugins/zero/hooks/zero-context.sh"
+      - "plugins/zero/hooks/auto-approve-zero.sh"
       - "scripts/build-gemini.sh"
       - ".github/workflows/release-gemini.yml"
   workflow_dispatch:
@@ -70,6 +74,6 @@ jobs:
         run: |
           gh release create "${{ steps.ver.outputs.tag }}" zero-gemini.tar.gz \
             --target "${{ github.sha }}" \
-            --title "Zero for Gemini CLI ${{ steps.ver.outputs.tag }}" \
+            --title "Zero for Gemini CLI and Qwen Code ${{ steps.ver.outputs.tag }}" \
             --latest \
-            --notes "Install with: \`gemini extensions install https://github.com/${{ github.repository }}\`"
+            --notes $'Install with: `gemini extensions install https://github.com/${{ github.repository }}`\n\nOr: `qwen extensions install https://github.com/${{ github.repository }}`'
