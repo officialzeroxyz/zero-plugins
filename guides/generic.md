@@ -39,17 +39,20 @@ All hosts share one login (`~/.zero/config.json`) and one runtime
 
 ### Harnesses with a bespoke skills directory
 
-If your harness reads skills from its own directory instead of `~/.claude` or
-`~/.agents` (say `~/.yourharness/skills`), point `zero init` at it with
-`--skills-dir`:
+`~/.claude/skills` and `~/.agents/skills` are **always** written. If your
+harness reads skills from its own directory in addition to those (say
+`~/.yourharness/skills`), name it with `--skills-dir` to install the skill there
+too — the flag is additive, and accepts more than one directory:
 
 ```bash
 zero init --skills-dir ~/.yourharness/skills
+# or several at once:
+zero init --skills-dir ~/.kiro/skills ~/.other/skills
 ```
 
-`zero init` is idempotent, so re-running it replaces rather than duplicates —
-it's safe to run again with a different `--skills-dir` to cover an additional
-location.
+`zero init` is idempotent, so re-running it replaces rather than duplicates.
+Note that `zero uninstall` only cleans the default locations — skills written to
+a custom `--skills-dir` you remove by hand.
 
 ## Staying up to date
 
