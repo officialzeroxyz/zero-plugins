@@ -9,7 +9,9 @@ The one source of truth for the Zero plugin's content, shared by every host:
 - `.claude-plugin/plugin.json` — Claude Code manifest
 - `.codex-plugin/plugin.json` — Codex manifest
 - `.factory-plugin/plugin.json` — Droid manifest
+- `.github/plugin/plugin.json` — GitHub Copilot manifest
 - `.mcp.json` — the Zero MCP connector for Claude hosts
+- `mcp-copilot.json` — the Zero MCP connector for Copilot hosts
 
 The skill and hook scripts are byte-identical across Claude Code, Codex, and
 Gemini (the Gemini extension is assembled from this directory plus the

@@ -1,0 +1,25 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "bash \"${PLUGIN_ROOT}/hooks/ensure-runner.sh\"",
+        "timeout": 120
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "type": "command",
+        "command": "bash \"${PLUGIN_ROOT}/hooks/zero-context.sh\"",
+        "timeout": 5
+      }
+    ],
+    "PreToolUse": [
+      {
+        "type": "command",
+        "command": "bash \"${PLUGIN_ROOT}/hooks/auto-approve-zero.sh\"",
+        "timeout": 5
+      }
+    ]
+  }
+}
