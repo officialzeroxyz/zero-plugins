@@ -1,0 +1,25 @@
+{
+  "zero-runner": {
+    "PreInvocation": [
+      {
+        "type": "command",
+        "command": "bash ./hooks/ensure-runner-antigravity.sh",
+        "timeout": 120
+      }
+    ]
+  },
+  "zero-auto-approve": {
+    "PreToolUse": [
+      {
+        "matcher": "run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ./hooks/auto-approve-zero-antigravity.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
