@@ -90,11 +90,10 @@ Find the subsection for the agent **you** are and run its steps in order. Run
 only your own subsection — the other agent's commands will not work for you.
 
 Every subsection ends the same way: **find the installed plugin root**, then
-continue with **Step 2** below. This page doesn't catalog where each harness
-keeps its plugins — you know your own harness. Your plugin `list`/`inspect`
-subcommand usually prints the path, and your harness's config directory is
-the usual home. You have the right directory when it contains
-`skills/zero/SKILL.md`.
+continue with **Step 2** below. You know your own harness's plugin cache —
+don't assume a command prints the path, since many don't, or print the
+marketplace source rather than the installed root. You have the right directory
+when it contains `skills/zero/SKILL.md`.
 
 ### Claude Code
 
@@ -105,7 +104,9 @@ the usual home. You have the right directory when it contains
    claude plugin install zero@zero-plugins
    ```
 
-2. **Find the installed plugin root**, then continue with **Step 2** below.
+2. **Find the installed plugin root.** It's in your plugin cache under
+   `~/.claude/plugins/`, recognizable by containing `skills/zero/SKILL.md`.
+   Continue with **Step 2** below.
 
 ### Codex
 
@@ -116,7 +117,10 @@ the usual home. You have the right directory when it contains
    codex plugin add zero@zero-plugins
    ```
 
-2. **Find the installed plugin root**, then continue with **Step 2** below.
+2. **Find the installed plugin root.** It's in your plugin cache under
+   `~/.codex/plugins/`, recognizable by containing `skills/zero/SKILL.md`.
+   (`codex plugin list` shows a path, but it's the marketplace snapshot, not the
+   installed root.) Continue with **Step 2** below.
 
 ### Gemini CLI
 
