@@ -1,0 +1,7 @@
+name: Zero MCP
+version: 0.0.1
+schema: v1
+mcpServers:
+  - name: Zero
+    type: streamable-http
+    url: https://mcp.zero.xyz

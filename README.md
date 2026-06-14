@@ -27,6 +27,7 @@ installation, use the guides below. Pick your agent:
   web, desktop, and mobile
 - **[Codex (CLI)](guides/codex.md)**
 - **[Codex app](guides/codex-app.md)**
+- **[Continue CLI (`cn`)](guides/continue-cli.md)**
 - **[Droid](guides/droid.md)**
 - **[Gemini CLI](guides/gemini-cli.md)**
 - **[Anything else (standalone installer)](guides/generic.md)** — works in any
@@ -74,6 +75,8 @@ plugins/zero/                     # the shared plugin: skill + hooks (+ Claude's
   └── .factory-plugin/            # Droid manifest
 plugins/zero-gemini/              # thin Gemini-only overlay (manifest + hook wiring)
 scripts/build-gemini.sh           # assembles the installable Gemini extension into dist/
+plugins/zero-continue/            # thin Continue CLI overlay (hooks + MCP + prompt)
+scripts/build-continue.sh         # assembles the Continue project template into dist/
 guides/                           # per-host install guides + the agent install runbook
 ```
 
@@ -83,5 +86,6 @@ mechanics — live in the per-host guides.
 ## Status
 
 This repo is built up iteratively, one carefully reviewed PR at a time. Today
-it ships the **Claude Code**, **Codex**, **Droid**, and **Gemini CLI** plugins;
-additional hosts (Cursor) will land in subsequent PRs.
+it ships the **Claude Code**, **Codex**, **Droid**, **Gemini CLI**, and
+**Continue CLI** plugins; additional hosts (Cursor) will land in subsequent
+PRs.
