@@ -29,8 +29,8 @@ installation, use the guides below. Pick your agent:
 - **[Codex app](guides/codex-app.md)**
 - **[Droid](guides/droid.md)**
 - **[Gemini CLI](guides/gemini-cli.md)**
-- **Anything else** — the standalone installer works in any agent with a
-  shell (and for humans at a terminal):
+- **[Anything else (standalone installer)](guides/generic.md)** — works in any
+  agent with a shell (and for humans at a terminal):
 
   ```bash
   curl -fsSL https://zero.xyz/install.sh | bash
@@ -39,8 +39,8 @@ installation, use the guides below. Pick your agent:
   It provisions the same runner the plugins use, puts `zero` on PATH, and
   installs the Zero skill where most harnesses look (`~/.claude/skills/` and
   `~/.agents/skills/`). The whole install is reversible with `zero uninstall`.
-  Full details, including harnesses with bespoke skill directories, are in the
-  [agent install runbook](guides/agent-install.md).
+  See the [standalone install guide](guides/generic.md) for what gets installed
+  where, the `--skills-dir` flag for bespoke skill directories, and updates.
 
 Once installed, ask your agent to *"help me set up and test Zero"* — it signs
 you in and takes it from there.
