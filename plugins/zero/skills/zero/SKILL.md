@@ -117,7 +117,7 @@ block the conversation polling by hand or waiting on the user to confirm; `--fin
 
 The session is saved to the shared `~/.zero/config.json`, so authenticating once here also signs
 you in everywhere Zero is used on this machine — the standalone `zero` CLI and your other agents
-all share the one login. Signing is managed server-side — nothing to set up.
+all share the one login.
 
 Check identity any time with `zero auth whoami`.
 
@@ -165,9 +165,8 @@ option). Reaching `*.zero.xyz` alone doesn't prove arbitrary-domain egress.
    ZERO_SESSION_TOKEN="$(cat /tmp/zero-session-token)" zero search "…"
    ```
 
-   Every CLI call picks `ZERO_SESSION_TOKEN` up from the environment; signing is managed
-   server-side. (`auth exchange --json` emits `{token, expiresAt}` instead, if you need the
-   expiry.)
+   Every CLI call picks `ZERO_SESSION_TOKEN` up from the environment. (`auth exchange --json` emits
+   `{token, expiresAt}` instead, if you need the expiry.)
 4. **Re-mint when it expires.** The token is short-lived and has no refresh path. If calls start
    failing with an auth error mid-task, call `authorize` again, re-run `auth exchange`, and
    re-capture `ZERO_SESSION_TOKEN` the same way.
@@ -229,7 +228,7 @@ zero fetch https://api.example.com/translate \
 | `-d <body>` | Inline JSON, `@./file`, or `@-`/`--data-stdin`. Implies POST + sets `Content-Type: application/json` if you didn't pass `-H`. |
 | `-H 'k:v'` | Repeatable. Caller-provided auth/API keys the capability requires. |
 | `--max-pay <usdc>` | Hard spend cap per call. Set this before unfamiliar or per-call-priced capabilities. |
-| `--timeout <seconds>` | Per-request timeout, overriding the default (60). Applies to each HTTP leg (probe and paid retry), not as a wall-clock deadline. Raise it up front for capabilities that take a while to respond — image, video, or audio generation commonly needs `--timeout 300` — rather than letting the call die at 60s after payment. |
+| `--timeout <seconds>` | Per-request timeout (default 60), applied to each HTTP leg — probe and paid retry — not as a wall-clock deadline. Raise it up front for slow capabilities (image/video/audio often need `--timeout 300`) so the call doesn't die at 60s after payment. |
 | `--json` | `{runId, ok, status, latencyMs, payment, body, bodyRaw}` envelope on stdout. Use `ok`, not `status`, for success. `body` is parsed JSON; `bodyRaw` is the literal text. |
 | `--raw-body` | With `--json`, keep `body` as the raw string. |
 | `--capability <slug>` | Required when calling outside a fresh `zero search` so the run is recorded for review. |
@@ -272,36 +271,24 @@ gotcha, fit/misfit).
 Skip `--content` rather than write filler ("Worked great", "Fast"). Submit numeric ratings alone
 if you have nothing specific.
 
-Every review needs an outcome flag, or the command errors: `--success` when the call delivered,
-`--no-success` when it didn't. The success path is
-`zero review <runId> --success --accuracy N --value N --reliability N --content "…"`.
+Every review needs an outcome flag or the command errors: `--success` when the call delivered,
+`--no-success --content "<what broke>"` when the capability failed. Skip review only if the failure
+was a CLI-internal bug (e.g. `No client registered for x402 version: N`) — file `zero bug-report`
+instead.
 
-Review failures with `--no-success --content "<what broke>"` when the capability is at fault. Skip
-review if the failure was a CLI-internal bug (e.g., `No client registered for x402 version: N`) —
-file `zero bug-report` instead.
-
-Review by `runId`, captured from the `fetch --json` envelope. `zero review --capability <slug>` can
+Review by `runId` (from the `fetch --json` envelope). `zero review --capability <slug>` can
 auto-resolve to your most recent unreviewed run, but only with the *exact* recorded slug — which is
-host-prefixed and hash-suffixed (e.g. `image-withzero-xyz-…-f422560b`), not guessable from the
-capability name. Lost the runId? `zero runs --unreviewed` lists every pending run with its slug.
+host-prefixed and hash-suffixed (e.g. `image-withzero-xyz-…-f422560b`), not guessable. Lost the
+runId? `zero runs --unreviewed` lists every pending run with its slug.
 
 ## Gotchas
 
-- **Always re-search.** Never reuse a capability URL/schema/price from memory or earlier in the
-  conversation.
-- **Always `zero get` before `zero fetch`.** Re-confirm URL, method, headers, schema, current price.
-- **Don't POST a GET envelope.** Encode `queryParams` as query string.
-- **`bodySchema: null` means unindexed.** Skip; don't guess field names.
-- **`--json` `body` is already parsed.** Use `bodyRaw` (or `--raw-body`) for literal bytes.
-- **Check `ok`, not `status`.** `ok` is a pre-computed 2xx boolean.
-- **`--max-pay` is your cost guard.** Set it for any unfamiliar capability.
-- **Long-running capability? Raise `--timeout`.** The default 60s per-request timeout can cut off
-  image/video/audio generation after payment has already gone out. Pass `--timeout 300` (or more)
-  up front instead of retrying — and paying — twice.
-- **Review needs an outcome flag.** Every `zero review` requires `--success` or `--no-success`; it
-  errors without one. `--success` on a good call, `--no-success` when the capability failed.
-- **Capability must be resolvable.** When calling outside a fresh search, pass `--capability <slug>`
-  so the run is reviewable.
+Quick pre-flight, each detailed above: re-search every time; `zero get` before every `zero fetch`;
+encode GET `queryParams` as a query string (don't POST the envelope); skip `bodySchema: null` rather
+than guess fields; check `ok`, not `status`; set `--max-pay` on anything unfamiliar; raise
+`--timeout` for slow image/video/audio so the call doesn't die after payment; every `zero review`
+needs `--success`/`--no-success`; pass `--capability <slug>` when calling outside a fresh search.
+
 - **Before ending a multi-call task, run `zero runs --unreviewed`** and review anything you missed.
 - **Zero reminder injected twice per prompt?** A plugin install and a standalone install
   (`zero init`) are coexisting; the harness may also warn the user about a shadowed Zero
