@@ -15,8 +15,15 @@ name: Version check
 # Always bump via the Makefile (`make patch|minor|major`) — never hand-edit a
 # manifest — so the manifests stay in lockstep and pass check #1.
 
+# Scoped to plugin changes: the bump-on-change check is a no-op when nothing
+# under plugins/ changed, and lockstep can only break when a manifest (which
+# lives under plugins/) changes — so there's nothing to check on other PRs.
+# NOTE: if this is ever made a *required* status check, drop the paths filter
+# (a path-filtered required check stays pending forever on PRs that skip it).
 on:
   pull_request:
+    paths:
+      - 'plugins/**'
 
 permissions:
   contents: read
