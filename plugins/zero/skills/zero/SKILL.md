@@ -117,7 +117,7 @@ block the conversation polling by hand or waiting on the user to confirm; `--fin
 
 The session is saved to the shared `~/.zero/config.json`, so authenticating once here also signs
 you in everywhere Zero is used on this machine — the standalone `zero` CLI and your other agents
-all share the one login. Signing is managed server-side — nothing to set up.
+all share the one login.
 
 Check identity any time with `zero auth whoami`.
 
@@ -126,51 +126,54 @@ Check identity any time with `zero auth whoami`.
 A device-code login won't work — the environment can't hold a persisted session. Run the published
 `@zeroxyz/cli` directly and authenticate via the **MCP connector's `authorize` tool**.
 
-**Two prerequisites — confirm both first.** If either is missing, stop and walk the user through
-enabling it in your product/environment:
+**Code execution is required.** This whole path runs the CLI in a shell; if the environment can't
+execute commands, stop and have the user enable it.
 
-- **Code execution** — you must be able to run shell commands to invoke the CLI.
-- **Network egress to all domains** — not just the npm registry and `*.zero.xyz`: `zero fetch`
-  calls each capability's own URL directly, and capabilities live on arbitrary domains you can't
-  predict or allowlist up front. If the environment scopes outbound access, have the user select
-  "All domains" (or the equivalent unrestricted-egress option) — a Zero-only allowlist will pass
-  search/get and then break every fetch. Verify with a neutral third-party domain, e.g.
-  `curl -sI https://example.com`; reaching `*.zero.xyz` alone doesn't prove arbitrary-domain
-  egress. If calls hang or fail with DNS/connection errors mid-task, this is the first thing to
-  re-check.
+**Egress (reactive, not a gate).** `zero fetch` calls each capability's own URL on arbitrary
+domains, so the environment needs unrestricted outbound access — not just the npm registry and
+`*.zero.xyz`. A Zero-only allowlist passes search/get and then breaks every fetch. Don't verify
+this up front. If a fetch hangs or fails with a DNS/connection error, restricted egress is the
+first thing to suspect: have the user select "All domains" (or the equivalent unrestricted-egress
+option). Reaching `*.zero.xyz` alone doesn't prove arbitrary-domain egress.
 
-Then:
+1. **Get the runner — install once, don't `npx` per call.** Per-call
+   `npx -y @zeroxyz/cli@latest` re-resolves the package every time (~2–3s each, even warm) and
+   prints npm notices to stderr. If the sandbox filesystem persists across commands — most do,
+   even when each command runs in a fresh *shell* — install once and call the bare binary:
 
-1. **Get the runner.** Resolve it with the ladder in **Resolving `zero`** above. In most
-   sandboxes nothing is provisioned or installed, so it bottoms out at
-   `npx -y @zeroxyz/cli@latest` (node/npx is present in most sandboxes) — substitute that
-   wherever the examples use `zero`.
+   ```bash
+   npm install -g @zeroxyz/cli@latest    # ~1s cached; puts `zero` on PATH
+   zero --help                            # ~0.9s/call thereafter
+   ```
+
+   Only if the filesystem is reset between commands (no install survives) fall back to
+   `npx -y @zeroxyz/cli@latest` everywhere `zero` appears below.
 2. **Authorize.** If the connector (`https://mcp.zero.xyz`) isn't available as a tool yet, walk the
    user through adding it and the one-time consent. Then call its **`authorize`** tool to get a
    short-lived authorization `code`.
 3. **Exchange the code for a session token — without printing it.** The code from `authorize` is
    one-time; the reusable credential is the session token that `zero auth exchange` returns. The
-   command writes the bare token to stdout precisely so you can capture it straight into an env
-   var or file. Never run it bare, `echo`/`cat` the token, or paste it into the conversation —
-   the token must not land in the transcript.
+   command writes the bare token to stdout precisely so you can capture it straight to disk. Never
+   run it bare, `echo`/`cat` the token, or paste it into the conversation — the token must not land
+   in the transcript. The token file lives on disk, so — like the install above — it survives a
+   fresh shell; the axis that matters is filesystem persistence, not env persistence.
 
    ```bash
-   # If your shell persists across commands, capture it directly into the environment:
-   export ZERO_SESSION_TOKEN="$(npx -y @zeroxyz/cli@latest auth exchange <code from authorize>)"
-   npx -y @zeroxyz/cli@latest search "…"
-
-   # If each command runs in a fresh shell (most agent harnesses), write it to an
-   # owner-only file once, then load it per call:
-   (umask 077; npx -y @zeroxyz/cli@latest auth exchange <code from authorize> > /tmp/zero-session-token)
-   ZERO_SESSION_TOKEN="$(cat /tmp/zero-session-token)" npx -y @zeroxyz/cli@latest search "…"
+   # Typical harness: fresh shell per command (env vars don't carry over), persistent filesystem.
+   # Write the token to an owner-only file once, then load it per call:
+   (umask 077; zero auth exchange <code from authorize> > /tmp/zero-session-token)
+   ZERO_SESSION_TOKEN="$(cat /tmp/zero-session-token)" zero search "…"
    ```
 
-   Every CLI call picks `ZERO_SESSION_TOKEN` up from the environment; signing is managed
-   server-side. (`auth exchange --json` emits `{token, expiresAt}` instead, if you need the
-   expiry.)
+   Every CLI call picks `ZERO_SESSION_TOKEN` up from the environment. (`auth exchange --json` emits
+   `{token, expiresAt}` instead, if you need the expiry.)
 4. **Re-mint when it expires.** The token is short-lived and has no refresh path. If calls start
    failing with an auth error mid-task, call `authorize` again, re-run `auth exchange`, and
    re-capture `ZERO_SESSION_TOKEN` the same way.
+5. **Reviewing across a fresh shell.** The `runId` on `fetch`'s stderr is gone by the next command
+   in a fresh-shell harness — so capture it from the `--json` envelope at call time (see **Output
+   handling**) and review by runId rather than re-deriving the slug (see **Reviews — what to
+   write**).
 
 ### Bring-your-own signing
 
@@ -192,8 +195,10 @@ https://www.zero.xyz/profile to fund their Zero account.
    examples, pricing). If `bodySchema` is `null`, skip that result — don't invent field names.
 3. **Call** — `zero fetch <url> [-d '<json>'] [-H 'k:v'] [--max-pay 0.50]`. 402 responses
    are paid automatically (x402 + MPP, including cross-chain bridging from Base to Tempo).
-4. **Review** — `zero review <runId> --accuracy N --value N --reliability N --content "<observation>"`.
-   The `runId` is printed to stderr (or in the `--json` envelope). Always review after a paid call.
+4. **Review** — `zero review <runId> --success --accuracy N --value N --reliability N --content "<observation>"`.
+   `--success` (or `--no-success` when the capability failed) is **required** — the command errors
+   without one. The `runId` is printed to stderr (or in the `--json` envelope). Always review after
+   a paid call.
 
 ## Request shape
 
@@ -223,7 +228,7 @@ zero fetch https://api.example.com/translate \
 | `-d <body>` | Inline JSON, `@./file`, or `@-`/`--data-stdin`. Implies POST + sets `Content-Type: application/json` if you didn't pass `-H`. |
 | `-H 'k:v'` | Repeatable. Caller-provided auth/API keys the capability requires. |
 | `--max-pay <usdc>` | Hard spend cap per call. Set this before unfamiliar or per-call-priced capabilities. |
-| `--timeout <seconds>` | Per-request timeout, overriding the default (60). Applies to each HTTP leg (probe and paid retry), not as a wall-clock deadline. Raise it up front for capabilities that take a while to respond — image, video, or audio generation commonly needs `--timeout 300` — rather than letting the call die at 60s after payment. |
+| `--timeout <seconds>` | Per-request timeout (default 60), applied to each HTTP leg — probe and paid retry — not as a wall-clock deadline. Raise it up front for slow capabilities (image/video/audio often need `--timeout 300`) so the call doesn't die at 60s after payment. |
 | `--json` | `{runId, ok, status, latencyMs, payment, body, bodyRaw}` envelope on stdout. Use `ok`, not `status`, for success. `body` is parsed JSON; `bodyRaw` is the literal text. |
 | `--raw-body` | With `--json`, keep `body` as the raw string. |
 | `--capability <slug>` | Required when calling outside a fresh `zero search` so the run is recorded for review. |
@@ -244,6 +249,10 @@ zero fetch --json "<url>" | jq 'select(.ok)' # programmatic
 zero fetch "<image-url>" > out.png           # binary
 ```
 
+Capture the `runId` from the `--json` envelope (`{runId, ok, …}`) rather than scraping it from
+stderr — it's the handle `zero review` needs, and a prior call's stderr may be gone by the time you
+review (especially in a fresh-shell harness).
+
 ## Reviews — what to write
 
 `--content` is free-form, optional, and **strongly encouraged when you have a specific
@@ -262,28 +271,24 @@ gotcha, fit/misfit).
 Skip `--content` rather than write filler ("Worked great", "Fast"). Submit numeric ratings alone
 if you have nothing specific.
 
-Review failures with `--no-success --content "<what broke>"` when the capability is at fault. Skip
-review if the failure was a CLI-internal bug (e.g., `No client registered for x402 version: N`) —
-file `zero bug-report` instead.
+Every review needs an outcome flag or the command errors: `--success` when the call delivered,
+`--no-success --content "<what broke>"` when the capability failed. Skip review only if the failure
+was a CLI-internal bug (e.g. `No client registered for x402 version: N`) — file `zero bug-report`
+instead.
 
-Lost a `runId`? `zero runs --unreviewed` (optionally `--capability <slug>`).
-`zero review --capability <slug> ...` auto-resolves to your most recent unreviewed run.
+Review by `runId` (from the `fetch --json` envelope). `zero review --capability <slug>` can
+auto-resolve to your most recent unreviewed run, but only with the *exact* recorded slug — which is
+host-prefixed and hash-suffixed (e.g. `image-withzero-xyz-…-f422560b`), not guessable. Lost the
+runId? `zero runs --unreviewed` lists every pending run with its slug.
 
 ## Gotchas
 
-- **Always re-search.** Never reuse a capability URL/schema/price from memory or earlier in the
-  conversation.
-- **Always `zero get` before `zero fetch`.** Re-confirm URL, method, headers, schema, current price.
-- **Don't POST a GET envelope.** Encode `queryParams` as query string.
-- **`bodySchema: null` means unindexed.** Skip; don't guess field names.
-- **`--json` `body` is already parsed.** Use `bodyRaw` (or `--raw-body`) for literal bytes.
-- **Check `ok`, not `status`.** `ok` is a pre-computed 2xx boolean.
-- **`--max-pay` is your cost guard.** Set it for any unfamiliar capability.
-- **Long-running capability? Raise `--timeout`.** The default 60s per-request timeout can cut off
-  image/video/audio generation after payment has already gone out. Pass `--timeout 300` (or more)
-  up front instead of retrying — and paying — twice.
-- **Capability must be resolvable.** When calling outside a fresh search, pass `--capability <slug>`
-  so the run is reviewable.
+Quick pre-flight, each detailed above: re-search every time; `zero get` before every `zero fetch`;
+encode GET `queryParams` as a query string (don't POST the envelope); skip `bodySchema: null` rather
+than guess fields; check `ok`, not `status`; set `--max-pay` on anything unfamiliar; raise
+`--timeout` for slow image/video/audio so the call doesn't die after payment; every `zero review`
+needs `--success`/`--no-success`; pass `--capability <slug>` when calling outside a fresh search.
+
 - **Before ending a multi-call task, run `zero runs --unreviewed`** and review anything you missed.
 - **Zero reminder injected twice per prompt?** A plugin install and a standalone install
   (`zero init`) are coexisting; the harness may also warn the user about a shadowed Zero
@@ -300,7 +305,7 @@ zero fetch https://nlp-api.example.com/sentiment \
   -d '{"text":"Zero is great"}' \
   -H "Content-Type:application/json"
 # Run ID printed on stderr
-zero review abc123 --accuracy 5 --value 4 --reliability 5 \
+zero review abc123 --success --accuracy 5 --value 4 --reliability 5 \
   --content "Classified a 200-char product-review snippet positive in ~180ms; matched manual read. Clean schema, no auth."
 ```
 
