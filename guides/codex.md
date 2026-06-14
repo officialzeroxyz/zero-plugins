@@ -6,6 +6,8 @@ How to install Zero in the Codex CLI and keep it up to date.
 
 ## Install
 
+### Inside Codex CLI
+
 Inside a Codex CLI session, run:
 
 ```
@@ -14,7 +16,7 @@ Inside a Codex CLI session, run:
 /reload-plugins
 ```
 
-Or, from a regular shell:
+### From the terminal
 
 ```bash
 codex plugin marketplace add officialzeroxyz/zero-plugins

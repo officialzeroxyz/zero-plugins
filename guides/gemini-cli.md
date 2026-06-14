@@ -4,7 +4,7 @@ How to install Zero in Gemini CLI and keep it up to date.
 
 ## Install
 
-From a regular shell:
+### From the terminal
 
 ```bash
 gemini extensions install https://github.com/officialzeroxyz/zero-plugins
