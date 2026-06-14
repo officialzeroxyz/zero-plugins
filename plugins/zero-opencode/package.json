@@ -1,0 +1,20 @@
+{
+  "name": "@zeroxyz/opencode-zero",
+  "version": "1.4.0",
+  "description": "OpenCode plugin for Zero: runner setup, context injection, and safe Zero command auto-approval.",
+  "type": "module",
+  "license": "MIT",
+  "homepage": "https://zero.xyz",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/officialzeroxyz/zero-plugins.git",
+    "directory": "plugins/zero-opencode"
+  },
+  "keywords": ["opencode", "zero", "x402", "mpp", "payments", "capabilities"],
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./server": "./index.js"
+  },
+  "files": ["index.js", "README.md"]
+}
