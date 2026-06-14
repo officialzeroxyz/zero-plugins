@@ -4,6 +4,8 @@ How to install Zero in Factory's Droid CLI and keep it up to date.
 
 ## Install
 
+### Inside Droid
+
 Inside a Droid session, run:
 
 ```
@@ -18,7 +20,7 @@ https://github.com/officialzeroxyz/zero-plugins
 
 Then install the `zero` plugin from that marketplace.
 
-Or, from a regular shell:
+### From the terminal
 
 ```bash
 droid plugin marketplace add https://github.com/officialzeroxyz/zero-plugins

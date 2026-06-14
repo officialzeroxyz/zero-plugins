@@ -8,6 +8,8 @@ How to install Zero in the Claude Code CLI and keep it up to date.
 
 ## Install
 
+### Inside Claude Code
+
 Inside a Claude Code session, run:
 
 ```
@@ -16,7 +18,7 @@ Inside a Claude Code session, run:
 /reload-plugins
 ```
 
-Or, from a regular shell:
+### From the terminal
 
 ```bash
 claude plugin marketplace add officialzeroxyz/zero-plugins
