@@ -1,0 +1,39 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CONTINUE_PROJECT_DIR:-$PWD}/.continue/zero/hooks/ensure-runner.sh\"",
+            "statusMessage": "Preparing the Zero runner...",
+            "timeout": 120
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CONTINUE_PROJECT_DIR:-$PWD}/.continue/zero/hooks/zero-context.sh\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CONTINUE_PROJECT_DIR:-$PWD}/.continue/zero/hooks/auto-approve-zero.sh\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
