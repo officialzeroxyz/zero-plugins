@@ -5,6 +5,17 @@
   updates only, written for a consumer audience — see the existing guides for
   the shape) and link it from the **Install Zero** list in `README.md`.
 
+## Commit messages
+
+- Every commit and PR title must follow [Conventional Commits](https://www.conventionalcommits.org):
+  `type(scope)?: description` (e.g. `fix(guides): correct plugin cache path`).
+  PRs are squash-merged, so the **PR title** becomes the commit on `main` — it
+  is held to the same rule.
+- Allowed types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`,
+  `build`, `ci`, `chore`, `revert`. The scope is optional; append `!` after the
+  type/scope (e.g. `feat!:`) to flag a breaking change.
+- A CI check (`.github/workflows/commit-lint.yml`) enforces this on every PR.
+
 ## Versioning
 
 - Any change to what a plugin ships — the skill, hooks, MCP config, or a plugin
