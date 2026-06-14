@@ -325,7 +325,7 @@ persist_env ZERO_RUNNER "$SHIM_PATH"
 RC_PATH_ADDED=""
 if [ "${ZERO_PATH_AUTOADD:-1}" != "0" ]; then
   if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
-    printf 'export PATH=%q":$PATH"\n' "$BIN_DIR" >> "$CLAUDE_ENV_FILE"
+    persist_env PATH "$BIN_DIR:$PATH"
   fi
 
   # Write the rc line $HOME-relative so it survives dotfile sync across machines;

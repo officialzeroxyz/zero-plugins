@@ -8,6 +8,7 @@ The one source of truth for the Zero plugin's content, shared by every host:
   `hooks.json`
 - `.claude-plugin/plugin.json` — Claude Code manifest
 - `.codex-plugin/plugin.json` — Codex manifest
+- `.factory-plugin/plugin.json` — Droid manifest
 - `.mcp.json` — the Zero MCP connector for Claude hosts
 
 The skill and hook scripts are byte-identical across Claude Code, Codex, and
