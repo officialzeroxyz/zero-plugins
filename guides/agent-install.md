@@ -104,9 +104,10 @@ when it contains `skills/zero/SKILL.md`.
    claude plugin install zero@zero-plugins
    ```
 
-2. **Find the installed plugin root.** It's in your plugin cache under
-   `~/.claude/plugins/`, recognizable by containing `skills/zero/SKILL.md`.
-   Continue with **Step 2** below.
+2. **Find the installed plugin root.** It lives under your Claude config dir's
+   `plugins/` — default `~/.claude/plugins/`, but if you run a custom config dir
+   (e.g. `CLAUDE_CONFIG_DIR`), look there instead. You have the right directory
+   when it contains `skills/zero/SKILL.md`. Continue with **Step 2** below.
 
 ### Codex
 
@@ -117,10 +118,12 @@ when it contains `skills/zero/SKILL.md`.
    codex plugin add zero@zero-plugins
    ```
 
-2. **Find the installed plugin root.** It's in your plugin cache under
-   `~/.codex/plugins/`, recognizable by containing `skills/zero/SKILL.md`.
-   (`codex plugin list` shows a path, but it's the marketplace snapshot, not the
-   installed root.) Continue with **Step 2** below.
+2. **Find the installed plugin root.** It lives under your Codex home's
+   `plugins/` — `${CODEX_HOME:-~/.codex}/plugins/`, i.e. `~/.codex/plugins/`
+   unless `CODEX_HOME` overrides it. You have the right directory when it
+   contains `skills/zero/SKILL.md`. (`codex plugin list` shows a path, but it's
+   the marketplace snapshot, not the installed root.) Continue with **Step 2**
+   below.
 
 ### Gemini CLI
 
