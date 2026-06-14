@@ -30,7 +30,8 @@ you through signing in (you approve a browser sign-in once per machine).
 - **The Zero skill** → `~/.claude/skills/zero/` **and** `~/.agents/skills/zero/`.
   Between those two locations, almost every harness picks up the skill from one
   or the other.
-- **The Zero hooks** → `~/.claude/settings.json`, for Claude-compatible hosts.
+- **The Zero hooks** → `~/.claude/settings.json` **and** `~/.agents/settings.json`,
+  so both Claude-compatible hosts and `~/.agents`-based harnesses pick them up.
   These keep the runner provisioned and up to date and remind the agent that
   Zero is available.
 
