@@ -1,0 +1,87 @@
+name: Version check
+
+# Guards the versioning rule from CONTRIBUTING.md / AGENTS.md: any change to what
+# a plugin ships (the skill, hooks, MCP config, or a manifest) must bump the version
+# in the same PR, and every manifest must carry the SAME version (lockstep).
+#
+# Two checks run on every PR:
+#   1. Lockstep — all versioned manifests agree on one version.
+#   2. Bump-on-change — if any shipped plugin file changed, the version changed too.
+#
+# "Shipped" = any file under plugins/ except READMEs. The skill (SKILL.md) is
+# markdown but IS shipped, so only README.md is treated as docs. Docs-only edits
+# (plugin READMEs, top-level guides) don't need a bump and won't trip this check.
+#
+# Always bump via the Makefile (`make patch|minor|major`) — never hand-edit a
+# manifest — so the manifests stay in lockstep and pass check #1.
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  version-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check manifest lockstep
+        run: |
+          set -euo pipefail
+          # Every manifest that carries a top-level "version".
+          manifests="$(grep -rl '"version"' plugins --include='*.json' | sort)"
+          [ -n "$manifests" ] || { echo "no versioned manifests found under plugins/"; exit 1; }
+          prev=""
+          while IFS= read -r m; do
+            v="$(jq -r .version "$m")"
+            [ -n "$v" ] && [ "$v" != "null" ] || { echo "::error file=$m::no \"version\" in $m"; exit 1; }
+            printf '  %-48s %s\n' "$m" "$v"
+            if [ -n "$prev" ] && [ "$v" != "$prev" ]; then
+              echo "::error::manifest versions are out of lockstep — bump with 'make patch|minor|major', never by hand."
+              exit 1
+            fi
+            prev="$v"
+          done <<< "$manifests"
+          echo "All manifests in lockstep at $prev."
+
+      - name: Require a version bump when shipped files change
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          git fetch --quiet origin "$BASE_REF"
+          base="origin/$BASE_REF"
+
+          # Files changed in this PR (merge-base diff, matching GitHub's PR view).
+          changed="$(git diff --name-only "$base...HEAD")"
+
+          # Shipped = under plugins/, excluding READMEs (the skill's SKILL.md IS shipped).
+          shipped="$(printf '%s\n' "$changed" | grep -E '^plugins/' | grep -vE '(^|/)README\.md$' || true)"
+          if [ -z "$shipped" ]; then
+            echo "No shipped plugin files changed — no version bump required."
+            exit 0
+          fi
+
+          echo "Shipped plugin files changed in this PR:"
+          printf '%s\n' "$shipped" | sed 's/^/  /'
+
+          src="plugins/zero/.claude-plugin/plugin.json"
+          head_ver="$(jq -r .version "$src")"
+          if git cat-file -e "$base:$src" 2>/dev/null; then
+            base_ver="$(git show "$base:$src" | jq -r .version)"
+          else
+            base_ver=""   # manifest is new on this branch — treat as bumped
+          fi
+
+          if [ "$head_ver" = "$base_ver" ]; then
+            echo "::error::Shipped plugin files changed but the version is still $head_ver."
+            echo "::error::Bump it in this PR: 'make patch' (fixes), 'make minor' (features), or 'make major' (breaking). See CONTRIBUTING.md."
+            exit 1
+          fi
+
+          echo "Version bumped: ${base_ver:-<new>} -> $head_ver."
