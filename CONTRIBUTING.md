@@ -4,6 +4,39 @@ Thanks for helping improve the Zero plugins. This repo is built up iteratively,
 one carefully reviewed PR at a time — keep changes focused and explain the
 "why" in your PR description.
 
+## Commit messages
+
+Commits and PR titles follow [Conventional Commits](https://www.conventionalcommits.org).
+Because PRs are squash-merged, the **PR title** becomes the commit that lands on
+`main`, so it must follow the same format:
+
+```
+type(scope)?: description
+```
+
+- **type** (required) — one of `feat`, `fix`, `docs`, `style`, `refactor`,
+  `perf`, `test`, `build`, `ci`, `chore`, `revert`.
+- **scope** (optional) — the area touched, in parentheses, e.g. `(guides)`,
+  `(zero)`.
+- **`!`** (optional) — append after the type/scope to flag a breaking change,
+  e.g. `feat(zero)!: drop $ZERO_RUNNER`.
+- **description** — a short, imperative summary (`add`, not `added`).
+
+Examples:
+
+```
+fix(guides): point Claude Code at its plugin cache
+docs: split install instructions into per-host guides
+chore: add version-bump tooling
+```
+
+A CI check (`.github/workflows/commit-lint.yml`) enforces this on every PR. It
+validates the **PR title** — the string that becomes the squash-merge commit on
+`main` — using the standard
+[`amannn/action-semantic-pull-request`](https://github.com/amannn/action-semantic-pull-request)
+action, and fails if it doesn't match. (Individual commits aren't linted: they're
+squashed away, so only the title lands.)
+
 ## Versioning
 
 The plugin ships from several host-specific manifests (Claude Code, Codex, and
