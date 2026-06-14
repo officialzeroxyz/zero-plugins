@@ -1,0 +1,55 @@
+{
+  "name": "zero",
+  "version": "1.4.0",
+  "description": "Discover and call paid AI capabilities (x402 / MPP) with automatic, wallet-backed payment. Search a live index of external services — image/video/audio generation, web scraping, data enrichment, real-time data, messaging — then call them and pay per use. Bundles the 'zero' skill and the Zero MCP connector.",
+  "mcpServers": {
+    "zero": {
+      "httpUrl": "https://mcp.zero.xyz"
+    }
+  },
+  "commands": "commands",
+  "skills": "skills",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${extensionPath}${/}hooks${/}ensure-runner.sh\"",
+            "name": "prepare-zero-runner",
+            "description": "Prepare the Zero runner",
+            "timeout": 120000
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${extensionPath}${/}hooks${/}zero-context.sh\"",
+            "name": "zero-context",
+            "description": "Remind Qwen Code that Zero is available",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${extensionPath}${/}hooks${/}auto-approve-zero.sh\"",
+            "name": "zero-read-only-approval",
+            "description": "Auto-approve read-only Zero commands",
+            "timeout": 5000
+          }
+        ]
+      }
+    ]
+  }
+}
+
