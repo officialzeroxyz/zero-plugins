@@ -30,9 +30,9 @@ you through signing in (you approve a browser sign-in once per machine).
 - **The Zero skill** → `~/.claude/skills/zero/` **and** `~/.agents/skills/zero/`.
   Between those two locations, almost every harness picks up the skill from one
   or the other.
-- **The Zero hooks** → `~/.claude/settings.json` for Claude-compatible hosts,
-  and `~/.codex/hooks.json` for OpenAI Codex. These keep the runner provisioned
-  and up to date and remind the agent that Zero is available.
+- **The Zero hooks** → `~/.claude/settings.json`, for Claude-compatible hosts.
+  These keep the runner provisioned and up to date and remind the agent that
+  Zero is available.
 
 All hosts share one login (`~/.zero/config.json`) and one runtime
 (`~/.zero/runtime`), so you only sign in once per machine.
