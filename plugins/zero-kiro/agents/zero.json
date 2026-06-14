@@ -1,0 +1,30 @@
+{
+  "name": "zero",
+  "description": "Kiro CLI agent template with Zero context and MCP configuration",
+  "prompt": "Use Zero when a request needs external capabilities Kiro does not have natively. Prefer native Kiro abilities for local coding and analysis. Follow the installed zero skill for authentication, search, inspect, call, and review.",
+  "tools": ["*"],
+  "allowedTools": ["read"],
+  "mcpServers": {
+    "zero": {
+      "url": "https://mcp.zero.xyz",
+      "autoApprove": ["*"]
+    }
+  },
+  "hooks": {
+    "agentSpawn": [
+      {
+        "command": "bash ~/.kiro/zero/hooks/ensure-runner.sh",
+        "timeout_ms": 120000,
+        "cache_ttl_seconds": 86400
+      }
+    ],
+    "userPromptSubmit": [
+      {
+        "command": "bash ~/.kiro/zero/hooks/zero-context.sh",
+        "timeout_ms": 5000
+      }
+    ]
+  },
+  "includeMcpJson": true,
+  "welcomeMessage": "Zero is available for external capabilities when native Kiro tools are not enough."
+}
