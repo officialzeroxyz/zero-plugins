@@ -14,7 +14,8 @@
 - Allowed types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`,
   `build`, `ci`, `chore`, `revert`. The scope is optional; append `!` after the
   type/scope (e.g. `feat!:`) to flag a breaking change.
-- A CI check (`.github/workflows/commit-lint.yml`) enforces this on every PR.
+- A CI check (`.github/workflows/commit-lint.yml`) enforces this on every PR by
+  validating the PR title (the squash-merge commit that lands on `main`).
 
 ## Versioning
 

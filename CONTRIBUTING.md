@@ -30,9 +30,12 @@ docs: split install instructions into per-host guides
 chore: add version-bump tooling
 ```
 
-A CI check (`.github/workflows/commit-lint.yml`) enforces this on every PR: it
-validates each commit in the PR and the PR title, and fails on any that don't
-match.
+A CI check (`.github/workflows/commit-lint.yml`) enforces this on every PR. It
+validates the **PR title** — the string that becomes the squash-merge commit on
+`main` — using the standard
+[`amannn/action-semantic-pull-request`](https://github.com/amannn/action-semantic-pull-request)
+action, and fails if it doesn't match. (Individual commits aren't linted: they're
+squashed away, so only the title lands.)
 
 ## Versioning
 
