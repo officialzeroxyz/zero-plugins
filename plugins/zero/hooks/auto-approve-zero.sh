@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Zero plugin — PreToolUse hook (Bash matcher).
+# Zero plugin — PreToolUse hook (shell matcher).
 #
 # Auto-approves safe, read-only Zero commands to cut permission fatigue. Never
 # auto-approves `fetch` (spends money) or `wallet` (manages funds) — those always
@@ -8,6 +8,10 @@
 # but matches the plugin's invocation shape: the executable may be a path
 # ($ZERO_RUNNER, .../bin/zero), a bare `zero`/`zerocli`, and may be preceded by env
 # assignments (e.g. `ZERO_SESSION_TOKEN=... zero ...`).
+#
+# This script also carries the matcher logic internally for hosts such as GitHub
+# Copilot in VS Code, where hook matcher values are parsed but ignored. It accepts
+# Claude/Codex snake_case payloads and Copilot camelCase payloads.
 #
 # No external tools — pure bash parameter expansion (no jq/sed/awk/node), so it runs
 # anywhere bash does. We only need the executable + subcommand, which are plain words
@@ -20,9 +24,22 @@ set -euo pipefail
 
 input="$(cat)"
 
-# Must be a Bash tool call (compact or spaced JSON).
+# Must be a shell-like tool call (compact or spaced JSON). Keep this conservative:
+# if the host uses an unknown terminal tool name, the command falls through to
+# normal manual approval until we verify that host shape.
 case "$input" in
-  *'"tool_name":"Bash"'* | *'"tool_name": "Bash"'*) ;;
+  *'"tool_name":"Bash"'* | *'"tool_name": "Bash"'* | \
+  *'"tool_name":"bash"'* | *'"tool_name": "bash"'* | \
+  *'"tool_name":"Shell"'* | *'"tool_name": "Shell"'* | \
+  *'"tool_name":"shell"'* | *'"tool_name": "shell"'* | \
+  *'"tool_name":"runTerminalCommand"'* | *'"tool_name": "runTerminalCommand"'* | \
+  *'"tool_name":"terminal"'* | *'"tool_name": "terminal"'* | \
+  *'"toolName":"Bash"'* | *'"toolName": "Bash"'* | \
+  *'"toolName":"bash"'* | *'"toolName": "bash"'* | \
+  *'"toolName":"Shell"'* | *'"toolName": "Shell"'* | \
+  *'"toolName":"shell"'* | *'"toolName": "shell"'* | \
+  *'"toolName":"runTerminalCommand"'* | *'"toolName": "runTerminalCommand"'* | \
+  *'"toolName":"terminal"'* | *'"toolName": "terminal"'*) ;;
   *) exit 0 ;;
 esac
 
@@ -30,7 +47,10 @@ esac
 # command key, trim whitespace, require the opening quote, then keep text up to the
 # first (possibly escaped) double-quote. The exe + subcommand live in that prefix.
 after="${input#*\"command\":}"
-[ "$after" = "$input" ] && exit 0                 # no command field → not ours
+if [ "$after" = "$input" ]; then
+  after="${input#*\"fullCommandText\":}"
+fi
+[ "$after" = "$input" ] && exit 0                 # no command field -> not ours
 after="${after#"${after%%[![:space:]]*}"}"        # trim leading whitespace
 case "$after" in \"*) after="${after#\"}" ;; *) exit 0 ;; esac # require opening quote
 lead="${after%%\"*}"                              # text before the first quote
@@ -69,6 +89,6 @@ case "$sub" in
 esac
 
 cat <<'JSON'
-{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow","permissionDecisionReason":"Zero read-only operation auto-approved"}}
+{"permissionDecision":"allow","permissionDecisionReason":"Zero read-only operation auto-approved","hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow","permissionDecisionReason":"Zero read-only operation auto-approved"}}
 JSON
 exit 0

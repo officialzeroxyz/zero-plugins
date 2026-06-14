@@ -6,5 +6,9 @@
   "homepage": "https://zero.xyz",
   "repository": "https://github.com/officialzeroxyz/zero-plugins",
   "license": "MIT",
-  "keywords": ["zero", "x402", "mpp", "payments", "capabilities", "mcp", "agent-tools"]
+  "keywords": ["zero", "x402", "mpp", "payments", "capabilities", "mcp", "agent-tools"],
+  "skills": "skills/",
+  "commands": "commands/",
+  "hooks": "hooks/copilot-hooks.json",
+  "mcpServers": "mcp-copilot.json"
 }

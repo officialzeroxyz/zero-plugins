@@ -29,6 +29,7 @@ installation, use the guides below. Pick your agent:
 - **[Codex app](guides/codex-app.md)**
 - **[Droid](guides/droid.md)**
 - **[Gemini CLI](guides/gemini-cli.md)**
+- **[GitHub Copilot](guides/github-copilot.md)** — CLI and VS Code agent mode
 - **Anything else** — the standalone installer works in any agent with a
   shell (and for humans at a terminal):
 
@@ -66,11 +67,13 @@ One plugin, several hosts. The skill and hook scripts live exactly once in
 `plugins/zero/` and are byte-identical across hosts, so they can't drift:
 
 ```
-.claude-plugin/marketplace.json   # Claude Code marketplace catalog
+.claude-plugin/marketplace.json   # Claude Code and Copilot marketplace catalog
+.github/plugin/marketplace.json   # Copilot marketplace catalog
 .agents/plugins/marketplace.json  # Codex marketplace catalog
 plugins/zero/                     # the shared plugin: skill + hooks (+ Claude's MCP connector)
   ├── .claude-plugin/             # Claude Code manifest
   ├── .codex-plugin/              # Codex manifest
+  ├── .github/plugin/             # GitHub Copilot manifest
   └── .factory-plugin/            # Droid manifest
 plugins/zero-gemini/              # thin Gemini-only overlay (manifest + hook wiring)
 scripts/build-gemini.sh           # assembles the installable Gemini extension into dist/
@@ -83,5 +86,5 @@ mechanics — live in the per-host guides.
 ## Status
 
 This repo is built up iteratively, one carefully reviewed PR at a time. Today
-it ships the **Claude Code**, **Codex**, **Droid**, and **Gemini CLI** plugins;
-additional hosts (Cursor) will land in subsequent PRs.
+it ships the **Claude Code**, **Codex**, **Droid**, **Gemini CLI**, and
+**GitHub Copilot** plugins; additional hosts will land in subsequent PRs.
