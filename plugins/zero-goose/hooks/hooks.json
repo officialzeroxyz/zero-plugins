@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${PLUGIN_ROOT}/hooks/ensure-runner.sh\"",
+            "timeout": 120
+          }
+        ]
+      }
+    ]
+  }
+}
