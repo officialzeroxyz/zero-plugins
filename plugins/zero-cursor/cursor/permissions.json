@@ -1,0 +1,10 @@
+{
+  "autoRun": {
+    "allow_instructions": [
+      "Read-only Zero CLI commands are safe to auto-run: zero search, zero get, zero runs, and zero review."
+    ],
+    "block_instructions": [
+      "Zero commands that can spend money or manage funds, especially zero fetch and zero wallet, should require explicit user approval."
+    ]
+  }
+}
