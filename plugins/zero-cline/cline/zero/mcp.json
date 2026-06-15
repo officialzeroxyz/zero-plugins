@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "zero": {
+      "url": "https://mcp.zero.xyz",
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}
