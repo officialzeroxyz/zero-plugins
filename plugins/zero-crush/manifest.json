@@ -1,0 +1,8 @@
+{
+  "name": "zero-crush",
+  "version": "1.4.0",
+  "description": "Crush adapter for Zero: project skills, MCP config fragment, and PreToolUse hook.",
+  "homepage": "https://zero.xyz",
+  "repository": "https://github.com/officialzeroxyz/zero-plugins",
+  "license": "MIT"
+}
