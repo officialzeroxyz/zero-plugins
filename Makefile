@@ -17,7 +17,8 @@ MANIFESTS := \
 	plugins/zero/.claude-plugin/plugin.json \
 	plugins/zero/.codex-plugin/plugin.json \
 	plugins/zero/.factory-plugin/plugin.json \
-	plugins/zero-gemini/gemini-extension.json
+	plugins/zero-gemini/gemini-extension.json \
+	plugins/zero-replit/manifest.json
 
 # The manifest read for the current version (all of MANIFESTS stay in lockstep).
 VERSION_SOURCE := plugins/zero/.claude-plugin/plugin.json

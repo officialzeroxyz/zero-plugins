@@ -1,0 +1,10 @@
+{
+  "name": "zero-replit",
+  "version": "1.4.0",
+  "description": "Replit Agent adapter for Zero. Ships the Zero skill for /.agents/skills and a Replit MCP install-link payload.",
+  "author": { "name": "Zero", "url": "https://zero.xyz" },
+  "homepage": "https://zero.xyz",
+  "repository": "https://github.com/officialzeroxyz/zero-plugins",
+  "license": "MIT",
+  "keywords": ["zero", "replit", "agent", "x402", "mpp", "payments", "capabilities", "mcp", "agent-tools"]
+}
