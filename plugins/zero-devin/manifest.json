@@ -1,0 +1,10 @@
+{
+  "name": "zero-devin",
+  "version": "1.4.0",
+  "description": "Devin Desktop / Windsurf adapter for Zero. Ships the Zero skill, Devin Local config and hooks, Cascade MCP config, and a manual /zero workflow.",
+  "author": { "name": "Zero", "url": "https://zero.xyz" },
+  "homepage": "https://zero.xyz",
+  "repository": "https://github.com/officialzeroxyz/zero-plugins",
+  "license": "MIT",
+  "keywords": ["zero", "devin", "windsurf", "cascade", "x402", "mpp", "payments", "capabilities", "mcp", "agent-tools"]
+}
