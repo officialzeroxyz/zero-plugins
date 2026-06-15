@@ -1,0 +1,35 @@
+{
+  "context_servers": {
+    "zero": {
+      "url": "https://mcp.zero.xyz"
+    }
+  },
+  "agent": {
+    "tool_permissions": {
+      "default": "confirm",
+      "tools": {
+        "skill": {
+          "default": "confirm",
+          "always_allow": [
+            {
+              "pattern": "^zero$"
+            }
+          ]
+        },
+        "terminal": {
+          "default": "confirm",
+          "always_allow": [
+            {
+              "pattern": "^(zero|\\$HOME/\\.zero/runtime/bin/zero|\"\\$HOME/\\.zero/runtime/bin/zero\")\\s+(search|get|runs|auth\\s+whoami)\\b"
+            }
+          ],
+          "always_confirm": [
+            {
+              "pattern": "^(zero|\\$HOME/\\.zero/runtime/bin/zero|\"\\$HOME/\\.zero/runtime/bin/zero\")\\s+(fetch|review|wallet|auth\\s+(login|logout|exchange))\\b"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
