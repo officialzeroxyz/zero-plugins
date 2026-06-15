@@ -1,0 +1,8 @@
+{
+  "name": "zero-zed",
+  "version": "1.4.0",
+  "description": "Zed adapter for Zero: Agent Skills project template, remote MCP context server settings, and tool permission recommendations.",
+  "homepage": "https://zero.xyz",
+  "repository": "https://github.com/officialzeroxyz/zero-plugins",
+  "license": "MIT"
+}
