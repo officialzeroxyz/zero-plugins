@@ -1,11 +1,7 @@
 # Zero for any agent (standalone installer)
 
-How to install Zero in any agent or harness with a shell — and for humans at a
-terminal — then keep it up to date.
-
-Use this when there's no dedicated guide for your agent. Claude Code, Codex,
-Droid, and Gemini CLI each have their own — prefer those if one matches. This
-installer sets up the exact same Zero, so you end up in the same place.
+How to install Zero in any agent or harness with a shell. Use this when there's
+no dedicated guide for your agent.
 
 ## Install
 
@@ -32,9 +28,14 @@ zero init --skills-dir ~/.youragent/skills
 
 ## Staying up to date
 
-- Zero updates itself automatically each time you start a session.
-- To refresh everything by hand, re-run `zero init` — it's safe to run as often
-  as you like.
+To update, just re-run the install command:
+
+```bash
+curl -fsSL https://zero.xyz/install.sh | bash
+```
+
+If Zero is already installed, it simply updates in place. Safe to run as often
+as you like.
 
 ## Uninstalling
 
