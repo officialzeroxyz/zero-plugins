@@ -29,6 +29,7 @@ installation, use the guides below. Pick your agent:
 - **[Codex app](guides/codex-app.md)**
 - **[Droid](guides/droid.md)**
 - **[Gemini CLI](guides/gemini-cli.md)**
+- **[Hermes Agent](guides/hermes-agent.md)**
 - **[Anything else (standalone installer)](guides/generic.md)** — works in any
   agent with a shell (and for humans at a terminal)
 
@@ -37,18 +38,19 @@ you in and takes it from there.
 
 ## What the plugin does
 
-Every install ships the same three ingredients:
+Every install ships the same core skill and then the host-specific integration
+points that host supports:
 
 - **The `zero` skill** — teaches the agent how to search Zero, call a
   capability, and review the result.
-- **Hooks** — keep the Zero CLI runner provisioned and up to date, and remind
-  the agent that Zero is available.
+- **Hooks, when supported** — keep the Zero CLI runner provisioned and up to
+  date, and remind the agent that Zero is available.
 - **The Zero MCP connector** — capability search and account status over MCP,
   on hosts that load it.
 
 All hosts share one login (`~/.zero/config.json`) and one runtime
-(`~/.zero/runtime`) — sign in once per machine. Updates are automatic; the
-per-agent guides have the details.
+(`~/.zero/runtime`) — sign in once per machine. Hosts with hooks can update
+automatically; the per-agent guides have the details.
 
 ## How this repo is organized
 
@@ -63,7 +65,8 @@ plugins/zero/                     # the shared plugin: skill + hooks (+ Claude's
   ├── .codex-plugin/              # Codex manifest
   └── .factory-plugin/            # Droid manifest
 plugins/zero-gemini/              # thin Gemini-only overlay (manifest + hook wiring)
-scripts/build-gemini.sh           # assembles the installable Gemini extension into dist/
+plugins/zero-hermes/              # thin Hermes Agent overlay (plugin + skill/config templates)
+scripts/build-*.sh                # assemble host-specific install bundles into dist/
 guides/                           # per-host install guides + the agent install runbook
 ```
 
@@ -73,5 +76,5 @@ mechanics — live in the per-host guides.
 ## Status
 
 This repo is built up iteratively, one carefully reviewed PR at a time. Today
-it ships the **Claude Code**, **Codex**, **Droid**, and **Gemini CLI** plugins;
-additional hosts (Cursor) will land in subsequent PRs.
+it ships the **Claude Code**, **Codex**, **Droid**, **Gemini CLI**, and
+**Hermes Agent** plugins; additional hosts will land in subsequent PRs.
