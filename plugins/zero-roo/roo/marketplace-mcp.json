@@ -1,0 +1,15 @@
+{
+  "name": "Zero",
+  "description": "Connect Roo Code to Zero for capability search, account authorization, and funding status over MCP.",
+  "config": {
+    "type": "streamable-http",
+    "url": "https://mcp.zero.xyz",
+    "alwaysAllow": [],
+    "disabled": false
+  },
+  "notes": [
+    "Keep alwaysAllow empty by default.",
+    "Only add known read-only Zero MCP tools after verifying their names in Roo.",
+    "Paid capability calls should go through the zero runner with an explicit --max-pay cap and user confirmation."
+  ]
+}

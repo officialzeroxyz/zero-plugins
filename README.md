@@ -29,6 +29,7 @@ installation, use the guides below. Pick your agent:
 - **[Codex app](guides/codex-app.md)**
 - **[Droid](guides/droid.md)**
 - **[Gemini CLI](guides/gemini-cli.md)**
+- **[Roo Code](guides/roo-code.md)**
 - **[Anything else (standalone installer)](guides/generic.md)** — works in any
   agent with a shell (and for humans at a terminal)
 
@@ -73,5 +74,5 @@ mechanics — live in the per-host guides.
 ## Status
 
 This repo is built up iteratively, one carefully reviewed PR at a time. Today
-it ships the **Claude Code**, **Codex**, **Droid**, and **Gemini CLI** plugins;
-additional hosts (Cursor) will land in subsequent PRs.
+it ships the **Claude Code**, **Codex**, **Droid**, **Gemini CLI**, and
+**Roo Code** plugins; additional hosts will land in subsequent PRs.
