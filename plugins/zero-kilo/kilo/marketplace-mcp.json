@@ -1,0 +1,15 @@
+{
+  "name": "Zero",
+  "description": "Connect Kilo Code to Zero for capability search, account authorization, and funding status over MCP.",
+  "config": {
+    "type": "remote",
+    "url": "https://mcp.zero.xyz",
+    "enabled": true,
+    "timeout": 15000
+  },
+  "permissionGuidance": [
+    "Keep permission empty by default.",
+    "Only add known read-only Zero MCP tool names after verifying them in Kilo.",
+    "Paid capability calls should go through the zero runner with an explicit --max-pay cap and user confirmation."
+  ]
+}

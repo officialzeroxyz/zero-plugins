@@ -1,0 +1,8 @@
+{
+  "name": "zero-kilo",
+  "version": "1.4.0",
+  "description": "Kilo Code adapter for Zero: project skills, remote skills.urls payload, MCP config, and slash command template.",
+  "homepage": "https://zero.xyz",
+  "repository": "https://github.com/officialzeroxyz/zero-plugins",
+  "license": "MIT"
+}
