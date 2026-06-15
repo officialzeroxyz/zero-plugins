@@ -1,0 +1,8 @@
+{
+  "name": "zero-trae",
+  "version": "1.4.0",
+  "description": "Trae adapter for Zero: project skill, MCP configuration, rules, and slash command template.",
+  "homepage": "https://zero.xyz",
+  "repository": "https://github.com/officialzeroxyz/zero-plugins",
+  "license": "MIT"
+}
