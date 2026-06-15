@@ -29,6 +29,7 @@ installation, use the guides below. Pick your agent:
 - **[Codex app](guides/codex-app.md)**
 - **[Droid](guides/droid.md)**
 - **[Gemini CLI](guides/gemini-cli.md)**
+- **[Warp](guides/warp.md)**
 - **[Anything else (standalone installer)](guides/generic.md)** — works in any
   agent with a shell (and for humans at a terminal):
 
@@ -74,6 +75,8 @@ plugins/zero/                     # the shared plugin: skill + hooks (+ Claude's
   └── .factory-plugin/            # Droid manifest
 plugins/zero-gemini/              # thin Gemini-only overlay (manifest + hook wiring)
 scripts/build-gemini.sh           # assembles the installable Gemini extension into dist/
+plugins/zero-warp/                # thin Warp overlay (skill + MCP config)
+scripts/build-warp.sh             # assembles the Warp project template into dist/
 guides/                           # per-host install guides + the agent install runbook
 ```
 
@@ -83,5 +86,5 @@ mechanics — live in the per-host guides.
 ## Status
 
 This repo is built up iteratively, one carefully reviewed PR at a time. Today
-it ships the **Claude Code**, **Codex**, **Droid**, and **Gemini CLI** plugins;
-additional hosts (Cursor) will land in subsequent PRs.
+it ships the **Claude Code**, **Codex**, **Droid**, **Gemini CLI**, and
+**Warp** plugins; additional hosts will land in subsequent PRs.
