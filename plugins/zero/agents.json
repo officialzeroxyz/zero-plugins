@@ -15,7 +15,7 @@
       },
       "standalone": {
         "skills": [".claude/skills", ".agents/skills"],
-        "hooks": { "file": ".claude/settings.json", "format": "claude-settings", "sessionStart": true }
+        "hooks": { "file": ".claude/settings.json", "format": "claude-settings", "sessionStart": true, "network": ["*.zero.xyz"] }
       }
     },
     {
