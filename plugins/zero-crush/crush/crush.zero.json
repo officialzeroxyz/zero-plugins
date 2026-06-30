@@ -1,0 +1,20 @@
+{
+  "$schema": "https://charm.land/crush.json",
+  "mcp": {
+    "zero": {
+      "type": "http",
+      "url": "https://mcp.zero.xyz",
+      "timeout": 120,
+      "disabled": false
+    }
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "name": "zero-command-policy",
+        "matcher": "^bash$",
+        "command": "./.crush/hooks/zero-pre-tool-use.sh"
+      }
+    ]
+  }
+}
