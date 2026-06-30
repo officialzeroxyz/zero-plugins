@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "minCli": "1.11.0",
+  "agents": [
+    {
+      "id": "claude-code",
+      "name": "Claude Code",
+      "detect": { "exe": "claude", "dir": ".claude" },
+      "install": {
+        "executable": "claude",
+        "steps": [
+          { "label": "add marketplace", "command": "claude", "args": ["plugin", "marketplace", "add", "officialzeroxyz/zero-plugins"], "required": false },
+          { "label": "install plugin", "command": "claude", "args": ["plugin", "install", "zero@zero-plugins"] }
+        ]
+      },
+      "standalone": {
+        "skills": [".claude/skills", ".agents/skills"],
+        "hooks": { "file": ".claude/settings.json", "format": "claude-settings", "sessionStart": true, "network": ["*.zero.xyz"] }
+      }
+    },
+    {
+      "id": "codex",
+      "name": "Codex",
+      "detect": { "exe": "codex", "dir": ".codex" },
+      "install": {
+        "executable": "codex",
+        "steps": [
+          { "label": "add marketplace", "command": "codex", "args": ["plugin", "marketplace", "add", "officialzeroxyz/zero-plugins"], "required": false },
+          { "label": "install plugin", "command": "codex", "args": ["plugin", "add", "zero@zero-plugins"] }
+        ]
+      },
+      "standalone": {
+        "skills": [".agents/skills"],
+        "hooks": { "file": ".codex/hooks.json", "format": "codex-hooks", "sessionStart": true }
+      }
+    },
+    {
+      "id": "droid",
+      "name": "Droid",
+      "detect": { "exe": "droid", "dir": ".factory" },
+      "install": {
+        "executable": "droid",
+        "steps": [
+          { "label": "add marketplace", "command": "droid", "args": ["plugin", "marketplace", "add", "https://github.com/officialzeroxyz/zero-plugins"], "required": false },
+          { "label": "install plugin", "command": "droid", "args": ["plugin", "install", "zero@zero-plugins", "--scope", "user"] }
+        ]
+      }
+    },
+    {
+      "id": "gemini-cli",
+      "name": "Gemini CLI",
+      "detect": { "exe": "gemini", "dir": ".gemini" },
+      "install": {
+        "executable": "gemini",
+        "steps": [
+          { "label": "install extension", "command": "gemini", "args": ["extensions", "install", "https://github.com/officialzeroxyz/zero-plugins", "--auto-update"] }
+        ]
+      }
+    },
+    {
+      "id": "kiro",
+      "name": "Kiro",
+      "detect": { "exe": "kiro-cli", "dir": ".kiro" },
+      "standalone": {
+        "skills": [".kiro/skills", ".agents/skills"],
+        "mcp": { "file": ".kiro/settings/mcp.json", "shape": "http-type-url" },
+        "hooks": { "file": ".kiro/agents/zero.json", "format": "kiro-agent", "sessionStart": true }
+      }
+    }
+  ]
+}
