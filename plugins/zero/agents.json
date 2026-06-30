@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "minCli": "1.9.0",
-  "harnesses": [
+  "minCli": "1.11.0",
+  "agents": [
     {
       "id": "claude-code",
       "name": "Claude Code",
@@ -37,7 +37,6 @@
     {
       "id": "kiro",
       "name": "Kiro",
-      "minCli": "1.10.0",
       "detect": { "exe": "kiro-cli", "dir": ".kiro" },
       "standalone": {
         "skills": [".kiro/skills", ".agents/skills"],
