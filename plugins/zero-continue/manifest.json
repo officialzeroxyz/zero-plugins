@@ -1,0 +1,10 @@
+{
+  "name": "zero-continue",
+  "version": "1.4.0",
+  "description": "Continue CLI adapter for Zero. Ships the Zero skill, streamable HTTP MCP config, a /zero prompt, and Claude Code-compatible hooks for runner provisioning, context injection, and read-only Zero command approval.",
+  "author": { "name": "Zero", "url": "https://zero.xyz" },
+  "homepage": "https://zero.xyz",
+  "repository": "https://github.com/officialzeroxyz/zero-plugins",
+  "license": "MIT",
+  "keywords": ["zero", "continue", "cn", "x402", "mpp", "payments", "capabilities", "mcp", "agent-tools"]
+}
