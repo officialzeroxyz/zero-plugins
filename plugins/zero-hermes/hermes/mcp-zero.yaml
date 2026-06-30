@@ -1,0 +1,7 @@
+mcp_servers:
+  zero:
+    url: "https://mcp.zero.xyz"
+    auth: oauth
+    enabled: true
+    timeout: 120
+    connect_timeout: 60
