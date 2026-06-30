@@ -1,0 +1,1 @@
+trae://trae.ai-ide/mcp-import?type=http&name=zero&config=eyJ1cmwiOiJodHRwczovL21jcC56ZXJvLnh5eiJ9
