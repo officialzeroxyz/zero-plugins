@@ -1,0 +1,10 @@
+{
+  "name": "zero-cline",
+  "version": "1.4.0",
+  "description": "Cline adapter for Zero. Ships the Zero skill, Cline MCP config fragment, and a manual /zero workflow.",
+  "author": { "name": "Zero", "url": "https://zero.xyz" },
+  "homepage": "https://zero.xyz",
+  "repository": "https://github.com/officialzeroxyz/zero-plugins",
+  "license": "MIT",
+  "keywords": ["zero", "cline", "x402", "mpp", "payments", "capabilities", "mcp", "agent-tools"]
+}
