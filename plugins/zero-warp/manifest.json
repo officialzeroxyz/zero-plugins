@@ -1,0 +1,10 @@
+{
+  "name": "zero-warp",
+  "version": "1.4.0",
+  "description": "Warp adapter for Zero. Ships the Zero skill in Warp and portable skills directories plus streamable HTTP MCP config.",
+  "author": { "name": "Zero", "url": "https://zero.xyz" },
+  "homepage": "https://zero.xyz",
+  "repository": "https://github.com/officialzeroxyz/zero-plugins",
+  "license": "MIT",
+  "keywords": ["zero", "warp", "x402", "mpp", "payments", "capabilities", "mcp", "agent-tools"]
+}
