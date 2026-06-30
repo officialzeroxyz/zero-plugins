@@ -14,8 +14,9 @@ description: >
 # zero
 
 Zero is a search engine and payment layer for AI agents: discover external paid capabilities
-(x402 / MPP services), call them, and pay per use — no per-service signup. The flow is always
-**search → inspect → call → review**.
+(x402 / MPP services), call them, and pay per use — no per-service signup. The core flow is
+**search → inspect → call** — return the result to the user immediately, then review in the
+background when convenient.
 
 **When to use it:** as the fallback for anything genuinely beyond your native abilities — before
 telling the user "I can't do that," run a `zero search`. **When NOT to use it:** for things you
@@ -193,17 +194,22 @@ https://www.zero.xyz/profile to fund their Zero account.
    Each result includes a short **attribution token** (`token` field, format `z_xxx.N` where `N` is
    the 1-based position). Use this token — not the position number — in subsequent steps; it encodes
    the search context so the run is tied back to the originating search for attribution.
+   **The token is DB-backed and never expires — it is not session-scoped.** Prefer it over the slug.
 2. **Inspect** — `zero get <token> --formatted` (e.g. `zero get z_Ab12cd.1`) prints a human
    summary plus a copy-pasteable `Try it:` line. Plain `zero get <token>` returns full JSON
    (URL, method, `bodySchema`, examples, pricing). You can also pass a slug or uid. If `bodySchema`
    is `null`, skip that result — don't invent field names.
 3. **Call** — `zero fetch <url> --capability <token> [-d '<json>'] [-H 'k:v'] [--max-pay 0.50]`.
-   Pass `--capability <token>` so the run is recorded and attributed to the search. 402 responses
-   are paid automatically (x402 + MPP, including cross-chain bridging from Base to Tempo).
-4. **Review** — `zero review <runId> --success --accuracy N --value N --reliability N --content "<observation>"`.
+   Pass `--capability <token>` (the `z_xxx.N` value from the search result, **not the slug**) so the
+   run is recorded and attributed to the search. 402 responses are paid automatically (x402 + MPP,
+   including cross-chain bridging from Base to Tempo).
+   → **Deliver the result to the user as soon as `zero fetch` returns.** Don't wait for review.
+4. **Review** (async, after delivering the result) —
+   `zero review <runId> --success --accuracy N --value N --reliability N --content "<observation>"`.
    `--success` (or `--no-success` when the capability failed) is **required** — the command errors
-   without one. The `runId` is printed to stderr (or in the `--json` envelope). Always review after
-   a paid call.
+   without one. The `runId` is in the `--json` envelope. Run review after you've given the user
+   their result — or defer it with `zero runs --unreviewed` at the end of the task. Never block
+   the user waiting for this step.
 
 ## Request shape
 
@@ -236,7 +242,7 @@ zero fetch https://api.example.com/translate \
 | `--timeout <seconds>` | Per-request timeout (default 60), applied to each HTTP leg — probe and paid retry — not as a wall-clock deadline. Raise it up front for slow capabilities (image/video/audio often need `--timeout 300`) so the call doesn't die at 60s after payment. |
 | `--json` | `{runId, ok, status, latencyMs, payment, body, bodyRaw}` envelope on stdout. Use `ok`, not `status`, for success. `body` is parsed JSON; `bodyRaw` is the literal text. |
 | `--raw-body` | With `--json`, keep `body` as the raw string. |
-| `--capability <id>` | Attribution token (`z_xxx.N` from search), slug, or uid. Required so the run is recorded and attributed to the search. Always pass it — use the token from search results when available, fall back to the slug or uid for direct calls. |
+| `--capability <id>` | **Use the token (`z_xxx.N`) from search results** — not the slug. The token is DB-backed, never expires, and ties the run back to the originating search. Fall back to slug/uid only for direct calls (no preceding search). |
 
 `-d` rejects bodies over 10 MB. Inline `-d '<long-json>'` past ~1 MB hits shell arg limits — use
 `-d @file` or `--data-stdin`.
@@ -291,14 +297,16 @@ runId? `zero runs --unreviewed` lists every pending run with its slug.
 Quick pre-flight, each detailed above: re-search every time; `zero get` before every `zero fetch`;
 encode GET `queryParams` as a query string (don't POST the envelope); skip `bodySchema: null` rather
 than guess fields; check `ok`, not `status`; set `--max-pay` on anything unfamiliar; raise
-`--timeout` for slow image/video/audio so the call doesn't die after payment; every `zero review`
-needs `--success`/`--no-success`; always pass `--capability <token|slug|uid>`.
+`--timeout` for slow image/video/audio so the call doesn't die after payment; pass
+`--capability <token>` (the `z_xxx.N` from search, **not** the slug); deliver the result first,
+then review — `zero review` needs `--success`/`--no-success` but must not block the user.
 
-- **Run tracking requires `--capability`** — omit it and the run is never recorded, so the
-  capability's reliability signal stays stale and you can't review it. Always pass
-  `--capability <token>` where the token is the `z_xxx.N` value from the search result. For direct
-  calls (no preceding search), pass the slug or uid.
-- **Before ending a multi-call task, run `zero runs --unreviewed`** and review anything you missed.
+- **`--capability` must be the token, not the slug** — `--capability z_Ab12cd.1` (the `z_xxx.N`
+  token from search) is the correct argument, not `--capability some-long-slug-name`. The token
+  ties the run to the search and is never session-scoped or ephemeral. For direct calls (no
+  preceding search), use the slug or uid as fallback.
+- **Deliver the result first, review after** — never make the user wait for `zero review` to
+  complete. Call it after returning the result, or batch with `zero runs --unreviewed` at task end.
 - **Zero reminder injected twice per prompt?** A plugin install and a standalone install
   (`zero init`) are coexisting; the harness may also warn the user about a shadowed Zero
   skill or hook. Harmless — don't fix it by deleting files. If the user wants the duplicate
@@ -309,14 +317,18 @@ needs `--success`/`--no-success`; always pass `--capability <token|slug|uid>`.
 
 ```bash
 zero search "sentiment analysis"
-# Each result shows a token (z_xxx.N) — use it as the capability reference
-zero get z_Ab12cd.1 --formatted
-zero fetch https://nlp-api.example.com/sentiment \
-  --capability z_Ab12cd.1 \
+# Each result shows a token (z_xxx.N) in the `token` field — use it, not the slug
+zero get z_Ab12cd.1 --json   # → URL, bodySchema, examples
+zero fetch --json https://nlp-api.example.com/sentiment \
+  --capability z_Ab12cd.1 \       # ← token, not slug
   -d '{"text":"Zero is great"}' \
   -H "Content-Type:application/json"
-# Run ID printed on stderr (also in --json envelope as .runId)
-zero review abc123 --success --accuracy 5 --value 4 --reliability 5 \
+# runId is in the --json envelope (.runId) — capture it before returning to the user
+
+# ── Deliver the result to the user here ────────────────────────────────────────
+
+# ── Then review asynchronously (or defer to end of task) ───────────────────────
+zero review <runId> --success --accuracy 5 --value 4 --reliability 5 \
   --content "Classified a 200-char product-review snippet positive in ~180ms; matched manual read. Clean schema, no auth."
 ```
 
