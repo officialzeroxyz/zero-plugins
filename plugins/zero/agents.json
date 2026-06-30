@@ -6,7 +6,13 @@
       "id": "claude-code",
       "name": "Claude Code",
       "detect": { "exe": "claude", "dir": ".claude" },
-      "plugin": { "via": "claude-plugin", "marketplace": "officialzeroxyz/zero-plugins", "ref": "zero@zero-plugins" },
+      "install": {
+        "executable": "claude",
+        "steps": [
+          { "label": "add marketplace", "command": "claude", "args": ["plugin", "marketplace", "add", "officialzeroxyz/zero-plugins"], "required": false },
+          { "label": "install plugin", "command": "claude", "args": ["plugin", "install", "zero@zero-plugins"] }
+        ]
+      },
       "standalone": {
         "skills": [".claude/skills", ".agents/skills"],
         "hooks": { "file": ".claude/settings.json", "format": "claude-settings", "sessionStart": true }
@@ -16,7 +22,13 @@
       "id": "codex",
       "name": "Codex",
       "detect": { "exe": "codex", "dir": ".codex" },
-      "plugin": { "via": "codex-plugin", "marketplace": "officialzeroxyz/zero-plugins", "ref": "zero@zero-plugins" },
+      "install": {
+        "executable": "codex",
+        "steps": [
+          { "label": "add marketplace", "command": "codex", "args": ["plugin", "marketplace", "add", "officialzeroxyz/zero-plugins"], "required": false },
+          { "label": "install plugin", "command": "codex", "args": ["plugin", "add", "zero@zero-plugins"] }
+        ]
+      },
       "standalone": {
         "skills": [".agents/skills"],
         "hooks": { "file": ".codex/hooks.json", "format": "codex-hooks", "sessionStart": true }
@@ -26,13 +38,24 @@
       "id": "droid",
       "name": "Droid",
       "detect": { "exe": "droid", "dir": ".factory" },
-      "plugin": { "via": "factory-plugin", "marketplace": "https://github.com/officialzeroxyz/zero-plugins", "ref": "zero@zero-plugins", "scope": "user" }
+      "install": {
+        "executable": "droid",
+        "steps": [
+          { "label": "add marketplace", "command": "droid", "args": ["plugin", "marketplace", "add", "https://github.com/officialzeroxyz/zero-plugins"], "required": false },
+          { "label": "install plugin", "command": "droid", "args": ["plugin", "install", "zero@zero-plugins", "--scope", "user"] }
+        ]
+      }
     },
     {
       "id": "gemini-cli",
       "name": "Gemini CLI",
       "detect": { "exe": "gemini", "dir": ".gemini" },
-      "plugin": { "via": "gemini-extension", "url": "https://github.com/officialzeroxyz/zero-plugins" }
+      "install": {
+        "executable": "gemini",
+        "steps": [
+          { "label": "install extension", "command": "gemini", "args": ["extensions", "install", "https://github.com/officialzeroxyz/zero-plugins", "--auto-update"] }
+        ]
+      }
     },
     {
       "id": "kiro",
