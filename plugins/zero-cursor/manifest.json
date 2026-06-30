@@ -1,0 +1,10 @@
+{
+  "name": "zero-cursor",
+  "version": "1.4.0",
+  "description": "Cursor adapter for Zero. Ships the Zero skill, streamable HTTP MCP config, a session-start runner provisioning hook, and Auto-review steering for Zero commands.",
+  "author": { "name": "Zero", "url": "https://zero.xyz" },
+  "homepage": "https://zero.xyz",
+  "repository": "https://github.com/officialzeroxyz/zero-plugins",
+  "license": "MIT",
+  "keywords": ["zero", "cursor", "x402", "mpp", "payments", "capabilities", "mcp", "agent-tools"]
+}

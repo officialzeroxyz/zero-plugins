@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "bash .cursor/zero/hooks/ensure-runner.sh",
+        "timeout": 120
+      }
+    ]
+  }
+}
