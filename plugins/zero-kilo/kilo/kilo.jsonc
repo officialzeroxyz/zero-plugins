@@ -1,0 +1,14 @@
+{
+  "instructions": [
+    ".kilo/rules/zero.md"
+  ],
+  "mcp": {
+    "zero": {
+      "type": "remote",
+      "url": "https://mcp.zero.xyz",
+      "enabled": true,
+      "timeout": 15000
+    }
+  },
+  "permission": {}
+}
