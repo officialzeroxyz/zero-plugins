@@ -1,0 +1,6 @@
+{
+  "zero": {
+    "url": "https://mcp.zero.xyz",
+    "includeTools": ["*"]
+  }
+}

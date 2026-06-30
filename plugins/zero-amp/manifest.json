@@ -1,0 +1,5 @@
+{
+  "name": "zero-amp",
+  "version": "1.4.0",
+  "description": "Zero Amp plugin, Agent Skill with embedded MCP, and runner provisioning helpers"
+}
