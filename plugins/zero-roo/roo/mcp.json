@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "zero": {
+      "type": "streamable-http",
+      "url": "https://mcp.zero.xyz",
+      "alwaysAllow": [],
+      "disabled": false
+    }
+  }
+}
