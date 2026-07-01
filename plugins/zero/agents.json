@@ -66,6 +66,15 @@
         "mcp": { "file": ".kiro/settings/mcp.json", "shape": "http-type-url" },
         "hooks": { "file": ".kiro/agents/zero.json", "format": "kiro-agent", "sessionStart": true }
       }
+    },
+    {
+      "id": "warp",
+      "name": "Warp",
+      "detect": { "exe": "warp-terminal", "dir": ".warp" },
+      "standalone": {
+        "skills": [".warp/skills", ".agents/skills"],
+        "mcp": { "file": ".warp/.mcp.json", "shape": "http-url" }
+      }
     }
   ]
 }
