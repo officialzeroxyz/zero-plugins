@@ -1,0 +1,51 @@
+name: Hooks fragment sync
+
+# The standalone hook fragments in plugins/zero/agents.json (standalone.hooks.merge)
+# duplicate the hook declarations the plugin itself ships in
+# plugins/zero/hooks/hooks.json — two consumers of the same shape:
+#   - plugin hosts read hooks.json with the ${CLAUDE_PLUGIN_ROOT}/hooks root
+#   - `zero init --standalone` deep-merges the agents.json fragment with the
+#     ${ZERO_HOOKS_DIR} root (the staged ~/.zero/hooks scripts)
+#
+# This check keeps them in lockstep: for every host whose fragment uses the
+# shared `{ hooks: { Event: [...] } }` shape (claude-code, codex), the fragment
+# must equal hooks.json with the plugin-root placeholder rewritten. Hosts with
+# bespoke config shapes (e.g. a future kiro-agent fragment) are not compared.
+on:
+  pull_request:
+    paths:
+      - 'plugins/zero/agents.json'
+      - 'plugins/zero/hooks/hooks.json'
+  push:
+    branches: [main]
+    paths:
+      - 'plugins/zero/agents.json'
+      - 'plugins/zero/hooks/hooks.json'
+
+permissions:
+  contents: read
+
+jobs:
+  hooks-fragment-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Compare agents.json fragments against hooks.json
+        run: |
+          set -euo pipefail
+          expected="$(jq -S '(.. | strings) |= gsub("\\$\\{CLAUDE_PLUGIN_ROOT\\}/hooks"; "${ZERO_HOOKS_DIR}")' plugins/zero/hooks/hooks.json)"
+          for id in claude-code codex; do
+            actual="$(jq -S --arg id "$id" '.agents[] | select(.id == $id) | .standalone.hooks.merge' plugins/zero/agents.json)"
+            if [ "$actual" = "null" ] || [ -z "$actual" ]; then
+              echo "::error file=plugins/zero/agents.json::agent '$id' has no standalone.hooks.merge fragment"
+              exit 1
+            fi
+            if [ "$actual" != "$expected" ]; then
+              echo "::error file=plugins/zero/agents.json::agent '$id' standalone.hooks.merge is out of sync with plugins/zero/hooks/hooks.json (modulo the \${CLAUDE_PLUGIN_ROOT}/hooks -> \${ZERO_HOOKS_DIR} rewrite)"
+              diff <(printf '%s\n' "$expected") <(printf '%s\n' "$actual") || true
+              exit 1
+            fi
+            echo "agent '$id': fragment in sync."
+          done

@@ -15,7 +15,25 @@
       },
       "standalone": {
         "skills": [".claude/skills", ".agents/skills"],
-        "hooks": { "file": ".claude/settings.json", "format": "claude-settings", "sessionStart": true, "network": ["*.zero.xyz"] }
+        "hooks": {
+          "file": ".claude/settings.json",
+          "format": "claude-settings",
+          "sessionStart": true,
+          "network": ["*.zero.xyz"],
+          "merge": {
+            "hooks": {
+              "SessionStart": [
+                { "hooks": [{ "type": "command", "command": "bash \"${ZERO_HOOKS_DIR}/ensure-runner.sh\"", "statusMessage": "Preparing the Zero runner...", "timeout": 120 }] }
+              ],
+              "UserPromptSubmit": [
+                { "hooks": [{ "type": "command", "command": "bash \"${ZERO_HOOKS_DIR}/zero-context.sh\"", "timeout": 5 }] }
+              ],
+              "PreToolUse": [
+                { "matcher": "Bash", "hooks": [{ "type": "command", "command": "bash \"${ZERO_HOOKS_DIR}/auto-approve-zero.sh\"", "timeout": 5 }] }
+              ]
+            }
+          }
+        }
       }
     },
     {
@@ -31,7 +49,24 @@
       },
       "standalone": {
         "skills": [".agents/skills"],
-        "hooks": { "file": ".codex/hooks.json", "format": "codex-hooks", "sessionStart": true }
+        "hooks": {
+          "file": ".codex/hooks.json",
+          "format": "codex-hooks",
+          "sessionStart": true,
+          "merge": {
+            "hooks": {
+              "SessionStart": [
+                { "hooks": [{ "type": "command", "command": "bash \"${ZERO_HOOKS_DIR}/ensure-runner.sh\"", "statusMessage": "Preparing the Zero runner...", "timeout": 120 }] }
+              ],
+              "UserPromptSubmit": [
+                { "hooks": [{ "type": "command", "command": "bash \"${ZERO_HOOKS_DIR}/zero-context.sh\"", "timeout": 5 }] }
+              ],
+              "PreToolUse": [
+                { "matcher": "Bash", "hooks": [{ "type": "command", "command": "bash \"${ZERO_HOOKS_DIR}/auto-approve-zero.sh\"", "timeout": 5 }] }
+              ]
+            }
+          }
+        }
       }
     },
     {
