@@ -99,7 +99,23 @@
       "standalone": {
         "skills": [".kiro/skills", ".agents/skills"],
         "mcp": { "file": ".kiro/settings/mcp.json", "shape": "http-type-url" },
-        "hooks": { "file": ".kiro/agents/zero.json", "format": "kiro-agent", "sessionStart": true }
+        "hooks": {
+          "file": ".kiro/agents/zero.json",
+          "format": "kiro-agent",
+          "sessionStart": true,
+          "merge": {
+            "name": "zero",
+            "description": "Zero — search, fetch, and pay for agent capabilities (zero.xyz)",
+            "hooks": {
+              "agentSpawn": [
+                { "command": "bash \"${ZERO_HOOKS_DIR}/ensure-runner.sh\"", "timeout_ms": 120000 }
+              ],
+              "userPromptSubmit": [
+                { "command": "bash \"${ZERO_HOOKS_DIR}/zero-context.sh\"", "timeout_ms": 5000 }
+              ]
+            }
+          }
+        }
       }
     },
     {
