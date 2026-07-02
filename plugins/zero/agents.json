@@ -132,8 +132,7 @@
       "name": "Amp",
       "detect": { "exe": "amp", "dir": ".config/amp" },
       "standalone": {
-        "skills": [".agents/skills"],
-        "mcp": { "file": ".config/amp/settings.json", "shape": "amp-dotted-key-mcp-servers" }
+        "skills": [".agents/skills"]
       }
     },
     {
@@ -141,8 +140,7 @@
       "name": "Antigravity",
       "detect": { "exe": "agy", "dir": ".gemini" },
       "standalone": {
-        "skills": [".gemini/antigravity-cli/skills", ".agents/skills"],
-        "mcp": { "file": ".gemini/config/mcp_config.json", "shape": "server-url" }
+        "skills": [".gemini/antigravity-cli/skills", ".agents/skills"]
       }
     },
     {
@@ -150,8 +148,7 @@
       "name": "Cline",
       "detect": { "exe": "cline", "dir": ".cline" },
       "standalone": {
-        "skills": [".cline/skills"],
-        "mcp": { "file": ".cline/data/settings/cline_mcp_settings.json", "shape": "mcpservers-url-autoapprove" }
+        "skills": [".cline/skills"]
       }
     },
     {
@@ -160,7 +157,6 @@
       "detect": { "exe": "cn", "dir": ".continue" },
       "standalone": {
         "skills": [".continue/skills"],
-        "mcp": { "file": ".continue/config.yaml", "shape": "yaml-mcpservers-streamable-http" },
         "hooks": {
           "file": ".continue/settings.json",
           "format": "continue-settings",
@@ -187,7 +183,6 @@
       "detect": { "exe": "copilot", "dir": ".copilot" },
       "standalone": {
         "skills": [".copilot/skills", ".agents/skills"],
-        "mcp": { "file": ".copilot/mcp-config.json", "shape": "http-type-url" },
         "hooks": {
           "file": ".copilot/hooks/zero.json",
           "format": "copilot-hooks",
@@ -208,8 +203,7 @@
       "name": "Crush",
       "detect": { "exe": "crush", "dir": ".local/share/crush" },
       "standalone": {
-        "skills": [".config/crush/skills", ".agents/skills"],
-        "mcp": { "file": ".config/crush/crush.json", "shape": "http-type-url" }
+        "skills": [".config/crush/skills", ".agents/skills"]
       }
     },
     {
@@ -218,7 +212,6 @@
       "detect": { "exe": "agent", "dir": ".cursor" },
       "standalone": {
         "skills": [".cursor/skills", ".agents/skills"],
-        "mcp": { "file": ".cursor/mcp.json", "shape": "mcpservers-url" },
         "hooks": {
           "file": ".cursor/hooks.json",
           "format": "cursor-hooks",
@@ -240,7 +233,6 @@
       "detect": { "exe": "devin", "dir": ".config/devin" },
       "standalone": {
         "skills": [".config/devin/skills"],
-        "mcp": { "file": ".config/devin/config.json", "shape": "mcpservers-url-transport-http" },
         "hooks": {
           "file": ".config/devin/config.json",
           "format": "devin-config",
@@ -264,7 +256,6 @@
       "detect": { "exe": "goose", "dir": ".config/goose" },
       "standalone": {
         "skills": [".agents/skills"],
-        "mcp": { "file": ".config/goose/config.yaml", "shape": "goose-yaml-extensions-streamable-http" },
         "hooks": {
           "file": ".agents/plugins/zero/hooks/hooks.json",
           "format": "open-plugins-hooks",
@@ -284,8 +275,7 @@
       "name": "Hermes Agent",
       "detect": { "exe": "hermes", "dir": ".hermes" },
       "standalone": {
-        "skills": [".hermes/skills"],
-        "mcp": { "file": ".hermes/config.yaml", "shape": "yaml-mcp-servers-url-auth" }
+        "skills": [".hermes/skills"]
       }
     },
     {
@@ -293,8 +283,7 @@
       "name": "Kilo Code",
       "detect": { "exe": "kilo", "dir": ".config/kilo" },
       "standalone": {
-        "skills": [".kilo/skills", ".agents/skills"],
-        "mcp": { "file": ".config/kilo/kilo.jsonc", "shape": "kilo-jsonc-mcp-remote-url" }
+        "skills": [".kilo/skills", ".agents/skills"]
       }
     },
     {
@@ -302,8 +291,7 @@
       "name": "OpenCode",
       "detect": { "exe": "opencode", "dir": ".config/opencode" },
       "standalone": {
-        "skills": [".config/opencode/skills", ".agents/skills"],
-        "mcp": { "file": ".config/opencode/opencode.json", "shape": "remote-type-url" }
+        "skills": [".config/opencode/skills", ".agents/skills"]
       }
     },
     {
@@ -319,7 +307,6 @@
       },
       "standalone": {
         "skills": [".qwen/skills"],
-        "mcp": { "file": ".qwen/settings.json", "shape": "mcp-servers-http-url" },
         "hooks": {
           "file": ".qwen/settings.json",
           "format": "qwen-settings",
@@ -353,8 +340,7 @@
       "name": "Zed",
       "detect": { "exe": "zed", "dir": ".config/zed" },
       "standalone": {
-        "skills": [".agents/skills"],
-        "mcp": { "file": ".config/zed/settings.json", "shape": "zed-settings-context-servers-url" }
+        "skills": [".agents/skills"]
       }
     }
   ]
