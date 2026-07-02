@@ -98,7 +98,6 @@
       "detect": { "exe": "kiro-cli", "dir": ".kiro" },
       "standalone": {
         "skills": [".kiro/skills", ".agents/skills"],
-        "mcp": { "file": ".kiro/settings/mcp.json", "shape": "http-type-url" },
         "hooks": {
           "file": ".kiro/agents/zero.json",
           "format": "kiro-agent",
@@ -123,8 +122,223 @@
       "name": "Warp",
       "detect": { "exe": "warp-terminal", "dir": ".warp" },
       "standalone": {
-        "skills": [".warp/skills", ".agents/skills"],
-        "mcp": { "file": ".warp/.mcp.json", "shape": "http-url" }
+        "skills": [".warp/skills", ".agents/skills"]
+      }
+    },
+    {
+      "id": "amp",
+      "name": "Amp",
+      "detect": { "exe": "amp", "dir": ".config/amp" },
+      "standalone": {
+        "skills": [".agents/skills"]
+      }
+    },
+    {
+      "id": "antigravity",
+      "name": "Antigravity",
+      "detect": { "exe": "agy", "dir": ".gemini" },
+      "standalone": {
+        "skills": [".gemini/antigravity-cli/skills", ".agents/skills"]
+      }
+    },
+    {
+      "id": "cline",
+      "name": "Cline",
+      "detect": { "exe": "cline", "dir": ".cline" },
+      "standalone": {
+        "skills": [".cline/skills"]
+      }
+    },
+    {
+      "id": "continue-cli",
+      "name": "Continue CLI",
+      "detect": { "exe": "cn", "dir": ".continue" },
+      "standalone": {
+        "skills": [".continue/skills"],
+        "hooks": {
+          "file": ".continue/settings.json",
+          "format": "continue-settings",
+          "sessionStart": true,
+          "merge": {
+            "hooks": {
+              "SessionStart": [
+                { "hooks": [{ "type": "command", "command": "bash \"${ZERO_HOOKS_DIR}/ensure-runner.sh\"", "statusMessage": "Preparing the Zero runner...", "timeout": 120 }] }
+              ],
+              "UserPromptSubmit": [
+                { "hooks": [{ "type": "command", "command": "bash \"${ZERO_HOOKS_DIR}/zero-context.sh\"", "timeout": 5 }] }
+              ],
+              "PreToolUse": [
+                { "matcher": "Bash", "hooks": [{ "type": "command", "command": "bash \"${ZERO_HOOKS_DIR}/auto-approve-zero.sh\"", "timeout": 5 }] }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "copilot",
+      "name": "GitHub Copilot CLI",
+      "detect": { "exe": "copilot", "dir": ".copilot" },
+      "standalone": {
+        "skills": [".copilot/skills", ".agents/skills"],
+        "hooks": {
+          "file": ".copilot/hooks/zero.json",
+          "format": "copilot-hooks",
+          "sessionStart": true,
+          "merge": {
+            "version": 1,
+            "hooks": {
+              "sessionStart": [
+                { "type": "command", "bash": "bash \"${ZERO_HOOKS_DIR}/ensure-runner.sh\"", "timeoutSec": 120 }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "crush",
+      "name": "Crush",
+      "detect": { "exe": "crush", "dir": ".local/share/crush" },
+      "standalone": {
+        "skills": [".config/crush/skills", ".agents/skills"]
+      }
+    },
+    {
+      "id": "cursor",
+      "name": "Cursor",
+      "detect": { "exe": "agent", "dir": ".cursor" },
+      "standalone": {
+        "skills": [".cursor/skills", ".agents/skills"],
+        "hooks": {
+          "file": ".cursor/hooks.json",
+          "format": "cursor-hooks",
+          "sessionStart": true,
+          "merge": {
+            "version": 1,
+            "hooks": {
+              "sessionStart": [
+                { "type": "command", "command": "bash \"${ZERO_HOOKS_DIR}/ensure-runner.sh\"", "timeout": 120 }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "devin",
+      "name": "Devin",
+      "detect": { "exe": "devin", "dir": ".config/devin" },
+      "standalone": {
+        "skills": [".config/devin/skills"],
+        "hooks": {
+          "file": ".config/devin/config.json",
+          "format": "devin-config",
+          "sessionStart": true,
+          "merge": {
+            "hooks": {
+              "SessionStart": [
+                { "hooks": [{ "type": "command", "command": "bash \"${ZERO_HOOKS_DIR}/ensure-runner.sh\"", "timeout": 120 }] }
+              ],
+              "UserPromptSubmit": [
+                { "hooks": [{ "type": "command", "command": "bash \"${ZERO_HOOKS_DIR}/zero-context.sh\"", "timeout": 5 }] }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "goose",
+      "name": "Goose",
+      "detect": { "exe": "goose", "dir": ".config/goose" },
+      "standalone": {
+        "skills": [".agents/skills"],
+        "hooks": {
+          "file": ".agents/plugins/zero/hooks/hooks.json",
+          "format": "open-plugins-hooks",
+          "sessionStart": true,
+          "merge": {
+            "hooks": {
+              "SessionStart": [
+                { "hooks": [{ "type": "command", "command": "bash \"${ZERO_HOOKS_DIR}/ensure-runner.sh\"", "timeout": 120 }] }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "hermes",
+      "name": "Hermes Agent",
+      "detect": { "exe": "hermes", "dir": ".hermes" },
+      "standalone": {
+        "skills": [".hermes/skills"]
+      }
+    },
+    {
+      "id": "kilo-code",
+      "name": "Kilo Code",
+      "detect": { "exe": "kilo", "dir": ".config/kilo" },
+      "standalone": {
+        "skills": [".kilo/skills", ".agents/skills"]
+      }
+    },
+    {
+      "id": "opencode",
+      "name": "OpenCode",
+      "detect": { "exe": "opencode", "dir": ".config/opencode" },
+      "standalone": {
+        "skills": [".config/opencode/skills", ".agents/skills"]
+      }
+    },
+    {
+      "id": "qwen-code",
+      "name": "Qwen Code",
+      "minCli": "1.14.0",
+      "detect": { "exe": "qwen", "dir": ".qwen" },
+      "install": {
+        "executable": "qwen",
+        "steps": [
+          { "label": "install extension", "command": "qwen", "args": ["extensions", "install", "https://github.com/officialzeroxyz/zero-plugins:zero", "--auto-update", "--consent"] }
+        ]
+      },
+      "standalone": {
+        "skills": [".qwen/skills"],
+        "hooks": {
+          "file": ".qwen/settings.json",
+          "format": "qwen-settings",
+          "sessionStart": true,
+          "merge": {
+            "hooks": {
+              "SessionStart": [
+                { "hooks": [{ "type": "command", "name": "zero-ensure-runner", "command": "bash \"${ZERO_HOOKS_DIR}/ensure-runner.sh\"", "timeout": 120000 }] }
+              ],
+              "UserPromptSubmit": [
+                { "hooks": [{ "type": "command", "name": "zero-context", "command": "bash \"${ZERO_HOOKS_DIR}/zero-context.sh\"", "timeout": 5000 }] }
+              ],
+              "PreToolUse": [
+                { "matcher": "Bash", "hooks": [{ "type": "command", "name": "zero-auto-approve", "command": "bash \"${ZERO_HOOKS_DIR}/auto-approve-zero.sh\"", "timeout": 5000 }] }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "trae",
+      "name": "Trae",
+      "detect": { "exe": "trae", "dir": ".trae" },
+      "standalone": {
+        "skills": [".trae/skills"]
+      }
+    },
+    {
+      "id": "zed",
+      "name": "Zed",
+      "detect": { "exe": "zed", "dir": ".config/zed" },
+      "standalone": {
+        "skills": [".agents/skills"]
       }
     }
   ]
