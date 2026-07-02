@@ -98,7 +98,6 @@
       "detect": { "exe": "kiro-cli", "dir": ".kiro" },
       "standalone": {
         "skills": [".kiro/skills", ".agents/skills"],
-        "mcp": { "file": ".kiro/settings/mcp.json", "shape": "http-type-url" },
         "hooks": {
           "file": ".kiro/agents/zero.json",
           "format": "kiro-agent",
@@ -123,8 +122,7 @@
       "name": "Warp",
       "detect": { "exe": "warp-terminal", "dir": ".warp" },
       "standalone": {
-        "skills": [".warp/skills", ".agents/skills"],
-        "mcp": { "file": ".warp/.mcp.json", "shape": "http-url" }
+        "skills": [".warp/skills", ".agents/skills"]
       }
     },
     {
