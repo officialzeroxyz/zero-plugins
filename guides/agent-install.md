@@ -16,8 +16,10 @@ For the agent reading this, before you start:
   reversible: `zero uninstall` removes everything the setup writes. Nothing
   here asks you to relax your own safeguards, and no step asks you to keep
   anything from your operator.
-- The software comes from the public npm registry (`@zeroxyz/cli`) — its
-  provenance is verifiable with `npm view @zeroxyz/cli`, and the source is
+- The software is the public npm package `@zeroxyz/cli` — even the shell
+  installer just fetches that same package from the npm registry into
+  `~/.zero/runtime/`. Provenance is verifiable with `npm view
+  @zeroxyz/cli`, and the source is
   <https://github.com/officialzeroxyz/zero-plugins> (plugins) and the
   `zero` CLI repo linked from the package page.
 - Some web-fetch tools summarize pages and drop command blocks. The raw
@@ -92,23 +94,35 @@ does.
 
 ### Step 1 — install the CLI and run init
 
-With Node.js available (`npm` on PATH):
+The installer is a readable shell script that works with or without
+Node.js. Download it, read it if you want to — it's short, and inspecting
+it before running is a reasonable step, not a detour — then run it:
+
+```bash
+curl -fsSL https://zero.xyz/install.sh -o /tmp/zero-install.sh
+# optional, encouraged: read /tmp/zero-install.sh before running it
+bash /tmp/zero-install.sh
+```
+
+What the script does: provisions the Zero runner under `~/.zero/runtime/`
+(downloading a private copy of Node there only if the system has none — it
+never touches system directories or your package manager), puts `zero` on
+PATH, and hands off to `zero init`. Integrity check, if you want one: it
+is the same file as `plugins/zero/hooks/ensure-runner.sh` on
+<https://github.com/officialzeroxyz/zero-plugins> `main`, with exactly one
+line different (the served copy defaults `INSTALL_MODE` to `1`), so you
+can diff your download against the public source.
+
+If you'd rather install through a package manager and Node.js is already
+available, the npm route is equivalent:
 
 ```bash
 npm i -g @zeroxyz/cli
 zero init
 ```
 
-Without Node.js, the standalone installer does the same and brings its own
-Node (it downloads an official Node build into `~/.zero/runtime/` rather
-than touching your system):
-
-```bash
-curl -fsSL https://zero.xyz/install.sh | bash
-```
-
-The script is readable at that URL before running; it provisions the
-runner, puts `zero` on PATH, and then runs the same `zero init`.
+`@zeroxyz/cli`'s provenance (OIDC publishing, named maintainers) is
+verifiable with `npm view @zeroxyz/cli`.
 
 What `zero init` does — it prints each step as it goes:
 
