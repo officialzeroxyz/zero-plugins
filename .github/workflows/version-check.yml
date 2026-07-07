@@ -40,8 +40,13 @@ jobs:
       - name: Check manifest lockstep
         run: |
           set -euo pipefail
-          # Every manifest that carries a top-level "version".
-          manifests="$(grep -rl '"version"' plugins --include='*.json' | sort)"
+          # Every manifest that carries a TOP-LEVEL "version" key. A plain grep
+          # would also match nested occurrences — e.g. agents.json hook-merge
+          # fragments carry hosts' own dialects, which can include a "version"
+          # field (Copilot/Cursor hooks files) — so probe with jq instead.
+          manifests="$(find plugins -name '*.json' | sort | while IFS= read -r f; do
+            jq -e 'type == "object" and has("version")' "$f" >/dev/null 2>&1 && printf '%s\n' "$f" || true
+          done)"
           [ -n "$manifests" ] || { echo "no versioned manifests found under plugins/"; exit 1; }
           prev=""
           while IFS= read -r m; do
