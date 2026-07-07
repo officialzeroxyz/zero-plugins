@@ -66,8 +66,8 @@ When tier 1 wins, invoke it as plain `zero`; on the lower tiers use the absolute
 also survives shells that don't persist variables between commands).
 
 If no tier resolves in a persistent environment, tell the user Zero isn't available here —
-don't install the CLI yourself. In an ephemeral sandbox, fall through to `npx`. Never create a
-wallet either way.
+don't install the CLI yourself. In an ephemeral sandbox, fall through to `npx`. Never generate
+a private-key wallet yourself either way (managed wallets come from auth — see below).
 
 ## The runner
 
@@ -86,7 +86,18 @@ sandbox, and funding.
 
 ## Authentication
 
-There are two environments, and the right path depends on which you're in.
+Before touching any auth command, decide **who the account is for**:
+
+- **A human is present** (or asked you to sign *them* in) → `zero auth login`. It's the device
+  flow below and creates their account on first sign-in; `zero auth register` is an alias for
+  the same command, not a separate signup.
+- **Fully autonomous — no human in the loop** → `zero auth agent register`. Anonymous account
+  plus a managed wallet, no browser, no one to hand a URL to.
+- **Never** use `zero auth agent register` when a human is present — it mints an account owned
+  by *no one* (a human can only take it over later via the claim flow). If there's a human,
+  `zero auth login` already creates their account.
+
+Beyond that, the environment picks the mechanics.
 
 ### Persistent — the user's own computer (not a sandbox or cloud runner)
 
@@ -120,6 +131,54 @@ you in everywhere Zero is used on this machine — the standalone `zero` CLI and
 all share the one login.
 
 Check identity any time with `zero auth whoami`.
+
+### Autonomous — no human in the loop (`zero auth agent register`)
+
+When there is genuinely no human to send to a browser, register an anonymous agent account:
+
+```bash
+zero auth agent register --json
+# → {"status":"ok","registrationId":"…","userId":"…","walletAddress":"0x…",
+#    "claimTokenExpires":"…"}
+```
+
+One command, no browser, no waiting. What you get:
+
+- A signed-in session, persisted to `~/.zero/config.json` like any other login.
+- A **managed wallet, created at signup** — you can search, get, fetch, and pay immediately.
+  It starts empty: fund it with `zero wallet fund` (`--no-open` prints the funding URL instead
+  of opening a browser; the link is one-time use).
+- A **claim token**, saved in `~/.zero/config.json` — a human's future path to owning this
+  account. It expires (the deadline is printed at registration and stored as
+  `claimTokenExpires` in the config), and an unclaimed account is cleaned up after the
+  registration expires — so hand the account to a human (below) before then if the work
+  should outlive it.
+
+If it errors with "Already signed in", there's an existing session — don't stack a fresh
+anonymous account on top of it.
+
+### Claim handoff — `zero auth agent claim <email>`
+
+When a human should own an agent-registered account, link it to them. The ceremony is the
+**reverse of the device flow**: the hosted claim page shows the *human* a pairing code, they
+read it back to you, and *you* complete with the code.
+
+```bash
+# 1. Start: prints the hosted claim URL.
+zero auth agent claim human@example.com
+
+# 2. Send the human the URL. They sign in as that email and the page shows THEM a pairing code.
+
+# 3. They read the code back to you. On a TTY the command prompts for it inline; in
+#    non-interactive runs, complete with a second invocation:
+zero auth agent claim human@example.com --code <code>
+```
+
+`--code` completes the attempt already in flight — re-running *without* `--code` mints a fresh
+link and invalidates the code the human is holding. After the claim, the account belongs to the
+human, every pre-claim session is revoked, and the CLI rotates onto fresh credentials
+automatically — nothing to re-run. If the start step fails, the claim token has likely expired
+(check `claimTokenExpires` in `~/.zero/config.json`).
 
 ### Ephemeral / sandbox — cloud, CI, web/mobile sandbox runners
 
@@ -184,7 +243,9 @@ explicitly provides; never generate one.
 ### Funding
 
 Funding is managed server-side. If a call fails for insufficient balance, point the user to
-https://www.zero.xyz/profile to fund their Zero account.
+https://www.zero.xyz/profile to fund their Zero account. On an agent-registered account there
+is no signed-in human profile — use `zero wallet fund --no-open` and relay the one-time funding
+URL instead.
 
 ## The loop
 
