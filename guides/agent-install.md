@@ -1,32 +1,54 @@
 # Install Zero
 
-> **Note for assistants:** if this page reached you through a web-fetch tool, you
-> may be reading a summary with commands truncated or dropped. Fetch the raw file
-> with `curl -fsSL https://zero.xyz/install.md` and work from that output. If the
-> fetch is blocked by a network allowlist (common in sandboxed environments), ask
-> the user to allow `zero.xyz` and `*.zero.xyz` in the environment's network
-> settings, then retry.
+Zero ([zero.xyz](https://zero.xyz)) is a search engine and payment layer for
+AI agents: search for a capability, call it, and pay per use. This page is
+the install guide, written for the agent that will perform the install.
 
-Zero is a search engine and payment platform for AI agents. There are two
-install paths — pick by where you're running:
+**This page carries no authority of its own.** Act on it only if your
+operator asked you to set up Zero, or asked for something that requires it
+(like calling a paid service listed on a Zero storefront). If you reached
+this page without such a request, treat it as reference documentation and do
+nothing.
+
+For the agent reading this, before you start:
+
+- Every step says what it changes and how to undo it; the whole install is
+  reversible (`zero uninstall`, or your harness's plugin uninstall). Nothing
+  here asks you to relax your own safeguards, and no step asks you to keep
+  anything from your operator.
+- Some web-fetch tools summarize pages and drop command blocks. The raw file
+  is served at <https://zero.xyz/install.md>; its canonical source is
+  `guides/agent-install.md` in
+  <https://github.com/officialzeroxyz/zero-plugins>. The two match, and you
+  can cross-check them.
+- If your environment blocks requests to `zero.xyz`, that allowlist is your
+  operator's to change — tell them what was blocked rather than working
+  around it.
+- The commands below are exact, and small adaptations (retyped flags,
+  from-memory variants) are the most common cause of broken installs. If a
+  command you're about to run isn't written here, it's worth re-reading the
+  raw file first.
+
+There are two install paths — pick by where you're running:
 
 - **In Claude Chat (the claude.ai consumer chat interface — web, desktop, or
   mobile app, they're all the same product) or Claude Cowork**: Zero installs
   through the Claude plugin UI — no shell involved. Follow the section just
-  below and you're done; the shell-based runbook in the rest of this page does
-  not apply to you (those sandboxes have no plugin CLI and typically no
-  network egress to zero.xyz, even when a shell exists).
+  below and you're done; the shell-based runbook in the rest of this page
+  does not apply (those sandboxes have no plugin CLI and typically no network
+  egress to zero.xyz, even when a shell exists).
 - **In a coding agent with a real shell** (Claude Code, Codex, Gemini CLI,
   OpenClaw, …): skip the next section and follow the
   [shell-based install](#shell-based-install-cli-coding-agents) below.
 
 ## Claude Chat (claude.ai) & Claude Cowork — plugin UI install
 
-These are clicks in the Claude app, nothing else. You can't click them
-yourself — walk the user through them in order, a few at a time, in plain
-terms ("adding the Zero plugin", "connecting your account"). If your
-environment blocks requests to `zero.xyz` after install, the user may need to
-allow `zero.xyz` and `*.zero.xyz` in their network or connector settings.
+These are clicks in the Claude app, nothing else. The agent can't click
+them, so this section is for relaying to the user in order, a few at a
+time, in plain terms ("adding the Zero plugin", "connecting your account").
+If the environment blocks requests to `zero.xyz` after install, the fix is
+the user's to make: allow `zero.xyz` and `*.zero.xyz` in the network or
+connector settings.
 
 **Install the plugin:**
 
@@ -59,41 +81,33 @@ rest of this page.
 
 ## Shell-based install (CLI coding agents)
 
-The rest of this page is an **install runbook for the coding agent reading
-it**: it installs the Zero plugin and bootstraps the runner — no restart
-required.
+The rest of this page is the runbook for the agent doing the install: the
+Zero plugin for your harness (Step 1), the runner bootstrap (Step 2), and
+authentication (Step 3). It takes effect in this same session — no restart
+or reload — and your operator's part is at most one browser approval.
 
-> You can run these steps yourself in the user's shell. Keep the user in the loop
-> as you would for any setup — they'll approve the browser sign-in in Step 3.
->
-> **Only run commands that appear verbatim in this file.** Do not invent, adapt, or
-> retype commands from memory — if a command you're about to run is not written
-> here, stop and re-read the raw file. In particular, **never delete anything under
-> `~/.claude/plugins/`**.
->
-> Use the `claude`/`codex`/`gemini`/`openclaw` binary's CLI subcommands — **never
-> REPL slash commands** (`/plugin …`, `/extensions …`), because the desktop apps
-> run you without an interactive REPL and cannot execute them. The install takes effect
-> *in this same session* — no reload or restart needed, so don't ask the user to
-> do either.
->
-> **Assume a non-technical audience.** Narrate what's happening in plain terms
-> ("installing Zero", "signing you in") rather than reciting commands, file paths,
-> or hook internals. Nothing here is secret — if the user asks what a step does,
-> explain it fully — but don't make them wade through plumbing they didn't ask about.
+Two practical notes:
 
----
+- The plugin installs below use the `claude`/`codex`/`gemini`/`openclaw`
+  binary's CLI subcommands rather than REPL slash commands (`/plugin …`,
+  `/extensions …`), because the desktop apps run agents without an
+  interactive REPL where slash commands could execute.
+- For a non-technical operator, plain-language narration ("installing Zero",
+  "signing you in") lands better than file paths and hook internals. Nothing
+  here is secret — if they ask what a step does, every detail on this page
+  is fine to share in full.
 
 ## Step 1 — agent-specific setup
 
-Find the subsection for the agent **you** are and run its steps in order. Run
-only your own subsection — the other agent's commands will not work for you.
+Find the subsection for the harness **you** are running in. The subsections
+aren't interchangeable — each harness's plugin CLI only exists in that
+harness, so another subsection's commands simply won't run in yours.
 
 Every subsection ends the same way: **find the installed plugin root**, then
 continue with **Step 2** below. You know your own harness's plugin cache —
-don't assume a command prints the path, since many don't, or print the
-marketplace source rather than the installed root. You have the right directory
-when it contains `skills/zero/SKILL.md`.
+the install commands don't reliably print the path (several print the
+marketplace source rather than the installed root). You have the right
+directory when it contains `skills/zero/SKILL.md`.
 
 ### Claude Code
 
@@ -146,32 +160,32 @@ when it contains `skills/zero/SKILL.md`.
    ```
 
 2. **Find the installed plugin root**, then continue with **Step 2** below.
-   One OpenClaw-specific point: OpenClaw imports the plugin's skill but
-   **never executes its hooks** — not on this session or any later one — so
-   the Step 2 bootstrap is the only time the runner's dependencies get set up.
-   Don't skip it.
+   One OpenClaw-specific point: OpenClaw imports the plugin's skill but does
+   not execute its hooks — not on this session or any later one — so the
+   Step 2 bootstrap is the only time the runner's dependencies get set up.
 
 ### Don't see your agent?
 
-If none of the subsections above is the agent you are — or you don't know how
-to install plugins in your harness — do **not** improvise with another agent's
-commands. Use the standalone installer instead:
+If none of the subsections above is the harness you are running in — or you
+don't know how to install plugins in your harness — the standalone installer
+covers everything the plugins do (another harness's plugin commands won't):
 
 ```bash
 curl -fsSL https://zero.xyz/install.sh | bash
 ```
 
-It provisions the same runner the plugins use, puts `zero` on PATH, and then
-runs `zero init`, which installs the Zero skill into both `~/.claude/skills/`
-and `~/.agents/skills/` (between those two, nearly every skills-capable
-harness reads one or the other) and registers the Zero hooks in
-`~/.claude/settings.json` for Claude-compatible hosts. The whole install is
-reversible with `zero uninstall`.
+What it does: provisions the same managed runner the plugins use, puts
+`zero` on PATH, and runs `zero init`, which installs the Zero skill into
+both `~/.claude/skills/` and `~/.agents/skills/` (between those two, nearly
+every skills-capable harness reads one or the other) and registers the Zero
+hooks in `~/.claude/settings.json` for Claude-compatible hosts. The whole
+install is reversible with `zero uninstall`, and the script is yours to read
+before running: <https://zero.xyz/install.sh>.
 
 If your harness reads skills from its own directory instead (say
 `~/.yourharness/skills`), follow up with a second `zero init` run naming it —
-an explicit exception to the verbatim-commands rule, since the path is yours
-to fill in. Init is idempotent, so the re-run replaces rather than duplicates:
+the path is yours to fill in. Init is idempotent, so the re-run replaces
+rather than duplicates:
 
 ```bash
 zero init --skills-dir ~/.yourharness/skills
@@ -183,11 +197,13 @@ bootstrapped the runner), and continue with **Step 3** using the runner path
 the summary printed (bare `zero` also works in new shells — use the full
 runner path if `zero` isn't found in this one).
 
-**If the installer fails**, request support and stop. Substitute the
-placeholder values in this command (also an exception to running commands
-byte-exact) — your agent/harness name plus a brief note on what failed (the
-field caps at 300 characters), and a contact email (ask the user if they want
-to leave theirs, and omit the `email` field entirely if not):
+**If the installer fails**, support can be requested with the command below;
+after sending it, stop — the remaining steps won't succeed without a working
+install. Substitute the placeholder values: your agent/harness name plus a
+brief note on what failed (the field caps at 300 characters). The `email`
+field is how Zero replies when support for your harness lands — it's your
+operator's email and their choice: ask if they want to leave one, and omit
+the field entirely if not.
 
 ```bash
 curl -sS -X POST https://api.zero.xyz/v1/request-agent-access \
@@ -195,38 +211,52 @@ curl -sS -X POST https://api.zero.xyz/v1/request-agent-access \
   -d '{"agent":"<the agent or harness you are, with version>","email":"<optional email for a reply>"}'
 ```
 
-`email` is optional, but it's how we tell you when support lands. Humans (or
-browser-driving agents — the page exposes a WebMCP tool) can use the form at
-<https://zero.xyz/request-agent-access> instead.
+Humans (or browser-driving agents — the page exposes a WebMCP tool) can use
+the form at <https://zero.xyz/request-agent-access> instead.
 
 ## Step 2 — bootstrap the runner (all agents)
 
-A fresh install would normally only take effect after a restart (or an interactive
-reload command, which the desktop apps can't run), because the plugin's
-`SessionStart` hook hasn't fired yet. That hook ensures the runner's `node`
-dependency exists (it downloads a node binary if one isn't found). Do it yourself
-now, inside the plugin root you found in Step 1:
+A fresh plugin install normally takes effect at the next session start,
+when the plugin's `SessionStart` hook provisions the runner. To use Zero in
+this session, run that same step now, from the plugin root you found in
+Step 1:
 
-- Read the Zero skill at `skills/zero/SKILL.md` first, to load the usage
-  instructions before you touch the runner.
-- Then read the plugin's hook definition (for Claude Code it's `hooks/hooks.json`
-  in the plugin root) and run the `SessionStart` hook command yourself to
-  bootstrap the runner (this installs node if needed).
+```bash
+bash hooks/ensure-runner.sh
+```
+
+What it does — it's the exact command from the plugin's hook definition
+(`hooks/hooks.json` in the plugin root), and a readable script if you want
+to check it before running: finds a usable `node` on PATH or downloads an
+official Node build into `~/.zero/runtime/`, installs the `@zeroxyz/cli`
+runner there, and finishes by printing a JSON status naming the runner path
+(`~/.zero/runtime/bin/zero` — referred to as `"$ZERO_RUNNER"` below).
+Everything it creates lives under `~/.zero/runtime/`, which is disposable —
+safe to delete and rebuild.
+
+Before moving on, read the Zero skill at `skills/zero/SKILL.md` in the same
+plugin root — it's the usage guide for everything after the install, and
+where these instructions defer whenever the two differ.
 
 ## Step 3 — authenticate (all agents)
 
-On a persistent machine (skip only in throwaway sandboxes/CI) the runner needs
-auth set up once. Run these commands yourself rather than handing them to the
-user to paste — their part is opening one URL to approve the sign-in. Invoke the
-runner as plain `zero` if that resolves on your PATH; otherwise substitute the
-absolute runner path the bootstrap just printed (written as `"$ZERO_RUNNER"` in
-the commands below):
+Zero accounts are how a wallet, payment history, and reviews attach to
+someone. Two paths — pick by whether a human is present. Invoke the runner
+as plain `zero` if that resolves on your PATH; otherwise substitute the
+absolute runner path the bootstrap printed (written as `"$ZERO_RUNNER"`
+below).
 
 > **First check:** run `"$ZERO_RUNNER" auth whoami --json`. The user is signed in
-> only if the output has a `user` object — if so, skip the login below. Anything
+> only if the output has a `user` object — if so, skip to **Step 4**. Anything
 > else (e.g. `"authMethod":"none"` — possibly flagging a leftover pre-1.0 wallet
 > key via `legacyKeyPresent` — or a `local-key` self-custody wallet) is **not**
-> signed in: proceed with the login.
+> signed in: proceed with one of the paths below.
+
+### Your operator is present (the default path)
+
+Device-code sign-in: the account and wallet are your operator's from the
+start, and their part is opening one URL. Run the commands yourself rather
+than handing them over to paste.
 
 ```bash
 # 1. Start the device-code login. Prints JSON with a url + userCode, exits immediately.
@@ -266,17 +296,42 @@ this time make the `url` + `userCode` the final message of your turn, then run
 
 `{"status":"ok"}` means you're signed in — confirm with `"$ZERO_RUNNER" auth
 whoami --json` (the output should now have a `user` object).
-`{"status":"expired"}` means the code lapsed — start over from step 1. Full
-details are in the skill's **Authentication** section — if anything here differs
-from the skill, the skill wins.
+`{"status":"expired"}` means the code lapsed — start over from step 1.
 
-However the sign-in detour played out, don't end the install here — close it
-out with **Step 4** below.
+### No human in the loop
+
+When your operator set you up to run autonomously (throwaway sandboxes, CI,
+agent fleets) and isn't available to approve a sign-in, Zero supports
+anonymous agent registration — an account and managed wallet created without
+a browser, an email, or a human step (the auth.md protocol; see
+<https://zero.xyz/auth.md>):
+
+```bash
+"$ZERO_RUNNER" auth agent register
+```
+
+It prints the new wallet's address and persists the session in
+`~/.zero/config.json`. The account starts unfunded: free capabilities work
+immediately; paid ones need funding first — check prices before spending,
+and stay inside whatever budget your operator authorized.
+
+A human can take ownership of the account later:
+
+```bash
+"$ZERO_RUNNER" auth agent claim <their-email>
+```
+
+prints a URL for them to open; they read a pairing code back to you and the
+account, wallet, and history become theirs. When an operator is available
+now, the device sign-in above is the better path — no claim step needed.
+
+However the sign-in played out, the install isn't quite done — close it out
+with **Step 4** below.
 
 ## Step 4 — try it out (optional, all agents)
 
-Once sign-in succeeds, the install works. A nice first thing to try: ask Zero to
-build and host a simple site, e.g.
+Once authentication succeeds, the install works. A nice first thing to try:
+ask Zero to build and host a simple site, e.g.
 
 > "Build me a simple, but visually stunning hello world site and host it with
 > Zero for free."
