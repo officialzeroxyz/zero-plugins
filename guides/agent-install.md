@@ -113,8 +113,8 @@ is the same file as `plugins/zero/hooks/ensure-runner.sh` on
 line different (the served copy defaults `INSTALL_MODE` to `1`), so you
 can diff your download against the public source.
 
-If you'd rather install through a package manager and Node.js is already
-available, the npm route is equivalent:
+If you'd rather install through a package manager, the npm route is
+equivalent:
 
 ```bash
 npm i -g @zeroxyz/cli
@@ -123,6 +123,13 @@ zero init
 
 `@zeroxyz/cli`'s provenance (OIDC publishing, named maintainers) is
 verifiable with `npm view @zeroxyz/cli`.
+
+No `npm` on PATH? Installing Node.js first (v20 or newer) through your
+platform's usual channel works fine — `brew install node`, `sudo apt-get
+install -y nodejs npm`, `winget install OpenJS.NodeJS.LTS`, or a version
+manager like `nvm` — then run the two commands above. (The shell installer
+exists precisely so this prerequisite is optional; either way ends in the
+same `zero init`.)
 
 What `zero init` does — it prints each step as it goes:
 
