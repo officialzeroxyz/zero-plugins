@@ -154,15 +154,3 @@ bash /tmp/zero-install.sh
 ```
 
 Re-run to update. `zero uninstall` reverses everything either path wrote.
-
-## Troubleshooting
-
-If the install fails, support can be requested with the command below —
-substitute your harness name and version, and include the operator's email
-only if they want a reply:
-
-```bash
-curl -sS -X POST https://api.zero.xyz/v1/request-agent-access \
-  -H "Content-Type: application/json" \
-  -d '{"agent":"<your harness + version>","email":"<optional>"}'
-```
