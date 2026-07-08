@@ -14,7 +14,7 @@ npm i -g @zeroxyz/cli && zero init
 No npm? Use the standalone installer:
 
 ```bash
-curl -fsSL https://zero.xyz/install.sh | bash
+curl -fsSL https://www.zero.xyz/install.sh | bash
 ```
 
 That's it — Zero sets itself up automatically and works across all your agents.
@@ -39,7 +39,7 @@ To update, just re-run whichever install command you used:
 ```bash
 npm i -g @zeroxyz/cli
 # or
-curl -fsSL https://zero.xyz/install.sh | bash
+curl -fsSL https://www.zero.xyz/install.sh | bash
 ```
 
 If Zero is already installed, it simply updates in place. Safe to run as often
