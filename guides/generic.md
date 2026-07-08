@@ -11,9 +11,7 @@ If you have npm (Node.js 20+), run this in your terminal:
 npm i -g @zeroxyz/cli && zero init
 ```
 
-No npm? The standalone installer does the same thing and brings its own
-private copy of Node (into `~/.zero/runtime/` — it never touches system
-directories or your package manager):
+No npm? Use the standalone installer:
 
 ```bash
 curl -fsSL https://zero.xyz/install.sh | bash

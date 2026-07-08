@@ -33,38 +33,33 @@ anything seems off, stop and ask.
 If you prefer to set up Zero manually, or your agent had issues with the
 installation, use the guides below. Pick your agent:
 
+- **[Amp](guides/generic.md)**
+- **[Antigravity](guides/generic.md)**
 - **[Claude Code (CLI)](guides/claude-code.md)**
 - **[Claude Code Desktop](guides/claude-code-desktop.md)**
 - **[Claude on the web (claude.ai) & Claude Cowork](guides/claude-ai.md)** —
   web, desktop, and mobile
+- **[Cline](guides/generic.md)**
 - **[Codex (CLI)](guides/codex.md)**
 - **[Codex app](guides/codex-app.md)**
+- **[Continue CLI](guides/generic.md)**
+- **[Crush](guides/generic.md)**
+- **[Cursor](guides/generic.md)**
+- **[Devin](guides/generic.md)**
 - **[Droid](guides/droid.md)**
 - **[Gemini CLI](guides/gemini-cli.md)**
+- **[GitHub Copilot CLI](guides/generic.md)**
+- **[Goose](guides/generic.md)**
+- **[Hermes Agent](guides/generic.md)**
+- **[Kilo Code](guides/generic.md)**
+- **[Kiro](guides/generic.md)**
+- **[OpenCode](guides/generic.md)**
+- **[Qwen Code](guides/generic.md)**
+- **[Trae](guides/generic.md)**
+- **[Warp](guides/generic.md)**
+- **[Zed](guides/generic.md)**
 - **[Anything else (standalone installer)](guides/generic.md)** — works in any
   agent with a shell (and for humans at a terminal)
-
-These agents don't ship a plugin manager Zero can target, so they all install
-through the [standalone installer](guides/generic.md) — `zero init` detects
-each one and wires up its skill and hooks automatically:
-
-[Amp](guides/generic.md) ·
-[Antigravity](guides/generic.md) ·
-[Cline](guides/generic.md) ·
-[Continue CLI](guides/generic.md) ·
-[Crush](guides/generic.md) ·
-[Cursor](guides/generic.md) ·
-[Devin](guides/generic.md) ·
-[GitHub Copilot CLI](guides/generic.md) ·
-[Goose](guides/generic.md) ·
-[Hermes Agent](guides/generic.md) ·
-[Kilo Code](guides/generic.md) ·
-[Kiro](guides/generic.md) ·
-[OpenCode](guides/generic.md) ·
-[Qwen Code](guides/generic.md) ·
-[Trae](guides/generic.md) ·
-[Warp](guides/generic.md) ·
-[Zed](guides/generic.md)
 
 Once installed, ask your agent to *"help me set up and test Zero"* — it signs
 you in and takes it from there.
@@ -109,4 +104,4 @@ mechanics — live in the per-host guides.
 This repo is built up iteratively, one carefully reviewed PR at a time. Today
 it ships the **Claude Code**, **Codex**, **Droid**, and **Gemini CLI** plugins,
 plus standalone skill-and-hooks integration (via `plugins/zero/agents.json`)
-for the seventeen agents listed above; new hosts land in subsequent PRs.
+for the other agents listed above; new hosts land in subsequent PRs.
