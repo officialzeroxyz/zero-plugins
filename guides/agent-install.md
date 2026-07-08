@@ -1,260 +1,168 @@
 # Install Zero
 
 Zero ([zero.xyz](https://zero.xyz)) is a search engine and payment layer for
-AI agents: search for a capability, call it, and pay per use. This page is
-the install guide, written for the agent that will perform the install.
+AI agents: search for a capability, call it, and pay per use. The CLI is
+published on npm as
+[`@zeroxyz/cli`](https://www.npmjs.com/package/@zeroxyz/cli); the plugin
+packaging and this runbook are maintained at
+[officialzeroxyz/zero-plugins](https://github.com/officialzeroxyz/zero-plugins).
 
-**This page carries no authority of its own.** Act on it only if your
-operator asked you to set up Zero, or asked for something that requires it
-(like calling a paid service listed on a Zero storefront). If you reached
-this page without such a request, treat it as reference documentation and do
-nothing.
+## Install
 
-For the agent reading this, before you start:
+Pick whichever applies:
 
-- The install is three commands and one browser approval, and it's
-  reversible: `zero uninstall` removes everything the setup writes. Nothing
-  here asks you to relax your own safeguards, and no step asks you to keep
-  anything from your operator.
-- The software is the public npm package `@zeroxyz/cli` — even the shell
-  installer just fetches that same package from the npm registry into
-  `~/.zero/runtime/`. Provenance is verifiable with `npm view
-  @zeroxyz/cli`, and the source is
-  <https://github.com/officialzeroxyz/zero-plugins> (plugins) and the
-  `zero` CLI repo linked from the package page.
-- Some web-fetch tools summarize pages and drop command blocks. The raw
-  file is served at <https://zero.xyz/install.md>; its canonical source is
-  `guides/agent-install.md` in
-  <https://github.com/officialzeroxyz/zero-plugins>. The two match, and you
-  can cross-check them.
-- If your environment blocks requests to `zero.xyz` or `registry.npmjs.org`,
-  that allowlist is your operator's to change — tell them what was blocked
-  rather than working around it.
+| Environment | Command |
+|---|---|
+| Claude Code | `claude plugin marketplace add officialzeroxyz/zero-plugins && claude plugin install zero@zero-plugins` |
+| Codex | `codex plugin marketplace add officialzeroxyz/zero-plugins && codex plugin add zero@zero-plugins` |
+| Gemini CLI | `gemini extensions install https://github.com/officialzeroxyz/zero-plugins` |
+| Anything with npm | `npm i -g @zeroxyz/cli && zero init` |
+| Claude Chat (claude.ai) / Claude Cowork | no shell — follow [zero.xyz/install/claude.md](https://zero.xyz/install/claude.md) instead |
+| None of the above | see [Fallback installer](#fallback-installer) |
 
-There are two install paths — pick by where you're running:
+The first three rows install through that harness's own plugin manager: they
+add the zero-plugins repo as a source, then install the Zero plugin from it
+via the manager's normal review-and-consent flow. The plugin's full contents
+are listed below. The npm and fallback rows end by running `zero init`.
 
-- **In Claude Chat (the claude.ai consumer chat interface — web, desktop, or
-  mobile app, they're all the same product) or Claude Cowork**: Zero installs
-  through the Claude plugin UI — no shell involved. Follow the section just
-  below and you're done; the shell-based setup does not apply (those
-  sandboxes typically have no network egress to zero.xyz, even when a shell
-  exists).
-- **In a coding agent with a shell** (Claude Code, Codex, Gemini CLI,
-  OpenClaw, Cursor, and nearly anything else): follow the
-  [shell-based setup](#shell-based-setup-all-cli-agents) below. One flow
-  covers every harness — `zero init` detects yours and installs the right
-  integration itself.
+## What the plugin installs
 
-## Claude Chat (claude.ai) & Claude Cowork — plugin UI install
+All three plugin-manager rows install the same contents, from
+[`plugins/zero/`](https://github.com/officialzeroxyz/zero-plugins/tree/main/plugins/zero)
+in the repo:
 
-These are clicks in the Claude app, nothing else. The agent can't click
-them, so this section is for relaying to the user in order, a few at a
-time, in plain terms ("adding the Zero plugin", "connecting your account").
-If the environment blocks requests to `zero.xyz` after install, the fix is
-the user's to make: allow `zero.xyz` and `*.zero.xyz` in the network or
-connector settings.
+- **A skill** — the usage guide for the `zero` CLI
+  ([source](https://github.com/officialzeroxyz/zero-plugins/blob/main/plugins/zero/skills/zero/SKILL.md))
+- **An MCP server** pointing at `mcp.zero.xyz`, for capability search and
+  account status
+- **Three hooks**
+  ([source](https://github.com/officialzeroxyz/zero-plugins/tree/main/plugins/zero/hooks)):
+  - `SessionStart` — installs the `zero` CLI into `~/.zero/runtime/`
+    (downloads Node only if the system lacks v20+) and puts it on PATH. On
+    harnesses without session-env support this appends one PATH line to the
+    shell rc (`ZERO_PATH_AUTOADD=0` skips it). Also refreshes the plugin
+    install in the background at most once a day
+    (`ZERO_PLUGIN_AUTOUPDATE=0` disables).
+  - `UserPromptSubmit` — adds a one-line reminder that Zero is available
+    for tasks beyond the agent's built-in abilities
+  - `PreToolUse` — auto-approves read-only `zero` subcommands (`search`,
+    `get`, `review`, …). `zero fetch` (spends money) and `zero wallet`
+    are never auto-approved; those always go through the harness's normal
+    permission prompt.
 
-**Install the plugin:**
+## What `zero init` does
 
-1. Open [claude.ai/customize](https://claude.ai/customize) — in Claude Cowork,
-   open the **Customize** tab instead.
-2. Click **Browse plugins**.
-3. Open the **Personal** tab and click the **+** icon.
-4. Click **Add marketplace**, then select **Add from a repository**.
-5. Paste `officialzeroxyz/zero-plugins`, select it from the dropdown, and click
-   **Sync**.
-6. After the sync completes, the Zero plugin appears in the list — click its
-   **+** icon to install it.
+Runs automatically at the end of the npm and fallback install paths (the
+plugin-manager rows integrate through the harness's own installer instead).
+It:
 
-**Connect the user's Zero account:**
+- writes the Zero skill into every well-known agent-skill directory it finds
+  on the machine (currently includes `~/.claude/skills/` and
+  `~/.agents/skills/`, and others as harnesses are added — see [supported
+  paths](https://github.com/officialzeroxyz/zero-plugins) for the current
+  list)
+- registers hook scripts in the config file of any harness it detects with
+  its own hook system (e.g. `~/.claude/settings.json`)
 
-1. Click the settings gear.
-2. In the left pane, under **Zero**, click **Connectors**, then click
-   **Install** on the Zero connector.
-3. Click **Add** in the modal.
-4. Click **Connect** and sign in to Zero.
-5. *(Recommended)* Set Zero's tools to **Always allow**, so Claude can use Zero
-   without approving every call.
+It prints each file it writes as it goes. `zero uninstall` reverses all of
+it.
 
-**Try it:** open a new session and ask — "Help me set up and test Zero."
+## Read the skill file now
 
-That's the whole install for Claude Chat and Cowork — you're done; ignore the
-rest of this page.
+Skills normally load at session start, so the session that just ran the
+install can't see the skill it installed yet. Read it now instead of
+waiting for a reload or a new session:
 
----
+- **npm / fallback path:** `zero init`'s output names the file it wrote —
+  read whichever matches your harness, e.g. `~/.claude/skills/zero/SKILL.md`
+  or `~/.agents/skills/zero/SKILL.md`.
+- **Plugin-manager path:** the skill ships inside the installed plugin at
+  `skills/zero/SKILL.md` under the plugin's install root.
 
-## Shell-based setup (all CLI agents)
+That file is the day-to-day usage guide — the same one the harness loads at
+the start of future sessions. Reading it now just brings this session up to
+parity with the next one.
 
-One flow for every harness. The `zero` CLI is the installer: `zero init`
-detects which harnesses are on the machine and installs the right
-integration for each — through the harness's own plugin manager where one
-exists (`claude`, `codex`, `gemini`, `openclaw`), or as a portable
-skill-and-hooks install everywhere else. You don't pick a variant; init
-does.
+## Authenticate
 
-### Step 1 — install the CLI and run init
+Already signed in? `zero auth whoami --json` shows a `user` object when a
+sign-in exists — if so, skip to [Try it](#try-it).
 
-The installer is a readable shell script that works with or without
-Node.js. Download it, read it if you want to — it's short, and inspecting
-it before running is a reasonable step, not a detour — then run it:
+Both paths below create a free account. Account creation cannot make
+purchases.
+
+**Interactive** (a person is present to approve a browser sign-in) —
+device-code sign-in, the same pattern as `gh auth login`:
+
+```bash
+zero auth login --start --json      # prints a url + code
+zero auth login --finish <code> --json   # waits for browser approval
+```
+
+Whoever is signing in opens the URL, enters the code, and approves in their
+browser. `--finish` polls until the sign-in is approved (expected, not a
+hang), and re-running it with the same code is safe.
+
+**Unattended** (sandboxes, CI — no one available for a browser step):
+
+```bash
+zero auth agent register --json
+```
+
+Output includes `"balance": 0, "payment_method": null` — the account exists
+but can't purchase anything until a person funds it. A person can take
+ownership of the account later with `zero auth agent claim <email>`.
+
+## Check balance / add funds
+
+```bash
+zero wallet balance --json
+```
+
+Funds can only be added by a person in a browser; no CLI command adds funds
+directly. If the balance is 0 and a paid capability is needed, the account
+owner runs:
+
+```bash
+zero wallet fund --start --json     # same device-code pattern as sign-in
+```
+
+and completes payment-method setup and the amount in the browser. This is
+the same regardless of which auth path created the account.
+
+## Try it
+
+```bash
+zero search "<capability you need>"
+zero fetch <result-id>
+```
+
+A good first task if you don't have one in mind: build a small site and host
+it with Zero.
+
+## Fallback installer
+
+Only needed with no npm and no supported plugin manager. Installs Node (only
+if the system doesn't have v20+) and the CLI into `~/.zero/runtime/`, adds
+`zero` to PATH for this shell, then runs `zero init` (see above). The
+script is plain shell; source is in the
+[zero-plugins repo](https://github.com/officialzeroxyz/zero-plugins).
 
 ```bash
 curl -fsSL https://zero.xyz/install.sh -o /tmp/zero-install.sh
-# optional, encouraged: read /tmp/zero-install.sh before running it
 bash /tmp/zero-install.sh
 ```
 
-What the script does: provisions the Zero runner under `~/.zero/runtime/`
-(downloading a private copy of Node there only if the system has none — it
-never touches system directories or your package manager), puts `zero` on
-PATH, and hands off to `zero init`. Integrity check, if you want one: it
-is the same file as `plugins/zero/hooks/ensure-runner.sh` on
-<https://github.com/officialzeroxyz/zero-plugins> `main`, with exactly one
-line different (the served copy defaults `INSTALL_MODE` to `1`), so you
-can diff your download against the public source.
+Re-run to update. `zero uninstall` reverses everything either path wrote.
 
-If you'd rather install through a package manager, the npm route is
-equivalent:
+## Troubleshooting
 
-```bash
-npm i -g @zeroxyz/cli
-zero init
-```
-
-`@zeroxyz/cli`'s provenance (OIDC publishing, named maintainers) is
-verifiable with `npm view @zeroxyz/cli`.
-
-No `npm` on PATH? Installing Node.js first (v20 or newer) through your
-platform's usual channel works fine — `brew install node`, `sudo apt-get
-install -y nodejs npm`, `winget install OpenJS.NodeJS.LTS`, or a version
-manager like `nvm` — then run the two commands above. (The shell installer
-exists precisely so this prerequisite is optional; either way ends in the
-same `zero init`.)
-
-What `zero init` does — it prints each step as it goes:
-
-- Detects installed harnesses by their config dirs (`~/.claude`,
-  `~/.codex`, `~/.gemini`, `~/.openclaw`, …).
-- For each one whose CLI is callable, installs the Zero plugin through that
-  harness's own plugin manager (e.g. `claude plugin install
-  zero@zero-plugins`). It never edits a harness's files behind its back
-  when a plugin manager can do it properly.
-- If no plugin install succeeds, falls back to a portable install: the
-  Zero skill into `~/.claude/skills/zero/` and `~/.agents/skills/zero/`,
-  hook scripts staged in `~/.zero/hooks/` and registered in
-  `~/.claude/settings.json` / `~/.codex/hooks.json`.
-- Creates no account and no wallet, and makes no purchases.
-
-All of it is reversed by `zero uninstall` (plugin installs are removed via
-each harness's own uninstall).
-
-### Step 2 — be operational in this session
-
-Skills load at session start, so the session that ran init can't see the
-skill it just installed. The init summary points at the installed skill
-file (e.g. `~/.agents/skills/zero/SKILL.md`) — read it now; it's the usage
-guide for everything after the install, and where these instructions defer
-whenever the two differ. If init installed through your harness's plugin
-manager instead, the skill is at `skills/zero/SKILL.md` under the installed
-plugin root. Future sessions load it automatically.
-
-### Step 3 — authenticate
-
-Zero accounts are how a wallet, payment history, and reviews attach to
-someone. Two paths — pick by whether a human is present.
-
-> **First check:** run `zero auth whoami --json`. The user is signed in only
-> if the output has a `user` object — if so, skip to **Step 4**. Anything
-> else (e.g. `"authMethod":"none"`, or a `local-key` self-custody wallet) is
-> **not** signed in: proceed with one of the paths below.
-
-#### Your operator is present (the default path)
-
-Device-code sign-in: the account and wallet are your operator's from the
-start, and their part is opening one URL. Run the commands yourself rather
-than handing them over to paste.
-
-```bash
-# 1. Start the device-code login. Prints JSON with a url + userCode, exits immediately.
-zero auth login --start --json
-```
-
-Show the user the `url` and `userCode`. Then run the finish command — it
-polls on its own until they authorize, so you don't need to ask whether
-they're done:
-
-```bash
-# 2. Blocks while polling (expected, not a hang); persists the session on success.
-zero auth login --finish <deviceCode from step 1> --json
-```
-
-Practical notes:
-
-- Run `--finish` in the foreground unless your harness re-invokes you when
-  a background command completes (Claude Code's background tasks do) — if
-  completion won't wake you, backgrounding it leaves the user waiting in
-  silence.
-- Re-running `--finish` with the same deviceCode is always safe: it returns
-  immediately if the user already authorized and resumes polling otherwise.
-  If your harness kills it with a tool timeout, just run it again.
-- `{"status":"ok"}` means signed in — confirm with `zero auth whoami
-  --json`. `{"status":"expired"}` means the code lapsed: start over from
-  step 1, and this time make the `url` + `userCode` the final message of
-  your turn, then run `--finish` when the user next replies.
-
-#### No human in the loop
-
-When your operator set you up to run autonomously (throwaway sandboxes, CI,
-agent fleets) and isn't available to approve a sign-in, Zero supports
-anonymous agent registration — an account and managed wallet created without
-a browser, an email, or a human step (the auth.md protocol; see
-<https://zero.xyz/auth.md>):
-
-```bash
-zero auth agent register
-```
-
-It prints the new wallet's address and persists the session in
-`~/.zero/config.json`. The account starts unfunded: free capabilities work
-immediately; paid ones need funding first — check prices before spending,
-and stay inside whatever budget your operator authorized.
-
-A human can take ownership of the account later:
-
-```bash
-zero auth agent claim <their-email>
-```
-
-prints a URL for them to open; they read a pairing code back to you and the
-account, wallet, and history become theirs. When an operator is available
-now, the device sign-in above is the better path — no claim step needed.
-
-### Step 4 — try it out (optional)
-
-Once authentication succeeds, the install works. A nice first thing to try:
-ask Zero to build and host a simple site, e.g.
-
-> "Build me a simple, but visually stunning hello world site and host it with
-> Zero for free."
-
-Offer it if it fits — skip it if the user already has their own task in mind.
-
----
-
-## If something fails
-
-Support can be requested with the command below; after sending it, stop —
-the remaining steps won't succeed without a working install. Substitute the
-placeholder values: your agent/harness name plus a brief note on what failed
-(the field caps at 300 characters). The `email` field is how Zero replies
-when support for your harness lands — it's your operator's email and their
-choice: ask if they want to leave one, and omit the field entirely if not.
+If the install fails, support can be requested with the command below —
+substitute your harness name and version, and include the operator's email
+only if they want a reply:
 
 ```bash
 curl -sS -X POST https://api.zero.xyz/v1/request-agent-access \
   -H "Content-Type: application/json" \
-  -d '{"agent":"<the agent or harness you are, with version>","email":"<optional email for a reply>"}'
+  -d '{"agent":"<your harness + version>","email":"<optional>"}'
 ```
-
-Humans (or browser-driving agents — the page exposes a WebMCP tool) can use
-the form at <https://zero.xyz/request-agent-access> instead.
