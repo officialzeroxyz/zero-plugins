@@ -1,6 +1,6 @@
 # Install Zero
 
-Zero ([zero.xyz](https://zero.xyz)) is a search engine and payment layer for
+Zero ([zero.xyz](https://www.zero.xyz)) is a search engine and payment layer for
 AI agents: search for a capability, call it, and pay per use. The CLI is
 published on npm as
 [`@zeroxyz/cli`](https://www.npmjs.com/package/@zeroxyz/cli); the plugin
@@ -17,7 +17,7 @@ Pick whichever applies:
 | Codex | `codex plugin marketplace add officialzeroxyz/zero-plugins && codex plugin add zero@zero-plugins` |
 | Gemini CLI | `gemini extensions install https://github.com/officialzeroxyz/zero-plugins` |
 | Anything with npm | `npm i -g @zeroxyz/cli && zero init` |
-| Claude Chat (claude.ai) / Claude Cowork | no shell — follow [zero.xyz/install/claude.md](https://zero.xyz/install/claude.md) instead |
+| Claude Chat (claude.ai) / Claude Cowork | no shell — follow [zero.xyz/install/claude.md](https://www.zero.xyz/install/claude.md) instead |
 | None of the above | see [Fallback installer](#fallback-installer) |
 
 The first three rows install through that harness's own plugin manager: they
@@ -33,8 +33,9 @@ in the repo:
 
 - **A skill** — the usage guide for the `zero` CLI
   ([source](https://github.com/officialzeroxyz/zero-plugins/blob/main/plugins/zero/skills/zero/SKILL.md))
-- **An MCP server** pointing at `mcp.zero.xyz`, for capability search and
-  account status
+- **An MCP connector** pointing at `mcp.zero.xyz` — how clients without a
+  shell (Claude web and mobile) sign in and reach Zero; CLI harnesses use
+  the `zero` CLI instead
 - **Three hooks**
   ([source](https://github.com/officialzeroxyz/zero-plugins/tree/main/plugins/zero/hooks)):
   - `SessionStart` — installs the `zero` CLI into `~/.zero/runtime/`
@@ -149,7 +150,7 @@ script is plain shell; source is in the
 [zero-plugins repo](https://github.com/officialzeroxyz/zero-plugins).
 
 ```bash
-curl -fsSL https://zero.xyz/install.sh -o /tmp/zero-install.sh
+curl -fsSL https://www.zero.xyz/install.sh -o /tmp/zero-install.sh
 bash /tmp/zero-install.sh
 ```
 
