@@ -5,7 +5,13 @@ no dedicated guide for your agent.
 
 ## Install
 
-Run this in your terminal:
+If you have npm (Node.js 20+), run this in your terminal:
+
+```bash
+npm i -g @zeroxyz/cli && zero init
+```
+
+No npm? Use the standalone installer:
 
 ```bash
 curl -fsSL https://zero.xyz/install.sh | bash
@@ -28,9 +34,11 @@ zero init --skills-dir ~/.youragent/skills
 
 ## Staying up to date
 
-To update, just re-run the install command:
+To update, just re-run whichever install command you used:
 
 ```bash
+npm i -g @zeroxyz/cli
+# or
 curl -fsSL https://zero.xyz/install.sh | bash
 ```
 

@@ -12,23 +12,52 @@ signups, no API keys to manage.
 ## Install Zero
 
 The recommended way to install Zero is to let your agent install it and guide
-you through setup. Just ask your agent:
+you through setup. Just paste this to your agent:
 
 ```
-Use curl www.zero.xyz/install.md and then install and setup Zero for me
+Help me install Zero (zero.xyz) in this agent. Zero is an agent plugin — a CLI,
+a skill, and hooks — that lets you find, invoke, and pay for thousands of
+external capabilities. The skill teaches you how to use the CLI, and the hooks
+remind you to reach for it when a task is beyond your built-in abilities. I
+understand it adds a skill and hooks to my agent config, plus a small CLI
+runtime under ~/.zero — that's what I want.
+
+Fetch the install runbook at https://zero.xyz/install.md and read it. Tell me
+briefly what the setup will do, then go ahead: use this harness's plugin
+manager if the runbook lists one, run the commands in my shell, and narrate as
+you go. I'll approve the browser sign-in when you show me the link. Don't add
+funds or buy anything — that's a separate step I'll do later if I want. If
+anything seems off, stop and ask.
 ```
 
 If you prefer to set up Zero manually, or your agent had issues with the
 installation, use the guides below. Pick your agent:
 
+- **[Amp](guides/generic.md)**
+- **[Antigravity](guides/generic.md)**
 - **[Claude Code (CLI)](guides/claude-code.md)**
 - **[Claude Code Desktop](guides/claude-code-desktop.md)**
 - **[Claude on the web (claude.ai) & Claude Cowork](guides/claude-ai.md)** —
   web, desktop, and mobile
+- **[Cline](guides/generic.md)**
 - **[Codex (CLI)](guides/codex.md)**
 - **[Codex app](guides/codex-app.md)**
+- **[Continue CLI](guides/generic.md)**
+- **[Crush](guides/generic.md)**
+- **[Cursor](guides/generic.md)**
+- **[Devin](guides/generic.md)**
 - **[Droid](guides/droid.md)**
 - **[Gemini CLI](guides/gemini-cli.md)**
+- **[GitHub Copilot CLI](guides/generic.md)**
+- **[Goose](guides/generic.md)**
+- **[Hermes Agent](guides/generic.md)**
+- **[Kilo Code](guides/generic.md)**
+- **[Kiro](guides/generic.md)**
+- **[OpenCode](guides/generic.md)**
+- **[Qwen Code](guides/generic.md)**
+- **[Trae](guides/generic.md)**
+- **[Warp](guides/generic.md)**
+- **[Zed](guides/generic.md)**
 - **[Anything else (standalone installer)](guides/generic.md)** — works in any
   agent with a shell (and for humans at a terminal)
 
@@ -73,5 +102,6 @@ mechanics — live in the per-host guides.
 ## Status
 
 This repo is built up iteratively, one carefully reviewed PR at a time. Today
-it ships the **Claude Code**, **Codex**, **Droid**, and **Gemini CLI** plugins;
-additional hosts (Cursor) will land in subsequent PRs.
+it ships the **Claude Code**, **Codex**, **Droid**, and **Gemini CLI** plugins,
+plus standalone skill-and-hooks integration (via `plugins/zero/agents.json`)
+for the other agents listed above; new hosts land in subsequent PRs.
