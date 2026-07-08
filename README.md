@@ -16,12 +16,12 @@ you through setup. Just paste this to your agent:
 
 ```
 Help me install Zero (zero.xyz) in this agent. Zero is an agent plugin — a CLI,
-a skill, hooks, and an MCP server — that lets you find, invoke, and pay for
+a skill, hooks, and an MCP connector — that lets you find, invoke, and pay for
 thousands of external capabilities. The skill teaches you how to use the CLI,
 the hooks remind you to reach for it when a task is beyond your built-in
-abilities, and the MCP server covers capability search and account status. I
-understand it adds a skill, hooks, and an MCP server to my agent config, plus
-a small CLI runtime under ~/.zero — that's what I want.
+abilities, and the MCP connector is how clients without a shell (web/mobile)
+sign in. I understand it adds a skill, hooks, and an MCP connector to my agent
+config, plus a small CLI runtime under ~/.zero — that's what I want.
 
 Fetch the install runbook using curl at https://zero.xyz/install.md and read
 it. Tell me briefly what the setup will do, then go ahead: use this harness's
@@ -73,8 +73,8 @@ Every install ships the same three ingredients:
   capability, and review the result.
 - **Hooks** — keep the Zero CLI runner provisioned and up to date, and remind
   the agent that Zero is available.
-- **The Zero MCP connector** — capability search and account status over MCP,
-  on hosts that load it.
+- **The Zero MCP connector** — how clients without a shell (Claude web and
+  mobile) sign in and reach Zero, on hosts that load it.
 
 All hosts share one login (`~/.zero/config.json`) and one runtime
 (`~/.zero/runtime`) — sign in once per machine. Updates are automatic; the

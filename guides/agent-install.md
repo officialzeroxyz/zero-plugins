@@ -33,8 +33,9 @@ in the repo:
 
 - **A skill** — the usage guide for the `zero` CLI
   ([source](https://github.com/officialzeroxyz/zero-plugins/blob/main/plugins/zero/skills/zero/SKILL.md))
-- **An MCP server** pointing at `mcp.zero.xyz`, for capability search and
-  account status
+- **An MCP connector** pointing at `mcp.zero.xyz` — how clients without a
+  shell (Claude web and mobile) sign in and reach Zero; CLI harnesses use
+  the `zero` CLI instead
 - **Three hooks**
   ([source](https://github.com/officialzeroxyz/zero-plugins/tree/main/plugins/zero/hooks)):
   - `SessionStart` — installs the `zero` CLI into `~/.zero/runtime/`
