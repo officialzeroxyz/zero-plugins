@@ -15,21 +15,24 @@ The recommended way to install Zero is to let your agent install it and guide
 you through setup. Just paste this to your agent:
 
 ```
-Help me install Zero (zero.xyz) in this agent. Zero is an agent plugin — a CLI,
-a skill, hooks, and an MCP connector — that lets you find, invoke, and pay for
-thousands of external capabilities. The skill teaches you how to use the CLI,
-the hooks remind you to reach for it when a task is beyond your built-in
-abilities, and the MCP connector is how clients without a shell (web/mobile)
-sign in. I understand it adds a skill, hooks, and an MCP connector to my agent
-config, plus a small CLI runtime under ~/.zero — that's what I want.
+Help me set up Zero — a tool that lets you find and use extra services you
+don't have built in (image/video generation, search live social media, or
+hosting a free webpage). It's free to set up.
 
-Fetch the install runbook using curl at https://www.zero.xyz/install.md and read
-it. Tell me briefly what the setup will do, then go ahead: use this harness's
-plugin manager if the runbook lists one, run the commands in my shell, and
-narrate as you go. I'll approve the browser sign-in when you show me the link.
-Don't add funds or buy anything — that's a separate step I'll do later if I
-want. If anything seems off, stop and ask.
+Set it up by running the Zero CLI's setup (needs Node.js — install it first if
+`npm` isn't available):
+
+    npm i -g @zeroxyz/cli
+    zero init
+    zero auth login
 ```
+
+This is the same prompt [zero.xyz](https://www.zero.xyz/setup.md) hands out:
+the CLI is a public npm package your agent can inspect
+([`@zeroxyz/cli`](https://www.npmjs.com/package/@zeroxyz/cli)), and
+`zero init` integrates the skill and hooks with every harness it detects —
+[What the plugin does](#what-the-plugin-does) lists exactly what that adds.
+`zero uninstall` reverses all of it.
 
 If you prefer to set up Zero manually, or your agent had issues with the
 installation, use the guides below. Pick your agent:
