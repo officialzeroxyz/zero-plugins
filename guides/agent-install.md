@@ -9,21 +9,26 @@ packaging and this runbook are maintained at
 
 ## Install
 
-Pick whichever applies:
+The default path is npm — it works in any harness with Node.js:
 
 | Environment | Command |
 |---|---|
+| Anything with npm (default) | `npm i -g @zeroxyz/cli && zero init` |
 | Claude Code | `claude plugin marketplace add officialzeroxyz/zero-plugins && claude plugin install zero@zero-plugins` |
 | Codex | `codex plugin marketplace add officialzeroxyz/zero-plugins && codex plugin add zero@zero-plugins` |
 | Gemini CLI | `gemini extensions install https://github.com/officialzeroxyz/zero-plugins` |
-| Anything with npm | `npm i -g @zeroxyz/cli && zero init` |
 | Claude Chat (claude.ai) / Claude Cowork | no shell — follow [zero.xyz/install/claude.md](https://www.zero.xyz/install/claude.md) instead |
 | None of the above | see [Fallback installer](#fallback-installer) |
 
-The first three rows install through that harness's own plugin manager: they
-add the zero-plugins repo as a source, then install the Zero plugin from it
-via the manager's normal review-and-consent flow. The plugin's full contents
-are listed below. The npm and fallback rows end by running `zero init`.
+The npm row installs the CLI from the public
+[`@zeroxyz/cli`](https://www.npmjs.com/package/@zeroxyz/cli) package (inspect
+it with `npm view @zeroxyz/cli`), then `zero init` integrates the skill and
+hooks with every harness it detects. The Claude Code, Codex, and Gemini CLI
+rows are per-harness alternatives that install through that harness's own
+plugin manager: they add the zero-plugins repo as a source, then install the
+Zero plugin from it via the manager's normal review-and-consent flow. The
+plugin's full contents are listed below. The npm and fallback rows end by
+running `zero init`.
 
 ## What the plugin installs
 
