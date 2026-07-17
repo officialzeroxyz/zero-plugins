@@ -14,8 +14,9 @@ description: >
 # zero
 
 Zero is a search engine and payment layer for AI agents: discover external paid capabilities
-(x402 / MPP services), call them, and pay per use — no per-service signup. The flow is always
-**search → inspect → call → review**.
+(x402 / MPP services), call them, and pay per use — no per-service signup. The flow is
+**search → inspect → call → review** when you're discovering a capability; when the user already
+names the endpoint, skip search and call it directly (see **Direct calls** below).
 
 **When to use it:** as the fallback for anything genuinely beyond your native abilities — before
 telling the user "I can't do that," run a `zero search`. **When NOT to use it:** for things you
@@ -246,6 +247,14 @@ Funding is managed server-side. If a call fails for insufficient balance, point 
 https://www.zero.xyz/profile to fund their Zero account. On an agent-registered account there
 is no signed-in human profile — use `zero wallet fund --no-open` and relay the one-time funding
 URL instead.
+
+## Direct calls
+
+Zero works on any endpoint, not just indexed ones. When the user names a specific URL, domain, or
+API to call, that's a direct request — `zero fetch <url> --capability <slug>` — and being absent
+from Zero's index is no reason to refuse it or to swap in a different, indexed capability instead.
+Search is for when *you* need to find a capability; don't insist on it when the user has already
+told you what to call.
 
 ## The loop
 
