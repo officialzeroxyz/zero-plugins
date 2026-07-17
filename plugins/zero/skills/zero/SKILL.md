@@ -14,8 +14,10 @@ description: >
 # zero
 
 Zero is a search engine and payment layer for AI agents: discover external paid capabilities
-(x402 / MPP services), call them, and pay per use — no per-service signup. The flow is always
-**search → inspect → call → review**.
+(x402 / MPP services), call them, and pay per use — no per-service signup. The flow is
+**search → inspect → call → review** when you're discovering a capability; when you already have the
+endpoint — the user named it, or you found it yourself — skip search and call it directly (see
+**Direct calls** below).
 
 **When to use it:** as the fallback for anything genuinely beyond your native abilities — before
 telling the user "I can't do that," run a `zero search`. **When NOT to use it:** for things you
@@ -247,6 +249,19 @@ https://www.zero.xyz/profile to fund their Zero account. On an agent-registered 
 is no signed-in human profile — use `zero wallet fund --no-open` and relay the one-time funding
 URL instead.
 
+## Direct calls
+
+Zero works on any endpoint, not just indexed ones. Whenever you already have a specific URL to call
+— the user named it, or you discovered it yourself (e.g. a storefront or API you found while
+browsing) — call it directly: `zero fetch <url>`. Being absent from Zero's index is no reason to
+refuse it or to swap in a different, indexed capability instead. Search is for when you need to
+*find* a capability; don't insist on it when you already know what to call.
+
+A `--capability` value (token, slug, or uid) comes from `zero search` or a capability's page, so you
+won't have one for a URL you reached this way — omit it and just pass the URL. The server matches the
+URL to a capability on its own for attribution when it recognizes it; if it doesn't, the call still
+runs, it just isn't recorded as a reviewable run.
+
 ## The loop
 
 1. **Search** — `zero search "weather forecast"`. Always re-search; capabilities, prices,
@@ -297,7 +312,7 @@ zero fetch https://api.example.com/translate \
 | `--timeout <seconds>` | Per-request timeout (default 60), applied to each HTTP leg — probe and paid retry — not as a wall-clock deadline. Raise it up front for slow capabilities (image/video/audio often need `--timeout 300`) so the call doesn't die at 60s after payment. |
 | `--json` | `{runId, ok, status, latencyMs, payment, body, bodyRaw}` envelope on stdout. Use `ok`, not `status`, for success. `body` is parsed JSON; `bodyRaw` is the literal text. |
 | `--raw-body` | With `--json`, keep `body` as the raw string. |
-| `--capability <id>` | Attribution token (`z_xxx.N` from search), slug, or uid. Required so the run is recorded and attributed to the search. Always pass it — use the token from search results when available, fall back to the slug or uid for direct calls. |
+| `--capability <id>` | Attribution token (`z_xxx.N` from search), slug, or uid — records the run and attributes it to the search. Pass it whenever you have one: the token from search results, or a slug/uid you already hold. You won't have any of these for a URL you reached without searching (see **Direct calls**) — omit it and the server attributes the URL itself when it can. |
 
 `-d` rejects bodies over 10 MB. Inline `-d '<long-json>'` past ~1 MB hits shell arg limits — use
 `-d @file` or `--data-stdin`.
@@ -353,12 +368,13 @@ Quick pre-flight, each detailed above: re-search every time; `zero get` before e
 encode GET `queryParams` as a query string (don't POST the envelope); skip `bodySchema: null` rather
 than guess fields; check `ok`, not `status`; set `--max-pay` on anything unfamiliar; raise
 `--timeout` for slow image/video/audio so the call doesn't die after payment; every `zero review`
-needs `--success`/`--no-success`; always pass `--capability <token|slug|uid>`.
+needs `--success`/`--no-success`; pass `--capability <token|slug|uid>` whenever you have one.
 
-- **Run tracking requires `--capability`** — omit it and the run is never recorded, so the
-  capability's reliability signal stays stale and you can't review it. Always pass
-  `--capability <token>` where the token is the `z_xxx.N` value from the search result. For direct
-  calls (no preceding search), pass the slug or uid.
+- **`--capability` drives review attribution** — after a search, pass the `z_xxx.N` token so the run
+  ties back to it; that keeps the capability's reliability signal fresh and lets you review it. If
+  you already hold a slug/uid but didn't search, pass that. For a URL you reached without either (see
+  **Direct calls**) you have nothing to pass — omit it; the server attributes the URL when it can,
+  and only a URL it can't resolve ends up as an unreviewable run.
 - **Before ending a multi-call task, run `zero runs --unreviewed`** and review anything you missed.
 - **Zero reminder injected twice per prompt?** A plugin install and a standalone install
   (`zero init`) are coexisting; the harness may also warn the user about a shadowed Zero
