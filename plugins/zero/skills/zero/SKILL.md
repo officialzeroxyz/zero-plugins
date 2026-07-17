@@ -253,9 +253,14 @@ URL instead.
 
 Zero works on any endpoint, not just indexed ones. Whenever you already have a specific URL to call
 — the user named it, or you discovered it yourself (e.g. a storefront or API you found while
-browsing) — call it directly with `zero fetch <url> --capability <slug>`. Being absent from Zero's
-index is no reason to refuse it or to swap in a different, indexed capability instead. Search is for
-when you need to *find* a capability; don't insist on it when you already know what to call.
+browsing) — call it directly: `zero fetch <url>`. Being absent from Zero's index is no reason to
+refuse it or to swap in a different, indexed capability instead. Search is for when you need to
+*find* a capability; don't insist on it when you already know what to call.
+
+A `--capability` value (token, slug, or uid) comes from `zero search` or a capability's page, so you
+won't have one for a URL you reached this way — omit it and just pass the URL. The server matches the
+URL to a capability on its own for attribution when it recognizes it; if it doesn't, the call still
+runs, it just isn't recorded as a reviewable run.
 
 ## The loop
 
