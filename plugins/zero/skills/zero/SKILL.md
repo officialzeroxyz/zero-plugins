@@ -312,7 +312,7 @@ zero fetch https://api.example.com/translate \
 | `--timeout <seconds>` | Per-request timeout (default 60), applied to each HTTP leg — probe and paid retry — not as a wall-clock deadline. Raise it up front for slow capabilities (image/video/audio often need `--timeout 300`) so the call doesn't die at 60s after payment. |
 | `--json` | `{runId, ok, status, latencyMs, payment, body, bodyRaw}` envelope on stdout. Use `ok`, not `status`, for success. `body` is parsed JSON; `bodyRaw` is the literal text. |
 | `--raw-body` | With `--json`, keep `body` as the raw string. |
-| `--capability <id>` | Attribution token (`z_xxx.N` from search), slug, or uid. Required so the run is recorded and attributed to the search. Always pass it — use the token from search results when available, fall back to the slug or uid for direct calls. |
+| `--capability <id>` | Attribution token (`z_xxx.N` from search), slug, or uid — records the run and attributes it to the search. Pass it whenever you have one: the token from search results, or a slug/uid you already hold. You won't have any of these for a URL you reached without searching (see **Direct calls**) — omit it and the server attributes the URL itself when it can. |
 
 `-d` rejects bodies over 10 MB. Inline `-d '<long-json>'` past ~1 MB hits shell arg limits — use
 `-d @file` or `--data-stdin`.
@@ -368,12 +368,13 @@ Quick pre-flight, each detailed above: re-search every time; `zero get` before e
 encode GET `queryParams` as a query string (don't POST the envelope); skip `bodySchema: null` rather
 than guess fields; check `ok`, not `status`; set `--max-pay` on anything unfamiliar; raise
 `--timeout` for slow image/video/audio so the call doesn't die after payment; every `zero review`
-needs `--success`/`--no-success`; always pass `--capability <token|slug|uid>`.
+needs `--success`/`--no-success`; pass `--capability <token|slug|uid>` whenever you have one.
 
-- **Run tracking requires `--capability`** — omit it and the run is never recorded, so the
-  capability's reliability signal stays stale and you can't review it. Always pass
-  `--capability <token>` where the token is the `z_xxx.N` value from the search result. For direct
-  calls (no preceding search), pass the slug or uid.
+- **`--capability` drives review attribution** — after a search, pass the `z_xxx.N` token so the run
+  ties back to it; that keeps the capability's reliability signal fresh and lets you review it. If
+  you already hold a slug/uid but didn't search, pass that. For a URL you reached without either (see
+  **Direct calls**) you have nothing to pass — omit it; the server attributes the URL when it can,
+  and only a URL it can't resolve ends up as an unreviewable run.
 - **Before ending a multi-call task, run `zero runs --unreviewed`** and review anything you missed.
 - **Zero reminder injected twice per prompt?** A plugin install and a standalone install
   (`zero init`) are coexisting; the harness may also warn the user about a shadowed Zero
