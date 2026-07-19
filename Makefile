@@ -17,7 +17,9 @@ MANIFESTS := \
 	plugins/zero/.claude-plugin/plugin.json \
 	plugins/zero/.codex-plugin/plugin.json \
 	plugins/zero/.factory-plugin/plugin.json \
-	plugins/zero-gemini/gemini-extension.json
+	plugins/zero-gemini/gemini-extension.json \
+	plugins/zero-hermes/manifest.json \
+	plugins/zero-hermes/hermes/plugin.yaml
 
 # The manifest read for the current version (all of MANIFESTS stay in lockstep).
 VERSION_SOURCE := plugins/zero/.claude-plugin/plugin.json
@@ -58,9 +60,10 @@ bump:
 	next="$$major.$$minor.$$patch"; \
 	for m in $(MANIFESTS); do \
 	  [ -f "$$m" ] || { echo "make: missing manifest: $$m" >&2; exit 1; }; \
-	  grep -q '"version"' "$$m" || { echo "make: no \"version\" key in $$m" >&2; exit 1; }; \
+	  grep -Eq '"version"|^version:' "$$m" || { echo "make: no version key in $$m" >&2; exit 1; }; \
 	  tmp=$$(mktemp); \
-	  sed 's/\("version"[[:space:]]*:[[:space:]]*"\)[^"]*"/\1'"$$next"'"/' "$$m" > "$$tmp" && mv "$$tmp" "$$m"; \
+	  sed -e 's/\("version"[[:space:]]*:[[:space:]]*"\)[^"]*"/\1'"$$next"'"/' \
+	      -e 's/^version:[[:space:]]*.*/version: '"$$next"'/' "$$m" > "$$tmp" && mv "$$tmp" "$$m"; \
 	  echo "  $$m -> $$next"; \
 	done; \
 	echo "Bumped $$current -> $$next"

@@ -271,7 +271,14 @@
     {
       "id": "hermes",
       "name": "Hermes Agent",
+      "minCli": "1.14.0",
       "detect": { "exe": "hermes", "dir": ".hermes" },
+      "install": {
+        "executable": "hermes",
+        "steps": [
+          { "label": "install plugin", "command": "hermes", "args": ["plugins", "install", "officialzeroxyz/zero-plugins/plugins/zero-hermes/hermes", "--force", "--enable"] }
+        ]
+      },
       "standalone": {
         "skills": [".hermes/skills"]
       }

@@ -17,24 +17,30 @@ The default path is npm — it works in any harness with Node.js:
 | Claude Code | `claude plugin marketplace add officialzeroxyz/zero-plugins && claude plugin install zero@zero-plugins` |
 | Codex | `codex plugin marketplace add officialzeroxyz/zero-plugins && codex plugin add zero@zero-plugins` |
 | Gemini CLI | `gemini extensions install https://github.com/officialzeroxyz/zero-plugins` |
+| Hermes Agent | `hermes plugins install officialzeroxyz/zero-plugins/plugins/zero-hermes/hermes --force --enable` |
 | Claude Chat (claude.ai) / Claude Cowork | no shell — follow [zero.xyz/install/claude.md](https://www.zero.xyz/install/claude.md) instead |
 | None of the above | see [Fallback installer](#fallback-installer) |
 
 The npm row installs the CLI from the public
 [`@zeroxyz/cli`](https://www.npmjs.com/package/@zeroxyz/cli) package (inspect
 it with `npm view @zeroxyz/cli`), then `zero init` integrates the skill and
-hooks with every harness it detects. The Claude Code, Codex, and Gemini CLI
-rows are per-harness alternatives that install through that harness's own
-plugin manager: they add the zero-plugins repo as a source, then install the
-Zero plugin from it via the manager's normal review-and-consent flow. The
-plugin's full contents are listed below. The npm and fallback rows end by
-running `zero init`.
+hooks with every harness it detects. The Claude Code, Codex, Gemini CLI, and
+Hermes Agent rows are per-harness alternatives that install through that
+harness's own plugin manager: they add the zero-plugins repo as a source (or,
+for Hermes, install straight from a subdirectory of it), then install the
+Zero plugin via the manager's normal review-and-consent flow. The plugin's
+full contents are listed below. The npm and fallback rows end by running
+`zero init`.
 
 ## What the plugin installs
 
-All three plugin-manager rows install the same contents, from
+The plugin-manager rows install the same contents, from
 [`plugins/zero/`](https://github.com/officialzeroxyz/zero-plugins/tree/main/plugins/zero)
-in the repo:
+in the repo (Hermes Agent installs the same skill and session-start hook from
+[`plugins/zero-hermes/hermes/`](https://github.com/officialzeroxyz/zero-plugins/tree/main/plugins/zero-hermes/hermes),
+where they are vendored for its plugin format; instead of an auto-approve
+hook — Hermes hooks can't approve — it adds a guard that blocks `zero fetch`
+commands missing an explicit `--max-pay` cap, plus a `/zero` command):
 
 - **A skill** — the usage guide for the `zero` CLI
   ([source](https://github.com/officialzeroxyz/zero-plugins/blob/main/plugins/zero/skills/zero/SKILL.md))
