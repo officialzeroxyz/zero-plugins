@@ -10,16 +10,22 @@ Requires Hermes Agent v2026.6.19 or newer (`hermes --version`).
 
 ```bash
 hermes plugins install officialzeroxyz/zero-plugins/plugins/zero-hermes/hermes --force --enable
-hermes mcp add zero --url https://mcp.zero.xyz --auth oauth
 ```
 
-The first command installs and enables the Zero plugin (hooks, the `/zero`
-command, and the Zero skill) from this repository. The second adds the Zero
-MCP server (optional — the plugin's `zero` CLI covers the full flow; the MCP
-server helps sessions without a shell).
+This installs and enables the Zero plugin (hooks, the `/zero` command, and
+the Zero skill) from this repository.
 
 Start a new Hermes session, then use `/zero` or ask Hermes:
-*"Help me set up and test Zero."* It walks you through signing in.
+*"Help me set up and test Zero."* It walks you through signing in with
+`zero auth login` — a device-code login persisted to `~/.zero`, shared with
+every other Zero install on the machine.
+
+If you run Hermes in an ephemeral environment where a session can't persist
+to disk, add the Zero MCP server instead and authorize through it:
+
+```bash
+hermes mcp add zero --url https://mcp.zero.xyz --auth oauth
+```
 
 ## Staying up to date
 
