@@ -54,7 +54,7 @@ installation, use the guides below. Pick your agent:
 - **[Gemini CLI](guides/gemini-cli.md)**
 - **[GitHub Copilot CLI](guides/generic.md)**
 - **[Goose](guides/generic.md)**
-- **[Hermes Agent](guides/generic.md)**
+- **[Hermes Agent](guides/hermes-agent.md)**
 - **[Kilo Code](guides/generic.md)**
 - **[Kiro](guides/generic.md)**
 - **[OpenCode](guides/generic.md)**

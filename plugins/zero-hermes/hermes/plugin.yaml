@@ -1,0 +1,11 @@
+name: zero
+version: 1.11.0
+description: Zero capability search and payment layer for Hermes Agent
+provides_hooks:
+  - on_session_start
+  - pre_llm_call
+  - pre_tool_call
+provides_commands:
+  - zero
+provides_skills:
+  - zero

@@ -1,0 +1,35 @@
+name: Hermes plugin sync
+
+# The Hermes plugin installs straight from this repo's subdirectory
+# (plugins/zero-hermes/hermes/), and a subdirectory install ships only what is
+# checked in there — it cannot reference plugins/zero/ at runtime. The shared
+# hook script and skill are therefore vendored into the plugin directory by
+# scripts/sync-hermes.sh. This check fails any PR where the vendored copies
+# drift from their sources.
+on:
+  pull_request:
+    paths:
+      - 'plugins/zero/hooks/ensure-runner.sh'
+      - 'plugins/zero/skills/zero/SKILL.md'
+      - 'plugins/zero-hermes/**'
+      - 'scripts/sync-hermes.sh'
+  push:
+    branches: [main]
+    paths:
+      - 'plugins/zero/hooks/ensure-runner.sh'
+      - 'plugins/zero/skills/zero/SKILL.md'
+      - 'plugins/zero-hermes/**'
+      - 'scripts/sync-hermes.sh'
+
+permissions:
+  contents: read
+
+jobs:
+  hermes-plugin-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify vendored Hermes plugin files are in sync
+        run: scripts/sync-hermes.sh --check
