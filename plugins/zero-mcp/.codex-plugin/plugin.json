@@ -1,6 +1,6 @@
 {
   "name": "zero",
-  "version": "1.11.0",
+  "version": "1.12.0",
   "description": "The Zero MCP connector and skill, nothing else — no hooks or scripts. Search a live index of paid AI capabilities (x402 / MPP) — live data, AI models, media generation, messaging — then call them and pay per use with a wallet. Connector-only alternative to the 'zero' plugin.",
   "author": { "name": "Zero", "url": "https://zero.xyz" },
   "homepage": "https://zero.xyz",
