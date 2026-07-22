@@ -273,18 +273,30 @@ favor of Kiro).
 The connector authenticates via OAuth on first use — the agent can trigger
 it; only the browser sign-in itself needs the user.
 
-1. **Trigger**: after the session reloads with the new MCP server, make one
-   free `search_capabilities` call (any query — "current weather for a
-   city"). The client sees the connector needs auth and opens the browser
-   sign-in. Tell the user to expect it: a zero.xyz sign-in (email-based,
-   creating a Zero account on first use), then an authorization screen for
-   this connector. No API keys are shown or pasted anywhere; access is
-   revocable later from their Zero account.
-2. **Fallback**: if no browser opens (some clients don't auto-launch from a
-   tool call), have the user trigger it manually — Claude Code: `/mcp` →
-   `zero` → **Authenticate**. Until sign-in, `claude mcp list` showing
-   "Needs authentication" is the expected state, not an error.
-3. **Verify**: once signed in, repeat the free search and confirm
+1. **Trigger (Claude Code — agent-runnable, works immediately after
+   install)**: `claude mcp login zero` starts the browser sign-in directly.
+   It requires a TTY, so from a tool shell wrap it in a pty and run it in
+   the background, then poll `claude mcp list` until `zero` shows connected:
+
+   ```bash
+   script -q /dev/null claude mcp login zero            # macOS
+   script -qec "claude mcp login zero" /dev/null        # Linux
+   ```
+
+   Tell the user to expect their browser to open: a zero.xyz sign-in
+   (email-based, creating a Zero account on first use), then an
+   authorization screen for this connector. No API keys are shown or pasted
+   anywhere; access is revocable later from their Zero account.
+2. **Trigger (other clients)**: once the client has loaded the connector's
+   tools, make one free `search_capabilities` call (any query — "current
+   weather for a city"). The client sees the connector needs auth and opens
+   the browser sign-in. Note most clients load MCP tools at session start,
+   so a server added mid-session needs a reload first.
+3. **Fallback**: if no browser opens, have the user trigger it manually —
+   Claude Code: `/mcp` → `zero` → **Authenticate**. Until sign-in,
+   `claude mcp list` showing "Needs authentication" is the expected state,
+   not an error.
+4. **Verify**: once signed in, run a free search and confirm
    search_capabilities returns ranked results. Searching is free — but do
    not invoke anything unless the user asks, since invocations spend money
    from their wallet. If a later invoke fails for insufficient balance, mint
