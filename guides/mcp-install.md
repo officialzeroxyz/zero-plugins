@@ -279,14 +279,29 @@ it; only the browser sign-in itself needs the user.
    the background, then poll `claude mcp list` until `zero` shows connected:
 
    ```bash
-   script -q /dev/null claude mcp login zero            # macOS
-   script -qec "claude mcp login zero" /dev/null        # Linux
+   script -q /dev/null claude mcp login <server-name>   # macOS
+   script -qec "claude mcp login <server-name>" /dev/null   # Linux
    ```
+
+   The server name comes from `claude mcp list`: it is `zero` for the
+   manual install and `plugin:zero:zero` for the plugin install.
 
    Tell the user to expect their browser to open: a zero.xyz sign-in
    (email-based, creating a Zero account on first use), then an
    authorization screen for this connector. No API keys are shown or pasted
    anywhere; access is revocable later from their Zero account.
+
+   **Remote or sandboxed session** (the shell runs on a different machine
+   than the user's browser — cloud sandboxes, containers): the sign-in
+   URL's localhost callback is on this machine, so the user's browser
+   cannot complete it. Use the login prompt's paste fallback instead: give
+   the user the authorization URL the command prints, have them sign in,
+   then ask them to copy the resulting `http://localhost:.../callback?...`
+   URL from their browser (it will show a connection error — that is
+   expected) and paste it back to you; feed it to the login prompt's
+   stdin. Keep the same login process running through the whole
+   round-trip — the code is bound to that process, and a restarted login
+   invalidates it.
 2. **Trigger (other clients)**: once the client has loaded the connector's
    tools, make one free `search_capabilities` call (any query — "current
    weather for a city"). The client sees the connector needs auth and opens
