@@ -1,6 +1,6 @@
 {
   "name": "zero-hermes",
-  "version": "1.11.0",
+  "version": "1.12.0",
   "description": "Hermes Agent adapter for Zero: plugin hooks, slash command, Hermes skill package, and MCP config fragment.",
   "homepage": "https://zero.xyz",
   "repository": "https://github.com/officialzeroxyz/zero-plugins",

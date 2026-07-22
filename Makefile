@@ -17,6 +17,8 @@ MANIFESTS := \
 	plugins/zero/.claude-plugin/plugin.json \
 	plugins/zero/.codex-plugin/plugin.json \
 	plugins/zero/.factory-plugin/plugin.json \
+	plugins/zero-mcp/.claude-plugin/plugin.json \
+	plugins/zero-mcp/.codex-plugin/plugin.json \
 	plugins/zero-gemini/gemini-extension.json \
 	plugins/zero-hermes/manifest.json \
 	plugins/zero-hermes/hermes/plugin.yaml
