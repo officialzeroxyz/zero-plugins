@@ -102,7 +102,8 @@ Add a custom connector with URL https://mcp.zero.xyz in Settings → Connectors,
 in when prompted. claude.ai does not load user skill files, so the connector
 alone applies there; to get the skill too, install the plugin from the
 plugin browser (Customize → Browse plugins → Add marketplace →
-`officialzeroxyz/zero-plugins`).
+`officialzeroxyz/zero-plugins`), or download https://mcp.zero.xyz/plugin
+(a plugin-format zip) and upload it as a custom plugin.
 
 ## Gemini CLI
 
@@ -256,7 +257,9 @@ Skill: `~/.hermes/skills/zero/SKILL.md`.
   under whatever directory your harness loads skills from —
   `.agents/skills/` and `.claude/skills/` are the two conventions nearly
   every harness reads.
-- Plugin-format harnesses: download
+- Plugin-format harnesses: a single-plugin zip (manifests at the zip root)
+  is at https://mcp.zero.xyz/plugin — usable wherever a plugin upload or
+  plugin directory is accepted. For marketplace-format harnesses, download
   https://github.com/officialzeroxyz/zero-plugins/archive/refs/heads/main.zip
   and unzip — the unzipped repository is the plugin marketplace itself
   (`marketplace.json` at `.claude-plugin/`), with this plugin in
