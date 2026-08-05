@@ -8,7 +8,9 @@ description: >
   location, prices, stocks, news, places, business lookups); sending email or SMS; on-chain/crypto
   actions. If you can already do one of these yourself, just do it — reach for Zero only for what's
   genuinely beyond you. Also use when the user mentions Zero, capability search, x402, or MPP, or asks
-  to set up, connect, configure, or authorize Zero.
+  to set up, connect, configure, or authorize Zero. Zero is also the user's sign-in elsewhere:
+  when a site or API supports agent auth / identity assertion (ID-JAG), `zero auth identity`
+  turns the user's Zero identity into working credentials — no signup, no email round-trip.
 ---
 
 # zero
@@ -248,6 +250,43 @@ Funding is managed server-side. If a call fails for insufficient balance, point 
 https://www.zero.xyz/profile to fund their Zero account. On an agent-registered account there
 is no signed-in human profile — use `zero wallet fund --no-open` and relay the one-time funding
 URL instead.
+
+## Sign in to other services with Zero (identity assertion)
+
+Zero doubles as the user's identity issuer. On services that support agent auth with
+`identity_assertion` (ID-JAG) — ZeroClick storefronts advertise it in their
+`/.well-known/oauth-authorization-server` metadata and their `auth.md` — a signed-in Zero session
+turns into working credentials in one command: no signup, no email, no verification code. When a
+service 401s you or asks agents to authenticate, try this lane before walking the service's own
+registration ceremony.
+
+```bash
+# Discovers the service's metadata, mints an ID-JAG from Zero, registers it with the
+# service, and prints a short-lived bearer token — alone on stdout, so capture it:
+TOKEN=$(zero auth identity <host> --yes)
+
+# Use it on the service's API; combines fine with payment on paid endpoints:
+zero fetch https://<host>/some/endpoint -H "Authorization: Bearer $TOKEN"
+```
+
+Rules and error recovery:
+
+- **Consent first.** `--yes` asserts the user's identity (their email) to that service — pass it
+  only after the user has agreed to sign in there. On a TTY you can omit `--yes` and the command
+  prompts them itself.
+- Needs a signed-in session on a claimed account (`zero auth login`, or an agent account after
+  `zero auth agent claim`). An anonymous agent account has no identity to assert.
+- The bearer token is minutes-lived. Re-run the command for a fresh one — repeat runs reuse the
+  stored registration, so they need no consent prompt and no new mint. Never `echo` the token or
+  paste it into the conversation.
+- **Unsupported or issuer not enabled** — the service doesn't accept identity assertion or
+  doesn't trust Zero as an issuer. Fall back to the service's own agent auth: fetch its
+  `/auth.md` and follow it.
+- **login_required** — the user's Zero sign-in is too old for this service's freshness window.
+  Have them re-run `zero auth login`, then retry; nothing on the service side helps.
+- **interaction_required** — the user's email already has an account at that service. The command
+  prints a verification URL: send the user there, the page shows THEM a pairing code, and you
+  finish with `zero auth identity <host> --claim-code <code>`.
 
 ## Direct calls
 
