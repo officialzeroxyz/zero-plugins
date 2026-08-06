@@ -268,9 +268,11 @@ zero fetch https://<host>/some/endpoint -H "Authorization: Bearer $TOKEN"
 
 Rules and error recovery:
 
-- **Consent first.** `--yes` asserts the user's identity (their email) to that service — pass it
-  only after the user has agreed to sign in there. On a TTY you can omit `--yes` and the command
-  prompts them itself.
+- **Consent first — but only once.** `--yes` asserts the user's identity (their email) to that
+  service — pass it only after the user has agreed to sign in there. Consent is recorded on their
+  Zero account, so no machine or surface ever asks again for that service; `--always` records a
+  blanket grant covering every service. On a TTY you can omit `--yes` and the command prompts the
+  user itself.
 - Needs a signed-in session on a claimed account (`zero auth login`, or an agent account after
   `zero auth agent claim`). An anonymous agent account has no identity to assert.
 - The bearer token is minutes-lived. Re-run the command for a fresh one — repeat runs reuse the
