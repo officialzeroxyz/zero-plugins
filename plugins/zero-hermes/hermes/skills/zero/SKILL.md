@@ -250,12 +250,11 @@ URL instead.
 
 ## Sign in to other services with Zero (identity assertion)
 
-Zero doubles as the user's identity issuer. On services that support agent auth with
-`identity_assertion` (ID-JAG) — ZeroClick storefronts advertise it in their
-`/.well-known/oauth-authorization-server` metadata and their `auth.md` — a signed-in Zero session
-turns into working credentials in one command: no signup, no email, no verification code. When a
-service 401s you or asks agents to authenticate, try this lane before walking the service's own
-registration ceremony.
+Zero is an agent identity provider. Services that accept agent auth with `identity_assertion`
+(ID-JAG) advertise it in their `/.well-known/oauth-authorization-server` metadata and their
+`auth.md`; on those, a signed-in Zero session turns into working credentials in one command — no
+signup, no email, no verification code. When a service 401s you or asks agents to authenticate,
+try this lane before walking the service's own registration ceremony.
 
 ```bash
 # Discovers the service's metadata, mints an ID-JAG from Zero, registers it with the
@@ -271,8 +270,8 @@ Rules and error recovery:
 - **Consent is the user's, decided in their browser — once.** The first sign-in to a service
   prints an approval link; send the user there, and the command waits while they approve or deny
   on the hosted page. There is no flag that skips this. Their decision is recorded on their Zero
-  account, so no machine or surface ever asks again for that service (a platform network like
-  ZeroClick counts as one service, and the page offers a "don't ask again for anything" option).
+  account, so no machine or surface ever asks again for that service (a platform fronting many
+  storefronts counts as one service; the page also offers a "don't ask again for anything" option).
 - Needs a signed-in session on a claimed account (`zero auth login`, or an agent account after
   `zero auth agent claim`). An anonymous agent account has no identity to assert.
 - The bearer token is minutes-lived. Re-run the command for a fresh one — repeat runs reuse the
