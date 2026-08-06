@@ -10,8 +10,8 @@ description: >
   genuinely beyond you. Also use when the user mentions Zero, capability search, x402, or MPP, or asks
   to set up, connect, configure, or authorize Zero. Zero can also act as the user's identity
   provider: when a site or API supports agent auth / identity assertion (ID-JAG), or asks the
-  agent to sign in or create an account, try `zero auth identity` — where Zero is a trusted
-  issuer, it signs the user in with their Zero identity, no signup needed.
+  agent to sign in or sign up, try `zero auth identity` — where Zero is a trusted issuer, it
+  signs the user in with their Zero identity, no signup needed.
 ---
 
 # zero
