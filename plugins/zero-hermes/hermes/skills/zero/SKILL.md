@@ -248,6 +248,47 @@ https://www.zero.xyz/profile to fund their Zero account. On an agent-registered 
 is no signed-in human profile — use `zero wallet fund --no-open` and relay the one-time funding
 URL instead.
 
+## Sign in to other services with Zero (identity assertion)
+
+Zero can act as the user's identity provider — on services that support agent auth with
+`identity_assertion` (ID-JAG) **and** list Zero among their trusted issuers. Support is
+advertised in the service's `/.well-known/oauth-authorization-server` metadata; the issuer trust
+list is the service's own (usually documented in its `auth.md`), so this is not universal. Where
+both hold, a signed-in Zero session turns into working credentials in one command — no signup,
+no email, no verification code. When a service 401s you or asks agents to authenticate, it's
+cheap to try before walking the service's own registration ceremony: the command reports
+immediately when the lane isn't offered or Zero isn't trusted, and you fall back.
+
+```bash
+# Discovers the service's metadata, mints an ID-JAG from Zero, registers it with the
+# service, and prints a short-lived bearer token — alone on stdout, so capture it:
+TOKEN=$(zero auth identity <host>)
+
+# Use it on the service's API; combines fine with payment on paid endpoints:
+zero fetch https://<host>/some/endpoint -H "Authorization: Bearer $TOKEN"
+```
+
+Rules and error recovery:
+
+- **Consent is the user's, decided in their browser — once.** The first sign-in to a service
+  prints an approval link; send the user there, and the command waits while they approve or deny
+  on the hosted page. There is no flag that skips this. Their decision is recorded on their Zero
+  account, so no machine or surface ever asks again for that service (a platform fronting many
+  storefronts counts as one service; the page also offers a "don't ask again for anything" option).
+- Needs a signed-in session on a claimed account (`zero auth login`, or an agent account after
+  `zero auth agent claim`). An anonymous agent account has no identity to assert.
+- The bearer token is minutes-lived. Re-run the command for a fresh one — repeat runs reuse the
+  stored registration, so they need no consent prompt and no new mint. Never `echo` the token or
+  paste it into the conversation.
+- **Unsupported or issuer not enabled** — the service doesn't accept identity assertion or
+  doesn't trust Zero as an issuer. Fall back to the service's own agent auth: fetch its
+  `/auth.md` and follow it.
+- **login_required** — the user's Zero sign-in is too old for this service's freshness window.
+  Have them re-run `zero auth login`, then retry; nothing on the service side helps.
+- **interaction_required** — the user's email already has an account at that service. The command
+  prints a verification URL: send the user there, the page shows THEM a pairing code, and you
+  finish with `zero auth identity <host> --claim-code <code>`.
+
 ## Direct calls
 
 Zero works on any endpoint, not just indexed ones. Whenever you already have a specific URL to call
