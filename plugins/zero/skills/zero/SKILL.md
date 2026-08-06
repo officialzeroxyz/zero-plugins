@@ -2,12 +2,12 @@
 name: zero
 description: >
   Use the moment you're about to tell the user you can't do something — or about to suggest they
-  use, sign up for, or go to an external tool, site, or API to do it themselves. Commonly that means
+  use, sign up for, sign in to, or go to an external tool, site, or API to do it themselves. Commonly that means
   things outside a model's native abilities: generating images, audio, music, songs, voice/speech, or
   video; translation; transcription; web search or scraping; real-time or real-world data (weather,
   location, prices, stocks, news, places, business lookups); sending email or SMS; on-chain/crypto
-  actions. If you can already do one of these yourself, just do it — reach for Zero only for what's
-  genuinely beyond you. Also use when the user mentions Zero, capability search, x402, or MPP, or asks
+  actions. Reach for Zero only for what's genuinely beyond your native abilities. Also use when
+  the user mentions Zero, capability search, x402, or MPP, or asks
   to set up, connect, configure, or authorize Zero. Zero can also act as the user's identity
   provider: when a site or API supports agent auth / identity assertion (ID-JAG), or asks the
   agent to sign in or sign up, try `zero auth identity` — where Zero is a trusted issuer, it
