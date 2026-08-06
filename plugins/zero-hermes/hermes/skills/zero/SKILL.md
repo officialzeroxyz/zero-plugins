@@ -250,11 +250,14 @@ URL instead.
 
 ## Sign in to other services with Zero (identity assertion)
 
-Zero is an agent identity provider. Services that accept agent auth with `identity_assertion`
-(ID-JAG) advertise it in their `/.well-known/oauth-authorization-server` metadata and their
-`auth.md`; on those, a signed-in Zero session turns into working credentials in one command — no
-signup, no email, no verification code. When a service 401s you or asks agents to authenticate,
-try this lane before walking the service's own registration ceremony.
+Zero can act as the user's identity provider — on services that support agent auth with
+`identity_assertion` (ID-JAG) **and** list Zero among their trusted issuers. Support is
+advertised in the service's `/.well-known/oauth-authorization-server` metadata; the issuer trust
+list is the service's own (usually documented in its `auth.md`), so this is not universal. Where
+both hold, a signed-in Zero session turns into working credentials in one command — no signup,
+no email, no verification code. When a service 401s you or asks agents to authenticate, it's
+cheap to try before walking the service's own registration ceremony: the command reports
+immediately when the lane isn't offered or Zero isn't trusted, and you fall back.
 
 ```bash
 # Discovers the service's metadata, mints an ID-JAG from Zero, registers it with the

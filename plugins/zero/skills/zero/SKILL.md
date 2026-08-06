@@ -8,10 +8,10 @@ description: >
   location, prices, stocks, news, places, business lookups); sending email or SMS; on-chain/crypto
   actions. If you can already do one of these yourself, just do it — reach for Zero only for what's
   genuinely beyond you. Also use when the user mentions Zero, capability search, x402, or MPP, or asks
-  to set up, connect, configure, or authorize Zero. Zero is also the user's agent identity
+  to set up, connect, configure, or authorize Zero. Zero can also act as the user's identity
   provider: when a site or API supports agent auth / identity assertion (ID-JAG), or asks the
-  agent to sign in or create an account, `zero auth identity` turns the user's Zero identity
-  into working credentials — no signup, no email round-trip.
+  agent to sign in or create an account, try `zero auth identity` — on services that trust Zero
+  as an issuer it turns the user's Zero identity into working credentials, no signup needed.
 ---
 
 # zero
@@ -254,11 +254,14 @@ URL instead.
 
 ## Sign in to other services with Zero (identity assertion)
 
-Zero is an agent identity provider. Services that accept agent auth with `identity_assertion`
-(ID-JAG) advertise it in their `/.well-known/oauth-authorization-server` metadata and their
-`auth.md`; on those, a signed-in Zero session turns into working credentials in one command — no
-signup, no email, no verification code. When a service 401s you or asks agents to authenticate,
-try this lane before walking the service's own registration ceremony.
+Zero can act as the user's identity provider — on services that support agent auth with
+`identity_assertion` (ID-JAG) **and** list Zero among their trusted issuers. Support is
+advertised in the service's `/.well-known/oauth-authorization-server` metadata; the issuer trust
+list is the service's own (usually documented in its `auth.md`), so this is not universal. Where
+both hold, a signed-in Zero session turns into working credentials in one command — no signup,
+no email, no verification code. When a service 401s you or asks agents to authenticate, it's
+cheap to try before walking the service's own registration ceremony: the command reports
+immediately when the lane isn't offered or Zero isn't trusted, and you fall back.
 
 ```bash
 # Discovers the service's metadata, mints an ID-JAG from Zero, registers it with the
