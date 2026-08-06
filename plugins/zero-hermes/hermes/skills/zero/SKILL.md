@@ -260,7 +260,7 @@ registration ceremony.
 ```bash
 # Discovers the service's metadata, mints an ID-JAG from Zero, registers it with the
 # service, and prints a short-lived bearer token — alone on stdout, so capture it:
-TOKEN=$(zero auth identity <host> --yes)
+TOKEN=$(zero auth identity <host>)
 
 # Use it on the service's API; combines fine with payment on paid endpoints:
 zero fetch https://<host>/some/endpoint -H "Authorization: Bearer $TOKEN"
@@ -268,11 +268,11 @@ zero fetch https://<host>/some/endpoint -H "Authorization: Bearer $TOKEN"
 
 Rules and error recovery:
 
-- **Consent first — but only once.** `--yes` asserts the user's identity (their email) to that
-  service — pass it only after the user has agreed to sign in there. Consent is recorded on their
-  Zero account, so no machine or surface ever asks again for that service; `--always` records a
-  blanket grant covering every service. On a TTY you can omit `--yes` and the command prompts the
-  user itself.
+- **Consent is the user's, decided in their browser — once.** The first sign-in to a service
+  prints an approval link; send the user there, and the command waits while they approve or deny
+  on the hosted page. There is no flag that skips this. Their decision is recorded on their Zero
+  account, so no machine or surface ever asks again for that service (a platform network like
+  ZeroClick counts as one service, and the page offers a "don't ask again for anything" option).
 - Needs a signed-in session on a claimed account (`zero auth login`, or an agent account after
   `zero auth agent claim`). An anonymous agent account has no identity to assert.
 - The bearer token is minutes-lived. Re-run the command for a fresh one — repeat runs reuse the
