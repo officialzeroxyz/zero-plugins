@@ -264,17 +264,25 @@ immediately when the lane isn't offered or Zero isn't trusted, and you fall back
 # service, and prints a short-lived bearer token — alone on stdout, so capture it:
 TOKEN=$(zero auth identity <host>)
 
-# Use it on the service's API; combines fine with payment on paid endpoints:
+# First-time sign-in needs the user's consent: the command prints an approval link
+# (on stderr) and exits without waiting. Relay that link to the user, then run
+# --finish — it waits for their decision and prints the token the moment they
+# approve. Each run waits up to a minute; on "No decision yet", just re-run it:
+TOKEN=$(zero auth identity <host> --finish)
+
+# Use the token on the service's API; combines fine with payment on paid endpoints:
 zero fetch https://<host>/some/endpoint -H "Authorization: Bearer $TOKEN"
 ```
 
 Rules and error recovery:
 
-- **Consent is the user's, decided in their browser — once.** The first sign-in to a service
-  prints an approval link; send the user there, and the command waits while they approve or deny
-  on the hosted page. There is no flag that skips this. Their decision is recorded on their Zero
-  account, so no machine or surface ever asks again for that service (a platform fronting many
-  storefronts counts as one service; the page also offers a "don't ask again for anything" option).
+- **Consent is the user's, decided in their browser — once.** When consent is needed, the first
+  run prints the approval link and exits; relay the link to the user immediately, then poll with
+  `--finish` re-runs until it prints the token (approved) or reports a denial. Never sit blocking
+  on a first run, and never skip relaying the link. There is no flag that skips consent. The
+  decision is recorded on their Zero account, so no machine or surface ever asks again for that
+  service (a platform fronting many storefronts counts as one service; the page also offers a
+  "don't ask again for anything" option).
 - Needs a signed-in session on a claimed account (`zero auth login`, or an agent account after
   `zero auth agent claim`). An anonymous agent account has no identity to assert.
 - The bearer token is minutes-lived. Re-run the command for a fresh one — repeat runs reuse the
