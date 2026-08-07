@@ -268,25 +268,34 @@ immediately when the lane isn't offered or Zero isn't trusted, and you fall back
 # service, and prints a short-lived bearer token — alone on stdout, so capture it:
 TOKEN=$(zero auth identity <host>)
 
-# First-time sign-in needs the user's consent: the command prints an approval link
-# (on stderr) and exits without waiting. Relay that link to the user, then run
-# --finish — it waits for their decision and prints the token the moment they
-# approve. Each run waits up to a minute; on "No decision yet", just re-run it:
-TOKEN=$(zero auth identity <host> --finish)
-
 # Use the token on the service's API; combines fine with payment on paid endpoints:
 zero fetch https://<host>/some/endpoint -H "Authorization: Bearer $TOKEN"
 ```
 
+**First-time sign-in needs the user's consent.** The command prints an approval link (on
+stderr) and exits without a token. When that happens, follow this sequence exactly:
+
+1. **STOP running commands. Put the approval link in your reply to the user, then wait for
+   your next turn.** The user cannot see command output — tool results are visible only to
+   you. The ONLY way the link ever reaches them is you pasting it into a chat message; until
+   you have, no approval can possibly arrive. Do not run `--finish` first, do not batch it
+   with other commands, do not bury the link mid-workflow.
+2. Only after the link has gone out in a message: `TOKEN=$(zero auth identity <host> --finish)`
+   waits up to a minute for their decision and prints the token the moment they approve.
+3. `No decision yet` is not an error — the user just hasn't clicked. Confirm the link is
+   actually in a message they can read (step 1), then re-run `--finish` to keep waiting.
+
+Running `--finish` in a loop *before* the user has been shown the link is the
+guaranteed-failure mode: it can only ever return `No decision yet`, because you're polling
+for a decision the user has no way to make.
+
 Rules and error recovery:
 
-- **Consent is the user's, decided in their browser — once.** When consent is needed, the first
-  run prints the approval link and exits; relay the link to the user immediately, then poll with
-  `--finish` re-runs until it prints the token (approved) or reports a denial. Never sit blocking
-  on a first run, and never skip relaying the link. There is no flag that skips consent. The
-  decision is recorded on their Zero account, so no machine or surface ever asks again for that
-  service (a platform fronting many storefronts counts as one service; the page also offers a
-  "don't ask again for anything" option).
+- **Consent is the user's, decided in their browser — once.** There is no flag that skips it,
+  and only the link-bearing approve page can grant it — so the STOP-and-show sequence above is
+  the only path through. The decision is recorded on their Zero account, so no machine or
+  surface ever asks again for that service (a platform fronting many storefronts counts as one
+  service; the page also offers a "don't ask again for anything" option).
 - Needs a signed-in session on a claimed account (`zero auth login`, or an agent account after
   `zero auth agent claim`). An anonymous agent account has no identity to assert.
 - The bearer token is minutes-lived. Re-run the command for a fresh one — repeat runs reuse the
