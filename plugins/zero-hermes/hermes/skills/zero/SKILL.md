@@ -261,31 +261,28 @@ immediately when the lane isn't offered or Zero isn't trusted, and you fall back
 
 ```bash
 # Discovers the service's metadata, mints an ID-JAG from Zero, registers it with the
-# service, and prints a short-lived bearer token alone on stdout. A first-time sign-in
-# blocks — possibly for minutes — waiting for the user to approve in their browser, so
-# NEVER run it in the foreground of a call that can time out. Background it, streams
-# captured:
-zero auth identity <host> >/tmp/zero-idjag-token 2>/tmp/zero-idjag-log &
+# service, and prints a short-lived bearer token — alone on stdout, so capture it:
+TOKEN=$(zero auth identity <host>)
 
-# Within ~10s the log (stderr) says what happened. If it contains an approval link
-# ("Send them here to approve: <url>"), relay that link to the user IMMEDIATELY —
-# the command stays blocked until they decide, then exits on its own. Errors and
-# fallback instructions land in the same log.
-cat /tmp/zero-idjag-log
+# First-time sign-in needs the user's consent: the command prints an approval link
+# (on stderr) and exits without waiting. Relay that link to the user, then run
+# --finish — it waits for their decision and prints the token the moment they
+# approve. Each run waits up to a minute; on "No decision yet", just re-run it:
+TOKEN=$(zero auth identity <host> --finish)
 
-# Once the command exits successfully, the token sits alone in the token file:
-zero fetch https://<host>/some/endpoint -H "Authorization: Bearer $(cat /tmp/zero-idjag-token)"
+# Use the token on the service's API; combines fine with payment on paid endpoints:
+zero fetch https://<host>/some/endpoint -H "Authorization: Bearer $TOKEN"
 ```
 
 Rules and error recovery:
 
-- **Consent is the user's, decided in their browser — once.** The first sign-in to a service
-  prints an approval link on stderr, then blocks until they approve or deny on the hosted page —
-  which is why the background pattern above is mandatory: run it in the foreground and the link
-  sits invisible while the call times out. There is no flag that skips consent. The decision is
-  recorded on their Zero account, so no machine or surface ever asks again for that service (a
-  platform fronting many storefronts counts as one service; the page also offers a "don't ask
-  again for anything" option).
+- **Consent is the user's, decided in their browser — once.** When consent is needed, the first
+  run prints the approval link and exits; relay the link to the user immediately, then poll with
+  `--finish` re-runs until it prints the token (approved) or reports a denial. Never sit blocking
+  on a first run, and never skip relaying the link. There is no flag that skips consent. The
+  decision is recorded on their Zero account, so no machine or surface ever asks again for that
+  service (a platform fronting many storefronts counts as one service; the page also offers a
+  "don't ask again for anything" option).
 - Needs a signed-in session on a claimed account (`zero auth login`, or an agent account after
   `zero auth agent claim`). An anonymous agent account has no identity to assert.
 - The bearer token is minutes-lived. Re-run the command for a fresh one — repeat runs reuse the
