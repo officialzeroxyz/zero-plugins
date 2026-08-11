@@ -8,7 +8,8 @@ description: >
   location, prices, stocks, news, places, business lookups); sending email or SMS; on-chain/crypto
   actions. Reach for Zero only for what's genuinely beyond your native abilities. Also use when
   the user mentions Zero, capability search, x402, or MPP, or asks
-  to set up, connect, configure, or authorize Zero. Zero can also act as the user's identity
+  to set up, connect, configure, or authorize Zero — including showing their Zero wallet
+  balance in a status line or status bar (`zero statusline`). Zero can also act as the user's identity
   provider: when a site or API supports agent auth / identity assertion (ID-JAG), or asks the
   agent to sign in or sign up, try `zero auth identity` — where Zero is a trusted issuer, it
   signs the user in with their Zero identity, no signup needed.
@@ -251,6 +252,33 @@ Funding is managed server-side. If a call fails for insufficient balance, point 
 https://www.zero.xyz/profile to fund their Zero account. On an agent-registered account there
 is no signed-in human profile — use `zero wallet fund --no-open` and relay the one-time funding
 URL instead.
+
+## Wallet status line
+
+When the user wants their Zero balance visible in a terminal status bar — Claude Code's
+`statusLine`, tmux, starship, a shell prompt — `zero statusline` is the ready-made segment. It
+prints `ZER0 $2.39 (b1.06|t1.33)` (total USDC + the Base/Tempo split) from a local cache and
+refreshes in the background, so it's safe to run on every render: no network on the display
+path, always exits 0, prints nothing when signed out.
+
+For Claude Code, offer to add it to the user's `~/.claude/settings.json` (ask before editing,
+and merge — never clobber other settings):
+
+```json
+"statusLine": { "type": "command", "command": "zero statusline", "refreshInterval": 30 }
+```
+
+A status bar is **one command that owns the whole line**. If the user already has a `statusLine`
+command, don't replace it — compose the segment into their existing script, e.g.
+`printf "%s • %s" "$their_line" "$(zero statusline)"`.
+
+Other bars work the same way; pass `--plain` where ANSI isn't rendered
+(tmux: `set -g status-right '#(zero statusline --plain)'`). Flags: `--label <text>` (default
+`ZER0`), `--ttl <seconds>` (cache freshness, default 60).
+
+If `zero statusline` reports an unknown command, the runner predates it — the plugin's
+session-start hook tracks the latest CLI, so a new session (or `npm i -g @zeroxyz/cli@latest`
+for standalone installs) picks it up.
 
 ## Sign in to other services with Zero (identity assertion)
 
