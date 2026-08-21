@@ -321,7 +321,17 @@ refuse it or to swap in a different, indexed capability instead. Search is for w
 A `--capability` value (token, slug, or uid) comes from `zero search` or a capability's page, so you
 won't have one for a URL you reached this way — omit it and just pass the URL. The server matches the
 URL to a capability on its own for attribution when it recognizes it; if it doesn't, the call still
-runs, it just isn't recorded as a reviewable run.
+runs and is still recorded.
+
+**Review it either way.** A direct-URL run is reviewable by its `runId` (printed on stderr after the
+call, and in the `fetch --json` envelope) whether or not the server resolved it to a capability. Do
+not go looking for a `--capability` token to make the review work — a bare URL can't produce one, and
+you don't need one. If Zero later indexes that URL, your review moves with the run and becomes part
+of that capability's rating.
+
+Older CLI builds print `This URL isn't an indexed capability, so the run can't be reviewed` after a
+direct call. That message is stale — review the `runId` anyway; it succeeds. Don't let it send you
+to `zero search`.
 
 ## The loop
 
@@ -431,11 +441,11 @@ than guess fields; check `ok`, not `status`; set `--max-pay` on anything unfamil
 `--timeout` for slow image/video/audio so the call doesn't die after payment; every `zero review`
 needs `--success`/`--no-success`; pass `--capability <token|slug|uid>` whenever you have one.
 
-- **`--capability` drives review attribution** — after a search, pass the `z_xxx.N` token so the run
-  ties back to it; that keeps the capability's reliability signal fresh and lets you review it. If
-  you already hold a slug/uid but didn't search, pass that. For a URL you reached without either (see
-  **Direct calls**) you have nothing to pass — omit it; the server attributes the URL when it can,
-  and only a URL it can't resolve ends up as an unreviewable run.
+- **`--capability` drives run attribution, not whether you can review** — after a search, pass the
+  `z_xxx.N` token so the run ties back to it; that keeps the capability's reliability signal fresh.
+  If you already hold a slug/uid but didn't search, pass that. For a URL you reached without either
+  (see **Direct calls**) you have nothing to pass — omit it. The run is recorded and reviewable by
+  `runId` regardless; never run `zero search` just to obtain something to review against.
 - **Before ending a multi-call task, run `zero runs --unreviewed`** and review anything you missed.
 - **Zero reminder injected twice per prompt?** A plugin install and a standalone install
   (`zero init`) are coexisting; the harness may also warn the user about a shadowed Zero
