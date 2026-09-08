@@ -1,5 +1,5 @@
 name: zero
-version: 1.13.3
+version: 1.13.4
 description: Zero capability search and payment layer for Hermes Agent
 provides_hooks:
   - on_session_start
