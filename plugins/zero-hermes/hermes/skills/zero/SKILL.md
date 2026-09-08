@@ -345,8 +345,8 @@ to `zero search`.
    are paid automatically (x402 + MPP, including cross-chain bridging from Base to Tempo).
 4. **Review** — `zero review <runId> --success --accuracy N --value N --reliability N --content "<observation>"`.
    `--success` (or `--no-success` when the capability failed) is **required** — the command errors
-   without one. The `runId` is printed to stderr (or in the `--json` envelope). Always review after
-   a paid call.
+   without one. The `runId` is printed to stderr (or in the `--json` envelope). Review after
+   a paid call when you can assess the service itself (see **Reviews — what to write**).
 
 ## Request shape
 
@@ -403,6 +403,13 @@ review (especially in a fresh-shell harness).
 
 ## Reviews — what to write
 
+**Review only the service or seller itself.** Outcome flags, numeric ratings, and written content
+must reflect its output, quality, value, or reliability. Exclude issues outside the service or
+seller's control, such as Zero platform/CLI bugs, insufficient wallet funds, or your own request
+or environment errors. If an external issue prevents you from assessing the service, skip the
+review entirely — even if a `runId` exists. If a failure's cause is unclear, don't attribute it
+to the seller without evidence.
+
 `--content` is free-form, optional, and **strongly encouraged when you have a specific
 observation.** It lands on the capability's public page on zero.xyz, so it doubles as signal for
 the next agent and copy for human buyers.
@@ -420,9 +427,8 @@ Skip `--content` rather than write filler ("Worked great", "Fast"). Submit numer
 if you have nothing specific.
 
 Every review needs an outcome flag or the command errors: `--success` when the call delivered,
-`--no-success --content "<what broke>"` when the capability failed. Skip review only if the failure
-was a CLI-internal bug (e.g. `No client registered for x402 version: N`) — file `zero bug-report`
-instead.
+`--no-success --content "<what broke>"` when the service itself failed. Handle funding issues
+through **Funding** above and Zero bugs through **Reporting Zero platform bugs** below.
 
 Review by `runId` (from the `fetch --json` envelope). `zero review --capability <slug>` can
 auto-resolve to your most recent unreviewed run, but only with the *exact* recorded slug — which is
@@ -442,7 +448,8 @@ needs `--success`/`--no-success`; pass `--capability <token|slug|uid>` whenever 
   If you already hold a slug/uid but didn't search, pass that. For a URL you reached without either
   (see **Direct calls**) you have nothing to pass — omit it. The run is recorded and reviewable by
   `runId` regardless; never run `zero search` just to obtain something to review against.
-- **Before ending a multi-call task, run `zero runs --unreviewed`** and review anything you missed.
+- **Before ending a multi-call task, run `zero runs --unreviewed`** and review any
+  missed runs that meet the service-only criteria above.
 - **Zero reminder injected twice per prompt?** A plugin install and a standalone install
   (`zero init`) are coexisting; the harness may also warn the user about a shadowed Zero
   skill or hook. Harmless — don't fix it by deleting files. If the user wants the duplicate

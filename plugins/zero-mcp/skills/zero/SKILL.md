@@ -36,12 +36,18 @@ calls cost the user real money; paying for something you can do natively is wast
    attributed. Paywalled endpoints are handled automatically: 402 challenges (x402 and MPP,
    including free auth handshakes) are signed and paid up to `maxPay` — default 1.00 USDC per
    call. Set `maxPay` explicitly before anything unfamiliar or expensive.
-4. **Review** — when the invoke result includes a `runId`, call `review_capability` after acting
-   on the response: `success` (required — `false` when the capability failed or returned garbage)
-   plus `accuracy`/`value`/`reliability` ratings 1–5. Add `content` only when you have a specific
+4. **Review** — when the invoke result includes a `runId` and you can assess the service itself,
+   call `review_capability` after acting on the response: `success` (required — `false` when the
+   service itself failed or returned garbage) plus `accuracy`/`value`/`reliability` ratings 1–5. Add `content` only when you have a specific
    observation — name the task, what actually came back, and one concrete note (latency, gotcha,
    fit/misfit); it's published on the capability's page and guides other agents. Skip `content`
    rather than write filler. No `runId` in the result means there's no run to review.
+   **Review only the service or seller itself.** Outcome, ratings, and content must reflect its
+   output, quality, value, or reliability. Exclude issues outside its control, such as Zero
+   platform/connector bugs, insufficient wallet funds, or your own request or environment errors.
+   If an external issue prevents you from assessing the service, skip the review entirely — even
+   if a `runId` exists. If a failure's cause is unclear, don't attribute it to the seller without
+   evidence.
 
 ## Request shape
 
