@@ -259,8 +259,15 @@ Zero can act as the user's identity provider — on services that support agent 
 advertised in the service's `/.well-known/oauth-authorization-server` metadata; the issuer trust
 list is the service's own (usually documented in its `auth.md`), so this is not universal. Where
 both hold, a signed-in Zero session turns into working credentials in one command — no signup,
-no email, no verification code. When a service 401s you or asks agents to authenticate, it's
-cheap to try before walking the service's own registration ceremony: the command reports
+no email, no verification code.
+
+`zero fetch` does this for you when a service answers `401 bearer_required` (every ZeroClick
+storefront does for a call without an agent credential, pay-as-you-go included): it signs in
+with your Zero identity or registers an agent credential, stores it for that host, and retries.
+If it prints `Allow Zero to sign you in to <host>: <link>` instead, that is the first-time
+consent below: put the link in your reply, then re-run the same `zero fetch` once the user
+approves. When any other service 401s you or asks agents to authenticate, it's cheap to try
+`zero auth identity` before walking the service's own registration ceremony: the command reports
 immediately when the lane isn't offered or Zero isn't trusted, and you fall back.
 
 ```bash
