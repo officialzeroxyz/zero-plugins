@@ -35,7 +35,11 @@ calls cost the user real money; paying for something you can do natively is wast
    matching its schema. Always pass `capabilityId` (the token) so the run is recorded and
    attributed. Paywalled endpoints are handled automatically: 402 challenges (x402 and MPP,
    including free auth handshakes) are signed and paid up to `maxPay` — default 1.00 USDC per
-   call. Set `maxPay` explicitly before anything unfamiliar or expensive.
+   call. Set `maxPay` explicitly before anything unfamiliar or expensive. Services that require
+   an agent sign-in (every ZeroClick storefront) are signed in with the user's Zero identity
+   automatically; the first call to a service the user hasn't approved returns
+   `agentCredential.status` `consent_required` with an `approveUrl`: show it to the user, and
+   retry once they approve.
 4. **Review** — when the invoke result includes a `runId` and you can assess the service itself,
    call `review_capability` after acting on the response: `success` (required — `false` when the
    service itself failed or returned garbage) plus `accuracy`/`value`/`reliability` ratings 1–5. Add `content` only when you have a specific
